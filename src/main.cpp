@@ -114,7 +114,7 @@ public:
     {
         wxMenu *menuFile = new wxMenu;
         menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                         "Help string shown in status bar for this menu item");
+                         "Hello mssg");
         menuFile->AppendSeparator();
         menuFile->Append(wxID_EXIT);
         wxMenu *menuHelp = new wxMenu;
@@ -124,7 +124,7 @@ public:
         menuBar->Append(menuHelp, "&Help");
         SetMenuBar(menuBar);
         CreateStatusBar();
-        SetStatusText("Welcome to wxWidgets!");
+        SetStatusText("Welcome to CineDoc!");
 
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -194,7 +194,7 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        MyFrame *frame = new MyFrame("Aplicación con wxWidgets", wxPoint(50, 50), wxSize(800, 600));
+        MyFrame *frame = new MyFrame("CineDoc", wxPoint(50, 50), wxSize(800, 600));
         frame->Show(true);
         return true;
     }
@@ -213,10 +213,13 @@ void MyFrame::OnExit(wxCommandEvent &event)
 }
 void MyFrame::OnAbout(wxCommandEvent &event)
 {
-    wxMessageBox("This is a wxWidgets' Hello world sample",
-                 "About Hello World", wxOK | wxICON_INFORMATION);
+    wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
+                 "About CineDoc", wxOK | wxICON_INFORMATION);                // TITULO VENTANA POP UP
 }
 void MyFrame::OnHello(wxCommandEvent &event)
 {
-    wxLogMessage("Hello world from wxWidgets!");
+    wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
+                 "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+
+    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
 }
