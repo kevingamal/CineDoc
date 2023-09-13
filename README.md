@@ -1,12 +1,10 @@
-# wx_cmake_template
+# CineDoc
 
-A template for multiplatform wxWidgets projects using CMake
+A multiplatform app for managing cinema production projects
 
 ## How this works
 
-This template searches for the wxWidgets library using `FindPackage`. If not found, it downloads the library source from GitHub, compiles it, and links it with the main project. 
-
-The super build pattern with `ExternalProject_Add` is used to achieve this.
+This App simplifies the processes of managing film production, starting from the script, allowing you to generate production sheets for each scene to be filmed.
 
 ## Requirements
 
@@ -37,9 +35,10 @@ This will create a copy of the template's directory structure in `directory`, re
 
 ## Notes
 
-For details, see the [blog post](https://www.justdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X. 
+Thanks to Luke (from Luke's Dev Tutorials) for helping us to set up the cross-platform development environment.
 
----
-Check out the blog for more! [www.justdevtutorials.com](https://www.justdevtutorials.com)
----
+For more details, see the [blog post](https://www.justdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X.
+Check out his blog for more! [www.justdevtutorials.com](https://www.justdevtutorials.com)
+
+
 
