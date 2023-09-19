@@ -6,6 +6,8 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
+#include <vector>
+#include <algorithm> // para std::sort
 
 enum
 {
@@ -16,11 +18,11 @@ class TitledTextBox : public wxPanel
 {
 public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
-        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer)
+        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index + 1)
     {
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
-        wxString title = wxString::Format("Texto %d", index + 1);
+        wxString title = wxString::Format("Fragmento %d", index + 1);
         wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
         sizerLocal->Add(titleLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
 
@@ -44,6 +46,12 @@ public:
         CaptureMouse();
         dragStartPosition = ClientToScreen(event.GetPosition());
         initialWindowPosition = GetPosition();
+
+        // Impresion del Item en pantalla
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
+
+        // itemPosition es inamovible e unico, sirve para saber su id en la BD
     }
 
     void OnMouseUp(wxMouseEvent &event)
@@ -104,6 +112,8 @@ private:
     wxPoint dragStartPosition;
     wxPoint initialWindowPosition;
     wxBoxSizer *parentSizer;
+    int panelPosition;
+    int itemPosition;
 };
 
 class MyFrame : public wxFrame
@@ -169,6 +179,39 @@ public:
             return;
         }
 
+        // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
+        int firstEmpty(std::vector<int> vector)
+        {
+            // Si el vector está vacío, el primer número faltante es 1
+            if (vector.empty())
+            {
+                return 1;
+            }
+
+            // Ordena el vector en orden ascendente
+            std::sort(vector.begin(), vector.end());
+
+            // Si el primer número no es 1, entonces 1 es el número faltante
+            if (vector[0] != 1)
+            {
+                return 1;
+            }
+
+            // Recorre el vector y busca el primer número faltante
+            for (size_t i = 0; i < vector.size() - 1; ++i)
+            {
+                if (vector[i + 1] - vector[i] > 1)
+                {
+                    return vector[i] + 1;
+                }
+            }
+
+            // Si no encontraste ningún número faltante, retorna el último número + 1
+            return vector.back() + 1;
+        }
+
+        int nextNumber = firstEmpty(positionsContainer);
+
         TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, textIndex, selectedText);
         textIndex++;
 
@@ -183,6 +226,14 @@ private:
     wxPanel *containerPanel;
     wxBoxSizer *containerSizer;
     int textIndex;
+
+    // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
+    std::vector<int> positionsContainer;
+    // numeros.push_back(x); // Añade el numero x al final
+    // int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
+    // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
+    // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
+
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
