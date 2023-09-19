@@ -157,6 +157,37 @@ public:
         textIndex = 0;
     }
 
+    // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
+    int firstEmpty(std::vector<int> vector)
+    {
+        // Si el vector está vacío, el primer número faltante es 1
+        if (vector.empty())
+        {
+            return 1;
+        }
+
+        // Ordena el vector en orden ascendente
+        std::sort(vector.begin(), vector.end());
+
+        // Si el primer número no es 1, entonces 1 es el número faltante
+        if (vector[0] != 1)
+        {
+            return 1;
+        }
+
+        // Recorre el vector y busca el primer número faltante
+        for (size_t i = 0; i < vector.size() - 1; ++i)
+        {
+            if (vector[i + 1] - vector[i] > 1)
+            {
+                return vector[i] + 1;
+            }
+        }
+
+        // Si no encontraste ningún número faltante, retorna el último número + 1
+        return vector.back() + 1;
+    }
+
     void OnAddButtonClicked(wxCommandEvent &event)
     {
         if (!leftTextBox)
@@ -179,38 +210,7 @@ public:
             return;
         }
 
-        // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
-        int firstEmpty(std::vector<int> vector)
-        {
-            // Si el vector está vacío, el primer número faltante es 1
-            if (vector.empty())
-            {
-                return 1;
-            }
-
-            // Ordena el vector en orden ascendente
-            std::sort(vector.begin(), vector.end());
-
-            // Si el primer número no es 1, entonces 1 es el número faltante
-            if (vector[0] != 1)
-            {
-                return 1;
-            }
-
-            // Recorre el vector y busca el primer número faltante
-            for (size_t i = 0; i < vector.size() - 1; ++i)
-            {
-                if (vector[i + 1] - vector[i] > 1)
-                {
-                    return vector[i] + 1;
-                }
-            }
-
-            // Si no encontraste ningún número faltante, retorna el último número + 1
-            return vector.back() + 1;
-        }
-
-        int nextNumber = firstEmpty(positionsContainer);
+        nextNumber = firstEmpty(positionsContainer);
 
         TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, textIndex, selectedText);
         textIndex++;
@@ -226,6 +226,7 @@ private:
     wxPanel *containerPanel;
     wxBoxSizer *containerSizer;
     int textIndex;
+    int nextNumber;
 
     // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
     std::vector<int> positionsContainer;
