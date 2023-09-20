@@ -18,17 +18,25 @@ class TitledTextBox : public wxPanel
 {
 public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
-        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index) // + 1)
+        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index)
     {
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
-        wxString title = wxString::Format("Fragmento %d", index); // + 1);
+        wxString title = wxString::Format("Fragmento %d", index);
         wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
         sizerLocal->Add(titleLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
 
         textBox = new wxTextCtrl(this, wxID_ANY, text,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxTE_READONLY);
+
+        // Establecer el cursor a la flecha estándar
+        textBox->SetCursor(wxCURSOR_ARROW);
+        // Bloquea la edicion (ya estaba bloqueada, es para que ande el scroll)
+        textBox->SetEditable(false);
+        // Manda todos los eventos de la rueda al controlador padre
+        textBox->Bind(wxEVT_MOUSEWHEEL, &TitledTextBox::OnMouseWheel, this);
+
         sizerLocal->Add(textBox, 1, wxEXPAND | wxALL, 5);
 
         SetSizer(sizerLocal);
@@ -40,6 +48,26 @@ public:
     }
 
     wxTextCtrl *GetTextBox() const { return textBox; }
+
+    void OnMouseWheel(wxMouseEvent &event)
+    {
+        wxScrolledWindow *scrollingParent = wxDynamicCast(GetParent(), wxScrolledWindow);
+        if (scrollingParent)
+        {
+            // Determina la dirección del desplazamiento
+            int rotation = event.GetWheelRotation();
+            int amount = event.GetLinesPerAction();
+
+            if (rotation < 0)
+            {
+                scrollingParent->ScrollLines(amount); // Desplazar hacia abajo
+            }
+            else if (rotation > 0)
+            {
+                scrollingParent->ScrollLines(-amount); // Desplazar hacia arriba
+            }
+        }
+    }
 
     void OnMouseDown(wxMouseEvent &event)
     {
@@ -91,6 +119,7 @@ public:
                 parentSizer->Detach(this);
                 parentSizer->Insert(insertPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
+                dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
             }
         }
     }
@@ -143,7 +172,9 @@ public:
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
         mainSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
 
-        containerPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
+        containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
+        containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
+
         containerSizer = new wxBoxSizer(wxVERTICAL);
         containerPanel->SetSizer(containerSizer);
         mainSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
@@ -153,8 +184,6 @@ public:
         mainSizer->Add(addButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
         SetSizer(mainSizer);
-
-        // textIndex = 0;
     }
 
     // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
@@ -212,21 +241,22 @@ public:
 
         nextNumber = firstEmpty(positionsContainer);
 
-        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText); // textIndex, selectedText);
-        // textIndex++;
+        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
+
         positionsContainer.push_back(nextNumber);
 
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
         containerSizer->Layout();
         containerPanel->Layout();
+        // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
+        containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
     }
 
 private:
     wxTextCtrl *leftTextBox;
-    wxPanel *containerPanel;
+    wxScrolledWindow *containerPanel;
     wxBoxSizer *containerSizer;
-    // int textIndex;
     int nextNumber;
 
     // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
