@@ -18,11 +18,11 @@ class TitledTextBox : public wxPanel
 {
 public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
-        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index + 1)
+        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index) // + 1)
     {
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
-        wxString title = wxString::Format("Fragmento %d", index + 1);
+        wxString title = wxString::Format("Fragmento %d", index); // + 1);
         wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
         sizerLocal->Add(titleLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
 
@@ -47,10 +47,10 @@ public:
         dragStartPosition = ClientToScreen(event.GetPosition());
         initialWindowPosition = GetPosition();
 
-        // Impresion del Item en pantalla
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // IMPRESION DEL Nº DE ITEM EN PANTALLA
+        panelPosition = GetItemPositionInSizer(parentSizer, this); // ----> Mandar este dato al TextBox correspondiente
         // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-
+        // itemPosition ----> Mandar este dato al TextBox correspondiente
         // itemPosition es inamovible e unico, sirve para saber su id en la BD
     }
 
@@ -154,7 +154,7 @@ public:
 
         SetSizer(mainSizer);
 
-        textIndex = 0;
+        // textIndex = 0;
     }
 
     // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
@@ -212,8 +212,9 @@ public:
 
         nextNumber = firstEmpty(positionsContainer);
 
-        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, textIndex, selectedText);
-        textIndex++;
+        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText); // textIndex, selectedText);
+        // textIndex++;
+        positionsContainer.push_back(nextNumber);
 
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
@@ -225,7 +226,7 @@ private:
     wxTextCtrl *leftTextBox;
     wxPanel *containerPanel;
     wxBoxSizer *containerSizer;
-    int textIndex;
+    // int textIndex;
     int nextNumber;
 
     // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
