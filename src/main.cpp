@@ -243,17 +243,62 @@ public:
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
-        wxMenu *menuFile = new wxMenu;
-        menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
-                         "Hello mssg");
-        menuFile->AppendSeparator();
-        menuFile->Append(wxID_EXIT);
+        // MENU PROYECTO
+        wxMenu *menuProject = new wxMenu;
+        // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
+        // menuProject->Append(ID_Hello, "&Hello..".\tCtrl-H", "Hello mssg");
+        // menuProject->AppendSeparator();
+        menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
+        menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
+        menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
+        menuProject->Append(wxID_CLOSE, "&Cerrar...", "Cerrar proyecto");
+        menuProject->Append(wxID_EXIT, "&Salir...", "Salir de CineDoc");
+
+        // MENU GUION
+        wxMenu *menuScript = new wxMenu;
+        menuScript->Append(ID_Hello, "&Nuevo...", "Nuevo guión");
+        menuScript->Append(ID_Hello, "&Editar...", "Editar guión");
+        menuScript->Append(ID_Hello, "&Eliminar...", "Eliminar guión");
+
+        // MENU PERSONAJE
+        wxMenu *menuCharacter = new wxMenu;
+        menuCharacter->Append(ID_Hello, "&Nuevo...", "Nuevo personaje");
+        menuCharacter->Append(ID_Hello, "&Editar...", "Editar personaje");
+        menuCharacter->Append(ID_Hello, "&Eliminar...", "Eliminar personaje");
+
+        // MENU ACTOR
+        wxMenu *menuActor = new wxMenu;
+        menuActor->Append(ID_Hello, "&Nuevo...", "Nuevo actor");
+        menuActor->Append(ID_Hello, "&Editar...", "Editar actor");
+        menuActor->Append(ID_Hello, "&Eliminar...", "Eliminar actor");
+
+        // MENU LOCACION
+        wxMenu *menuLocation = new wxMenu;
+        menuLocation->Append(ID_Hello, "&Nuevo...", "Nueva locación");
+        menuLocation->Append(ID_Hello, "&Editar...", "Editar locación");
+        menuLocation->Append(ID_Hello, "&Eliminar...", "Eliminar locación");
+
+        // MENU OBJETO
+        wxMenu *menuObject = new wxMenu;
+        menuObject->Append(ID_Hello, "&Nuevo...", "Nuevo objeto");
+        menuObject->Append(ID_Hello, "&Editar...", "Editar objeto");
+        menuObject->Append(ID_Hello, "&Eliminar...", "Eliminar objeto");
+
+        // MENU AYUDA
         wxMenu *menuHelp = new wxMenu;
         menuHelp->Append(wxID_ABOUT);
+
+        // CARGA MENUES
         wxMenuBar *menuBar = new wxMenuBar;
-        menuBar->Append(menuFile, "&File");
-        menuBar->Append(menuHelp, "&Help");
+        menuBar->Append(menuProject, "&Proyecto");
+        menuBar->Append(menuScript, "&Guion");
+        menuBar->Append(menuCharacter, "&Personaje");
+        menuBar->Append(menuActor, "&Actor");
+        menuBar->Append(menuLocation, "&Locacion");
+        menuBar->Append(menuObject, "&Objeto");
+        menuBar->Append(menuHelp, "&Ayuda");
         SetMenuBar(menuBar);
+
         CreateStatusBar();
         SetStatusText("Welcome to CineDoc!");
 
