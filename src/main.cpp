@@ -14,6 +14,13 @@ enum
     ID_Hello = 1
 };
 
+// VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
+std::vector<int> positionsContainer;
+// numeros.push_back(x); // Añade el numero x al final
+// int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
+// size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
+// std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
+
 class TitledTextBox : public wxPanel
 {
 public:
@@ -92,6 +99,7 @@ public:
 
     void OnRightButtonClick(wxCommandEvent &event)
     {
+        deleteVectorItem(positionsContainer, itemPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -199,6 +207,22 @@ public:
             }
         }
         return -1; // No encontrado
+    }
+
+    void deleteVectorItem(std::vector<int> &vector, int item)
+    {
+        for (size_t i = 0; i < vector.size();)
+        {
+            if (vector[i] == item)
+            {
+                vector.erase(vector.begin() + i);
+                break;
+            }
+            else
+            {
+                ++i;
+            }
+        }
     }
 
 private:
@@ -326,14 +350,6 @@ private:
     wxScrolledWindow *containerPanel;
     wxBoxSizer *containerSizer;
     int nextNumber;
-
-    // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
-    std::vector<int> positionsContainer;
-    // numeros.push_back(x); // Añade el numero x al final
-    // int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
-    // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
-    // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
-
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
