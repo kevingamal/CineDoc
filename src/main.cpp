@@ -22,13 +22,35 @@ public:
     {
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
+        // Sizer horizontal para el título y los botones
+        wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Botón izquierdo
+        wxButton *leftButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(leftButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        leftButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnLeftButtonClick, this);
+
+        // BARRA DE TITULO
         wxString title = wxString::Format("Fragmento %d", index);
         wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
-        sizerLocal->Add(titleLabel, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
+        titleSizer->Add(titleLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+        // CUADRO DE TEXTO
         textBox = new wxTextCtrl(this, wxID_ANY, text,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxTE_READONLY);
+
+        // Boton derecho >
+        wxButton *middleButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(middleButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+        middleButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnMiddleButtonClick, this);
+
+        // Boton derecho x
+        wxButton *rightButton = new wxButton(this, wxID_ANY, "X", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(rightButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+        rightButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnRightButtonClick, this);
+
+        sizerLocal->Add(titleSizer, 0, wxEXPAND);
 
         // Establecer el cursor a la flecha estándar
         textBox->SetCursor(wxCURSOR_ARROW);
@@ -48,6 +70,29 @@ public:
     }
 
     wxTextCtrl *GetTextBox() const { return textBox; }
+
+    void OnLeftButtonClick(wxCommandEvent &event)
+    {
+        textBox->Show(!textBox->IsShown());
+        Layout();
+        dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
+    }
+
+    void OnMiddleButtonClick(wxCommandEvent &event)
+    {
+        // Implementa la lógica para este botón aquí
+    }
+
+    void OnRightButtonClick(wxCommandEvent &event)
+    {
+        wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
+        Destroy();
+        parentWindow->Layout(); // Llamar al Layout del padre
+        if (wxDynamicCast(parentWindow, wxScrolledWindow))
+        {
+            dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
+        }
+    }
 
     void OnMouseWheel(wxMouseEvent &event)
     {
