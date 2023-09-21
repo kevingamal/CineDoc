@@ -26,7 +26,7 @@ public:
         wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
 
         // Botón izquierdo
-        wxButton *leftButton = new wxButton(this, wxID_ANY, "^", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *leftButton = new wxButton(this, wxID_ANY, "-", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // Cambiado "^" por "-"
         titleSizer->Add(leftButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         leftButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnLeftButtonClick, this);
 
@@ -74,6 +74,13 @@ public:
     void OnLeftButtonClick(wxCommandEvent &event)
     {
         textBox->Show(!textBox->IsShown());
+        wxButton *btn = dynamic_cast<wxButton *>(event.GetEventObject());
+        if (btn)
+        {
+            // Si el textBox ahora está mostrándose, cambia el símbolo a "-"
+            // De lo contrario, cambia el símbolo a "+"
+            btn->SetLabel(textBox->IsShown() ? "-" : "+");
+        }
         Layout();
         dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
     }
@@ -121,14 +128,18 @@ public:
         initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
-        panelPosition = GetItemPositionInSizer(parentSizer, this); // ----> Mandar este dato al TextBox correspondiente
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
         // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-        // itemPosition ----> Mandar este dato al TextBox correspondiente
+        // textboxA = panelPosition // Mandar este dato al TextBox correspondiente
+
+        // textboxB = itemPosition // Mandar este dato al TextBox correspondiente
         // itemPosition es inamovible e unico, sirve para saber su id en la BD
     }
 
     void OnMouseUp(wxMouseEvent &event)
     {
+        // MoveToDesiredPosition();
+
         if (HasCapture())
             ReleaseMouse();
     }
@@ -139,33 +150,42 @@ public:
         {
             wxPoint currentPosition = GetParent()->ScreenToClient(wxGetMousePosition());
 
-            int insertPosition = -1;
-
             for (size_t i = 0; i < parentSizer->GetItemCount(); i++)
             {
                 wxRect childRect = parentSizer->GetItem(i)->GetWindow()->GetRect();
 
+                // Detectar si estamos por encima o por debajo del elemento actual.
                 if (currentPosition.y < childRect.y + childRect.height / 2)
                 {
-                    insertPosition = i;
+                    desiredPosition = i;
+                    thresholdTop = childRect.y - childRect.height / 3;    // 33% de altura arriba.
+                    thresholdBottom = childRect.y + childRect.height / 3; // 33% de altura abajo.
+
+                    // Si la posición actual del ratón está por encima o por debajo de los umbrales, realiza el cambio.
+                    if (currentPosition.y < thresholdTop || currentPosition.y > thresholdBottom)
+                    {
+                        MoveToDesiredPosition();
+                    }
                     break;
                 }
             }
+        }
+    }
 
-            // Asegúrate de que insertPosition esté en un rango válido
+    void MoveToDesiredPosition()
+    {
+        if (desiredPosition != -1)
+        {
             int currentPos = GetItemPositionInSizer(parentSizer, this);
-            if (insertPosition < 0)
-                insertPosition = currentPos;
-            else if (insertPosition > parentSizer->GetItemCount())
-                insertPosition = parentSizer->GetItemCount();
 
-            if (insertPosition != currentPos)
+            if (desiredPosition != currentPos)
             {
                 parentSizer->Detach(this);
-                parentSizer->Insert(insertPosition, this, 0, wxEXPAND | wxALL, 5);
+                parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
                 dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
             }
+            desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
     }
 
@@ -186,8 +206,11 @@ private:
     wxPoint dragStartPosition;
     wxPoint initialWindowPosition;
     wxBoxSizer *parentSizer;
-    int panelPosition;
     int itemPosition;
+    int panelPosition;
+    int desiredPosition = -1;
+    int thresholdTop = -1;
+    int thresholdBottom = -1;
 };
 
 class MyFrame : public wxFrame
