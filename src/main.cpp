@@ -11,7 +11,10 @@
 
 enum
 {
-    ID_Hello = 1
+    ID_Hello = 1,
+    ID_SCRIPT_NEW = 2,
+    ID_SCRIPT_EDIT = 3,
+    ID_SCRIPT_DEL = 4
 };
 
 // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
@@ -246,7 +249,7 @@ public:
         // MENU PROYECTO
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
-        // menuProject->Append(ID_Hello, "&Hello..".\tCtrl-H", "Hello mssg");
+        // menuProject->Append(ID_Hello, "&Hello...\tCtrl-H", "Hello mssg");
         // menuProject->AppendSeparator();
         menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
         menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
@@ -256,9 +259,10 @@ public:
 
         // MENU GUION
         wxMenu *menuScript = new wxMenu;
-        menuScript->Append(ID_Hello, "&Nuevo...", "Nuevo guión");
-        menuScript->Append(ID_Hello, "&Editar...", "Editar guión");
-        menuScript->Append(ID_Hello, "&Eliminar...", "Eliminar guión");
+        // menuScript->Append(ID_Hello, "&Hello...", "Test");
+        menuScript->Append(ID_SCRIPT_NEW, "&Nuevo...\tCtrl-L", "Nuevo guión");
+        menuScript->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar guión");
+        menuScript->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar guión");
 
         // MENU PERSONAJE
         wxMenu *menuCharacter = new wxMenu;
@@ -286,21 +290,21 @@ public:
 
         // MENU AYUDA
         wxMenu *menuHelp = new wxMenu;
-        menuHelp->Append(wxID_ABOUT);
+        menuHelp->Append(wxID_ABOUT, "&Ayuda...\tCtrl-H", "Buscar ayuda");
 
         // CARGA MENUES
         wxMenuBar *menuBar = new wxMenuBar;
         menuBar->Append(menuProject, "&Proyecto");
         menuBar->Append(menuScript, "&Guion");
-        menuBar->Append(menuCharacter, "&Personaje");
-        menuBar->Append(menuActor, "&Actor");
-        menuBar->Append(menuLocation, "&Locacion");
-        menuBar->Append(menuObject, "&Objeto");
+        // menuBar->Append(menuCharacter, "&Personaje");
+        // menuBar->Append(menuActor, "&Actor");
+        // menuBar->Append(menuLocation, "&Locacion");
+        // menuBar->Append(menuObject, "&Objeto");
         menuBar->Append(menuHelp, "&Ayuda");
         SetMenuBar(menuBar);
 
         CreateStatusBar();
-        SetStatusText("Welcome to CineDoc!");
+        SetStatusText("Bienvenido a CineDoc!");
 
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -398,6 +402,7 @@ private:
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
+    void OnNewScript(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
 };
 
@@ -413,11 +418,16 @@ public:
 };
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-    EVT_MENU(ID_Hello, MyFrame::OnHello)
-        EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-            EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-                wxEND_EVENT_TABLE()
-                    wxIMPLEMENT_APP(MyApp);
+
+    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+        EVT_MENU(ID_SCRIPT_NEW, MyFrame::OnNewScript)
+            EVT_MENU(ID_SCRIPT_EDIT, MyFrame::OnHello)
+                EVT_MENU(ID_SCRIPT_DEL, MyFrame::OnHello)
+
+                    EVT_MENU(ID_Hello, MyFrame::OnHello)
+                        EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+                            wxEND_EVENT_TABLE()
+                                wxIMPLEMENT_APP(MyApp);
 
 void MyFrame::OnExit(wxCommandEvent &event)
 {
@@ -433,5 +443,13 @@ void MyFrame::OnHello(wxCommandEvent &event)
     wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
                  "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
 
+    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+}
+
+void MyFrame::OnNewScript(wxCommandEvent &event)
+{
+    wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
+                 "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+    SetStatusText("StatusBar overide");
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
 }
