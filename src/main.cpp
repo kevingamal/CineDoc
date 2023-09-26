@@ -35,30 +35,40 @@ public:
         // Sizer horizontal para el título y los botones
         wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
 
-        // Botón izquierdo
-        wxButton *leftButton = new wxButton(this, wxID_ANY, "-", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // Cambiado "^" por "-"
-        titleSizer->Add(leftButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
-        leftButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnLeftButtonClick, this);
+        // Botón de colapsar
+        wxButton *collapseButton = new wxButton(this, wxID_ANY, "-", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // Cambiado "^" por "-"
+        titleSizer->Add(collapseButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        collapseButton->Bind(wxEVT_BUTTON, &TitledTextBox::OncollapseButtonClick, this);
+
+        // Botón de arriba
+        wxButton *upButton = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(upButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        upButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnupButtonClick, this);
+
+        // Botón de abajo
+        wxButton *downButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(downButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        downButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndownButtonClick, this);
 
         // BARRA DE TITULO
         wxString title = wxString::Format("Fragmento %d", index);
         wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
         titleSizer->Add(titleLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
+        // Boton de edicion >
+        wxButton *editButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(editButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+        editButton->Bind(wxEVT_BUTTON, &TitledTextBox::OneditButtonClick, this);
+
+        // Boton de eliminar
+        wxButton *deleteButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(deleteButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+        deleteButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndeleteButtonClick, this);
+
         // CUADRO DE TEXTO
         textBox = new wxTextCtrl(this, wxID_ANY, text,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxTE_READONLY);
-
-        // Boton derecho >
-        wxButton *middleButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
-        titleSizer->Add(middleButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-        middleButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnMiddleButtonClick, this);
-
-        // Boton derecho x
-        wxButton *rightButton = new wxButton(this, wxID_ANY, "X", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
-        titleSizer->Add(rightButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-        rightButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnRightButtonClick, this);
 
         sizerLocal->Add(titleSizer, 0, wxEXPAND);
 
@@ -81,7 +91,7 @@ public:
 
     wxTextCtrl *GetTextBox() const { return textBox; }
 
-    void OnLeftButtonClick(wxCommandEvent &event)
+    void OncollapseButtonClick(wxCommandEvent &event)
     {
         textBox->Show(!textBox->IsShown());
         wxButton *btn = dynamic_cast<wxButton *>(event.GetEventObject());
@@ -95,12 +105,26 @@ public:
         dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
     }
 
-    void OnMiddleButtonClick(wxCommandEvent &event)
+    void OnupButtonClick(wxCommandEvent &event)
+    {
+        desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
+        MoveToDesiredPosition();
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
+    }
+
+    void OndownButtonClick(wxCommandEvent &event)
+    {
+        desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        MoveToDesiredPosition();
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
+    }
+
+    void OneditButtonClick(wxCommandEvent &event)
     {
         // Implementa la lógica para este botón aquí
     }
 
-    void OnRightButtonClick(wxCommandEvent &event)
+    void OndeleteButtonClick(wxCommandEvent &event)
     {
         deleteVectorItem(positionsContainer, itemPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
@@ -150,6 +174,7 @@ public:
     void OnMouseUp(wxMouseEvent &event)
     {
         // MoveToDesiredPosition();
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
 
         if (HasCapture())
             ReleaseMouse();
@@ -185,7 +210,9 @@ public:
 
     void MoveToDesiredPosition()
     {
-        if (desiredPosition != -1)
+        int count = parentSizer->GetItemCount();
+
+        if (desiredPosition != -1 && desiredPosition < count)
         {
             int currentPos = GetItemPositionInSizer(parentSizer, this);
 
