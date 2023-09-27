@@ -159,8 +159,8 @@ public:
     void OnMouseDown(wxMouseEvent &event)
     {
         CaptureMouse();
-        dragStartPosition = ClientToScreen(event.GetPosition());
-        initialWindowPosition = GetPosition();
+        // dragStartPosition = ClientToScreen(event.GetPosition());
+        // initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
         panelPosition = GetItemPositionInSizer(parentSizer, this);
@@ -257,8 +257,8 @@ public:
 
 private:
     wxTextCtrl *textBox;
-    wxPoint dragStartPosition;
-    wxPoint initialWindowPosition;
+    // wxPoint dragStartPosition;
+    // wxPoint initialWindowPosition;
     wxBoxSizer *parentSizer;
     int itemPosition;
     int panelPosition;
