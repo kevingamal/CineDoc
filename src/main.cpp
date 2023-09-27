@@ -188,7 +188,7 @@ public:
 
             for (size_t i = 0; i < parentSizer->GetItemCount(); i++)
             {
-                wxRect childRect = parentSizer->GetItem(i)->GetWindow()->GetRect();
+                wxRect childRect = parentSizer->GetItem(i)->GetWindow()->GetRect(); // Funciona sin getwindow ???
 
                 // Detectar si estamos por encima o por debajo del elemento actual.
                 if (currentPosition.y < childRect.y + childRect.height / 2)
@@ -198,7 +198,7 @@ public:
                     thresholdBottom = childRect.y + childRect.height / 3; // 33% de altura abajo.
 
                     // Si la posición actual del ratón está por encima o por debajo de los umbrales, realiza el cambio.
-                    if (currentPosition.y < thresholdTop || currentPosition.y > thresholdBottom)
+                    if (currentPosition.y < thresholdTop || currentPosition.y > thresholdBottom) // FUNCIONA CON LIN Y MAC; DESHABILITAR CON WIN
                     {
                         MoveToDesiredPosition();
                     }
