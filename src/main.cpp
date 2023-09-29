@@ -334,11 +334,24 @@ public:
         SetStatusText("Bienvenido a CineDoc!");
 
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+        wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                      wxDefaultPosition, wxSize(400, 600),
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
-        mainSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
+        leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
+
+        wxButton *backButton = new wxButton(this, wxID_ANY, "Volver");
+        backButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this); // Dejamos asi por ahora, hasta crear el evento
+        buttonSizer->Add(backButton, 1, wxEXPAND | wxRIGHT, 5);
+
+        wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
+        addButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this);
+        buttonSizer->Add(addButton, 2, wxEXPAND, 0);
+
+        leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
+        mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
 
         containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
@@ -346,10 +359,6 @@ public:
         containerSizer = new wxBoxSizer(wxVERTICAL);
         containerPanel->SetSizer(containerSizer);
         mainSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
-
-        wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
-        addButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this);
-        mainSizer->Add(addButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
         SetSizer(mainSizer);
     }
