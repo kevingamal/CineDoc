@@ -9,6 +9,8 @@
 #include <vector>
 #include <algorithm> // para std::sort
 
+wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
+
 enum
 {
     ID_Hello = 1,
@@ -172,9 +174,12 @@ public:
 
         // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
         // itemPositionTextBox = panelPosition; // Mandar este dato al TextBox correspondiente
-
         // itemIndexTextBox = itemPosition; // Mandar este dato al TextBox correspondiente
         // es inamovible e unico, sirve para saber su id en la BD
+
+        wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        evt.SetInt(panelPosition); // O puedes usar SetClientData() para pasar un puntero a un objeto más complejo si lo necesitas.
+        wxPostEvent(this, evt);    // Envía el evento.
     }
 
     void OnMouseUp(wxMouseEvent &event)
@@ -276,7 +281,6 @@ public:
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
-
         // MENU PROYECTO
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
@@ -407,6 +411,8 @@ public:
         mainSizer->Add(propertiesSizer, 0, wxEXPAND | wxALL, 5);
 
         SetSizer(mainSizer);
+
+        Bind(wxEVT_UPDATE_POSITION_EVENT, &MyFrame::OnUpdatePositionEvent, this);
     }
 
     // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
@@ -476,6 +482,8 @@ public:
         containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
     }
 
+    void OnUpdatePositionEvent(wxCommandEvent &event);
+
 private:
     wxComboBox *itemSelector;
     wxTextCtrl *leftTextBox;
@@ -501,6 +509,8 @@ public:
         return true;
     }
 };
+
+wxDEFINE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
@@ -537,4 +547,9 @@ void MyFrame::OnNewScript(wxCommandEvent &event)
                  "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
     SetStatusText("StatusBar overide");
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+}
+
+void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
+{
+    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
 }
