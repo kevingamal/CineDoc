@@ -24,6 +24,10 @@ std::vector<int> positionsContainer;
 // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
 // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
 
+// Posiciones de la lista
+int indexPosition;
+int panelPosition;
+
 class TitledTextBox : public wxPanel
 {
 public:
@@ -164,11 +168,13 @@ public:
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
         panelPosition = GetItemPositionInSizer(parentSizer, this);
-        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-        // textboxA = panelPosition // Mandar este dato al TextBox correspondiente
+        indexPosition = itemPosition;
 
-        // textboxB = itemPosition // Mandar este dato al TextBox correspondiente
-        // itemPosition es inamovible e unico, sirve para saber su id en la BD
+        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
+        // itemPositionTextBox = panelPosition; // Mandar este dato al TextBox correspondiente
+
+        // itemIndexTextBox = itemPosition; // Mandar este dato al TextBox correspondiente
+        // es inamovible e unico, sirve para saber su id en la BD
     }
 
     void OnMouseUp(wxMouseEvent &event)
@@ -257,14 +263,11 @@ public:
 
 private:
     wxTextCtrl *textBox;
-    // wxPoint dragStartPosition;
-    // wxPoint initialWindowPosition;
     wxBoxSizer *parentSizer;
-    int itemPosition;
-    int panelPosition;
     int desiredPosition = -1;
     int thresholdTop = -1;
     int thresholdBottom = -1;
+    int itemPosition;
 };
 
 class MyFrame : public wxFrame
@@ -273,6 +276,7 @@ public:
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
+
         // MENU PROYECTO
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
@@ -333,9 +337,31 @@ public:
         CreateStatusBar();
         SetStatusText("Bienvenido a CineDoc!");
 
+        // Principal (HORIZONTAL)
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Izquierdo (VERTICAL)
         wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Derecho (VERTICAL)
+        wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
+
+        wxString choices[] = {wxT("Opción 1"), wxT("Opción 2"), wxT("Opción 3")}; // wxT("cadena") forza a tomar como unicode el string cadena
+
+        // itemSelector = new wxComboBox(this, wxID_ANY, "Opción 1", wxDefaultPosition, wxDefaultSize,
+        // 3, choices, wxCB_DROPDOWN | wxCB_READONLY, wxDefaultValidator, "itemSelector");
+        // En este ejemplo "Opción 1" será la opción seleccionada inicialmente en el wxComboBox.
+
+        // itemSelector->SetValue(wxT("Opción 1")); // Para cambiar posteriormente la opcion marcada por default
+
+        itemSelector = new wxComboBox(this, wxID_ANY, wxT("Opción 1"), wxDefaultPosition, wxDefaultSize,
+                                      3, choices, wxCB_DROPDOWN | wxCB_READONLY,
+                                      wxDefaultValidator, "itemSelector");
+
+        // itemSelector->SetValue(wxT("Opción 3"));
+
+        leftSizer->Add(itemSelector, 1, wxEXPAND | wxALL, 5);
 
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                      wxDefaultPosition, wxSize(400, 600),
@@ -359,6 +385,26 @@ public:
         containerSizer = new wxBoxSizer(wxVERTICAL);
         containerPanel->SetSizer(containerSizer);
         mainSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
+
+        // Crear un wxStaticBox con el título "Propiedades"
+        wxStaticBox *propertiesBox = new wxStaticBox(this, wxID_ANY, "Propiedades");
+        // Crear un sizer vertical para los controles dentro del wxStaticBox
+        wxStaticBoxSizer *propertiesSizer = new wxStaticBoxSizer(propertiesBox, wxVERTICAL);
+
+        // Crear itemIndexTextBox y añadirlo al propertiesSizer
+        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), indexPosition),
+                                          wxDefaultPosition, wxSize(200, -1), 0,
+                                          wxDefaultValidator, "itemIndexTextBox");
+        // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
+        propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
+
+        // Crear itemPositionTextBox y añadirlo al propertiesSizer
+        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), panelPosition),
+                                             wxDefaultPosition, wxSize(200, -1), 0);
+        // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
+        propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
+
+        mainSizer->Add(propertiesSizer, 0, wxEXPAND | wxALL, 5);
 
         SetSizer(mainSizer);
     }
@@ -431,9 +477,12 @@ public:
     }
 
 private:
+    wxComboBox *itemSelector;
     wxTextCtrl *leftTextBox;
     wxScrolledWindow *containerPanel;
     wxBoxSizer *containerSizer;
+    wxTextCtrl *itemIndexTextBox;
+    wxTextCtrl *itemPositionTextBox;
     int nextNumber;
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
