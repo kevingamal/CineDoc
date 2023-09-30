@@ -393,14 +393,14 @@ public:
 
         // Crear itemIndexTextBox y añadirlo al propertiesSizer
         itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), indexPosition),
-                                          wxDefaultPosition, wxSize(200, -1), 0,
+                                          wxDefaultPosition, wxSize(70, -1), 0,
                                           wxDefaultValidator, "itemIndexTextBox");
         // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
         propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
         itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), panelPosition),
-                                             wxDefaultPosition, wxSize(200, -1), 0);
+                                             wxDefaultPosition, wxSize(70, -1), 0);
         // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
         propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
 
