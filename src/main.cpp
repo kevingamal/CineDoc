@@ -10,6 +10,7 @@
 #include <algorithm> // para std::sort
 
 wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 enum
 {
@@ -36,6 +37,7 @@ public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
         : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index)
     {
+        // this->SetFocus();
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
         // Sizer horizontal para el título y los botones
@@ -164,39 +166,52 @@ public:
 
     void OnMouseDown(wxMouseEvent &event)
     {
-        CaptureMouse();
-        // dragStartPosition = ClientToScreen(event.GetPosition());
-        // initialWindowPosition = GetPosition();
+        // wxLogMessage(wxT("OnMouseDown llamado"));
+        //  CaptureMouse();
+        //   dragStartPosition = ClientToScreen(event.GetPosition());
+        //   initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
         // panelPosition = GetItemPositionInSizer(parentSizer, this);
         // indexPosition = itemPosition;
 
         // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-        // itemPositionTextBox = panelPosition; // Mandar este dato al TextBox correspondiente
-        // itemIndexTextBox = itemPosition; // Mandar este dato al TextBox correspondiente
         // es inamovible e unico, sirve para saber su id en la BD
 
-        wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        evt.SetInt(indexPosition);
-        wxPostEvent(GetParent(), evt);
+        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        // evt.SetInt(panelPosition);
+        // wxPostEvent(GetParent(), evt);
+        // event.Skip();
     }
 
     void OnMouseUp(wxMouseEvent &event)
     {
         // MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // wxLogMessage(wxT("OnMouseUp llamado"));
+        // panelPosition = GetItemPositionInSizer(parentSizer, this);
 
-        wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        evt.SetInt(itemPosition);
-        wxPostEvent(GetParent(), evt);
+        // if (HasCapture())
+        //     ReleaseMouse();
 
-        if (HasCapture())
-            ReleaseMouse();
+        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        // evt.SetInt(panelPosition);
+        // wxPostEvent(GetParent(), evt);
+        //  event.Skip();
     }
 
     void OnMouseMove(wxMouseEvent &event)
     {
+        panelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        indexPosition = itemPosition;
+
+        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
+        evta.SetInt(panelPosition);
+        wxPostEvent(GetParent(), evta);
+
+        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
+        evtb.SetInt(indexPosition);
+        wxPostEvent(GetParent(), evtb);
+
         if (event.Dragging() && event.LeftIsDown())
         {
             wxPoint currentPosition = GetParent()->ScreenToClient(wxGetMousePosition());
@@ -417,6 +432,7 @@ public:
         SetSizer(mainSizer);
 
         Bind(wxEVT_UPDATE_POSITION_EVENT, &MyFrame::OnUpdatePositionEvent, this);
+        Bind(wxEVT_UPDATE_INDEX_EVENT, &MyFrame::OnUpdateIndexEvent, this);
     }
 
     // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
@@ -487,6 +503,7 @@ public:
     }
 
     void OnUpdatePositionEvent(wxCommandEvent &event);
+    void OnUpdateIndexEvent(wxCommandEvent &event);
 
 private:
     wxComboBox *itemSelector;
@@ -515,6 +532,7 @@ public:
 };
 
 wxDEFINE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
@@ -555,6 +573,20 @@ void MyFrame::OnNewScript(wxCommandEvent &event)
 
 void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
 {
-    int receivedIndexPosition = event.GetInt();
-    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), receivedIndexPosition));
+    // wxLogMessage(wxT("Evento Position corriendo"));
+    int receivedNumber = event.GetInt();
+    //(wxString::Format(wxT("Posición recibida: %d"), receivedNumber));
+    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), receivedNumber));
+    // itemPositionTextBox->Refresh();
+    // itemPositionTextBox->Update();
+}
+
+void MyFrame::OnUpdateIndexEvent(wxCommandEvent &event)
+{
+    // wxLogMessage(wxT("Evento Position corriendo"));
+    int receivedNumber = event.GetInt();
+    //(wxString::Format(wxT("Posición recibida: %d"), receivedNumber));
+    itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), receivedNumber));
+    // itemIndexTextBox->Refresh();
+    // itemIndexTextBox->Update();
 }
