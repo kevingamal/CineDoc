@@ -169,8 +169,8 @@ public:
         // initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
-        indexPosition = itemPosition;
+        // panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // indexPosition = itemPosition;
 
         // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
         // itemPositionTextBox = panelPosition; // Mandar este dato al TextBox correspondiente
@@ -178,14 +178,18 @@ public:
         // es inamovible e unico, sirve para saber su id en la BD
 
         wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        evt.SetInt(panelPosition); // O puedes usar SetClientData() para pasar un puntero a un objeto más complejo si lo necesitas.
-        wxPostEvent(this, evt);    // Envía el evento.
+        evt.SetInt(indexPosition);
+        wxPostEvent(GetParent(), evt);
     }
 
     void OnMouseUp(wxMouseEvent &event)
     {
         // MoveToDesiredPosition();
         panelPosition = GetItemPositionInSizer(parentSizer, this);
+
+        wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        evt.SetInt(itemPosition);
+        wxPostEvent(GetParent(), evt);
 
         if (HasCapture())
             ReleaseMouse();
@@ -551,5 +555,6 @@ void MyFrame::OnNewScript(wxCommandEvent &event)
 
 void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
 {
-    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
+    int receivedIndexPosition = event.GetInt();
+    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), receivedIndexPosition));
 }
