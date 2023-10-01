@@ -9,6 +9,9 @@
 #include <vector>
 #include <algorithm> // para std::sort
 
+wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
+wxDECLARE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
+
 enum
 {
     ID_Hello = 1,
@@ -24,12 +27,17 @@ std::vector<int> positionsContainer;
 // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
 // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
 
+// Posiciones de la lista
+int indexPosition;
+int panelPosition;
+
 class TitledTextBox : public wxPanel
 {
 public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
         : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index)
     {
+        // this->SetFocus();
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
         // Sizer horizontal para el título y los botones
@@ -158,30 +166,52 @@ public:
 
     void OnMouseDown(wxMouseEvent &event)
     {
-        CaptureMouse();
-        // dragStartPosition = ClientToScreen(event.GetPosition());
-        // initialWindowPosition = GetPosition();
+        // wxLogMessage(wxT("OnMouseDown llamado"));
+        //  CaptureMouse();
+        //   dragStartPosition = ClientToScreen(event.GetPosition());
+        //   initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
-        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-        // textboxA = panelPosition // Mandar este dato al TextBox correspondiente
+        // panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // indexPosition = itemPosition;
 
-        // textboxB = itemPosition // Mandar este dato al TextBox correspondiente
-        // itemPosition es inamovible e unico, sirve para saber su id en la BD
+        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
+        // es inamovible e unico, sirve para saber su id en la BD
+
+        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        // evt.SetInt(panelPosition);
+        // wxPostEvent(GetParent(), evt);
+        // event.Skip();
     }
 
     void OnMouseUp(wxMouseEvent &event)
     {
         // MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // wxLogMessage(wxT("OnMouseUp llamado"));
+        // panelPosition = GetItemPositionInSizer(parentSizer, this);
 
-        if (HasCapture())
-            ReleaseMouse();
+        // if (HasCapture())
+        //     ReleaseMouse();
+
+        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
+        // evt.SetInt(panelPosition);
+        // wxPostEvent(GetParent(), evt);
+        //  event.Skip();
     }
 
     void OnMouseMove(wxMouseEvent &event)
     {
+        panelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        indexPosition = itemPosition;
+
+        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
+        evta.SetInt(panelPosition);
+        wxPostEvent(GetParent(), evta);
+
+        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
+        evtb.SetInt(indexPosition);
+        wxPostEvent(GetParent(), evtb);
+
         if (event.Dragging() && event.LeftIsDown())
         {
             wxPoint currentPosition = GetParent()->ScreenToClient(wxGetMousePosition());
@@ -257,14 +287,11 @@ public:
 
 private:
     wxTextCtrl *textBox;
-    // wxPoint dragStartPosition;
-    // wxPoint initialWindowPosition;
     wxBoxSizer *parentSizer;
-    int itemPosition;
-    int panelPosition;
     int desiredPosition = -1;
     int thresholdTop = -1;
     int thresholdBottom = -1;
+    int itemPosition;
 };
 
 class MyFrame : public wxFrame
@@ -333,12 +360,47 @@ public:
         CreateStatusBar();
         SetStatusText("Bienvenido a CineDoc!");
 
+        // Principal (HORIZONTAL)
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Izquierdo (VERTICAL)
+        wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Derecho (VERTICAL)
+        wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
+
+        wxString choices[] = {wxT("Opción 1"), wxT("Opción 2"), wxT("Opción 3")}; // wxT("cadena") forza a tomar como unicode el string cadena
+
+        // itemSelector = new wxComboBox(this, wxID_ANY, "Opción 1", wxDefaultPosition, wxDefaultSize,
+        // 3, choices, wxCB_DROPDOWN | wxCB_READONLY, wxDefaultValidator, "itemSelector");
+        // En este ejemplo "Opción 1" será la opción seleccionada inicialmente en el wxComboBox.
+
+        // itemSelector->SetValue(wxT("Opción 1")); // Para cambiar posteriormente la opcion marcada por default
+
+        itemSelector = new wxComboBox(this, wxID_ANY, wxT("Opción 1"), wxDefaultPosition, wxDefaultSize,
+                                      3, choices, wxCB_DROPDOWN | wxCB_READONLY,
+                                      wxDefaultValidator, "itemSelector");
+
+        // itemSelector->SetValue(wxT("Opción 3"));
+
+        leftSizer->Add(itemSelector, 1, wxEXPAND | wxALL, 5);
 
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                      wxDefaultPosition, wxSize(400, 600),
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
-        mainSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
+        leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
+
+        wxButton *backButton = new wxButton(this, wxID_ANY, "Volver");
+        backButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this); // Dejamos asi por ahora, hasta crear el evento
+        buttonSizer->Add(backButton, 1, wxEXPAND | wxRIGHT, 5);
+
+        wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
+        addButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this);
+        buttonSizer->Add(addButton, 2, wxEXPAND, 0);
+
+        leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
+        mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
 
         containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
@@ -347,11 +409,30 @@ public:
         containerPanel->SetSizer(containerSizer);
         mainSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
 
-        wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
-        addButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this);
-        mainSizer->Add(addButton, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+        // Crear un wxStaticBox con el título "Propiedades"
+        wxStaticBox *propertiesBox = new wxStaticBox(this, wxID_ANY, "Propiedades");
+        // Crear un sizer vertical para los controles dentro del wxStaticBox
+        wxStaticBoxSizer *propertiesSizer = new wxStaticBoxSizer(propertiesBox, wxVERTICAL);
+
+        // Crear itemIndexTextBox y añadirlo al propertiesSizer
+        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), indexPosition),
+                                          wxDefaultPosition, wxSize(70, -1), 0,
+                                          wxDefaultValidator, "itemIndexTextBox");
+        // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
+        propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
+
+        // Crear itemPositionTextBox y añadirlo al propertiesSizer
+        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), panelPosition),
+                                             wxDefaultPosition, wxSize(70, -1), 0);
+        // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
+        propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
+
+        mainSizer->Add(propertiesSizer, 0, wxEXPAND | wxALL, 5);
 
         SetSizer(mainSizer);
+
+        Bind(wxEVT_UPDATE_POSITION_EVENT, &MyFrame::OnUpdatePositionEvent, this);
+        Bind(wxEVT_UPDATE_INDEX_EVENT, &MyFrame::OnUpdateIndexEvent, this);
     }
 
     // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
@@ -421,10 +502,16 @@ public:
         containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
     }
 
+    void OnUpdatePositionEvent(wxCommandEvent &event);
+    void OnUpdateIndexEvent(wxCommandEvent &event);
+
 private:
+    wxComboBox *itemSelector;
     wxTextCtrl *leftTextBox;
     wxScrolledWindow *containerPanel;
     wxBoxSizer *containerSizer;
+    wxTextCtrl *itemIndexTextBox;
+    wxTextCtrl *itemPositionTextBox;
     int nextNumber;
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
@@ -443,6 +530,9 @@ public:
         return true;
     }
 };
+
+wxDEFINE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
+wxDEFINE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
@@ -479,4 +569,24 @@ void MyFrame::OnNewScript(wxCommandEvent &event)
                  "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
     SetStatusText("StatusBar overide");
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+}
+
+void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
+{
+    // wxLogMessage(wxT("Evento Position corriendo"));
+    int receivedNumber = event.GetInt();
+    //(wxString::Format(wxT("Posición recibida: %d"), receivedNumber));
+    itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), receivedNumber));
+    // itemPositionTextBox->Refresh();
+    // itemPositionTextBox->Update();
+}
+
+void MyFrame::OnUpdateIndexEvent(wxCommandEvent &event)
+{
+    // wxLogMessage(wxT("Evento Position corriendo"));
+    int receivedNumber = event.GetInt();
+    //(wxString::Format(wxT("Posición recibida: %d"), receivedNumber));
+    itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), receivedNumber));
+    // itemIndexTextBox->Refresh();
+    // itemIndexTextBox->Update();
 }
