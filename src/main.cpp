@@ -22,6 +22,7 @@ enum
 
 // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
 std::vector<int> positionsContainer;
+std::vector<int> itemsContainer;
 // numeros.push_back(x); // Añade el numero x al final
 // int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
 // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
@@ -294,6 +295,168 @@ private:
     int itemPosition;
 };
 
+class ItemTextList : public wxPanel
+{
+public:
+    ItemTextList(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
+        : wxPanel(parent, wxID_ANY), parentSizer(sizer), itemPosition(index)
+    {
+        // this->SetFocus();
+        wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
+
+        // Sizer horizontal para el título y los botones
+        wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
+
+        // Botón de arriba
+        wxButton *upButton = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(upButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        upButton->Bind(wxEVT_BUTTON, &ItemTextList::OnupButtonClick, this);
+
+        // Botón de abajo
+        wxButton *downButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(downButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
+        downButton->Bind(wxEVT_BUTTON, &ItemTextList::OndownButtonClick, this);
+
+        // BARRA DE TITULO
+        // wxString title = wxString::Format("Fragmento %d", text);
+        // wxString title = wxString::Format("Fragmento %s", text.c_str());
+        wxString title = text;
+        wxStaticText *titleLabel = new wxStaticText(this, wxID_ANY, title);
+        titleSizer->Add(titleLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+
+        // Boton de eliminar
+        wxButton *deleteButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        titleSizer->Add(deleteButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+        deleteButton->Bind(wxEVT_BUTTON, &ItemTextList::OndeleteButtonClick, this);
+
+        sizerLocal->Add(titleSizer, 0, wxEXPAND);
+
+        SetSizer(sizerLocal);
+
+        // Añade los eventos de ratón
+        Bind(wxEVT_MOTION, &ItemTextList::OnMouseMove, this);
+    }
+
+    void OnupButtonClick(wxCommandEvent &event)
+    {
+        desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
+        MoveToDesiredPosition();
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
+    }
+
+    void OndownButtonClick(wxCommandEvent &event)
+    {
+        desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        MoveToDesiredPosition();
+        panelPosition = GetItemPositionInSizer(parentSizer, this);
+    }
+
+    void OndeleteButtonClick(wxCommandEvent &event)
+    {
+        deleteVectorItem(itemsContainer, itemPosition);
+        wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
+        Destroy();
+        parentWindow->Layout(); // Llamar al Layout del padre
+        if (wxDynamicCast(parentWindow, wxScrolledWindow))
+        {
+            dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
+        }
+    }
+
+    void OnMouseMove(wxMouseEvent &event)
+    {
+        panelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        indexPosition = itemPosition;
+
+        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
+        evta.SetInt(panelPosition);
+        wxPostEvent(GetParent(), evta);
+
+        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
+        evtb.SetInt(indexPosition);
+        wxPostEvent(GetParent(), evtb);
+
+        if (event.Dragging() && event.LeftIsDown())
+        {
+            wxPoint currentPosition = GetParent()->ScreenToClient(wxGetMousePosition());
+
+            for (size_t i = 0; i < parentSizer->GetItemCount(); i++)
+            {
+                wxRect childRect = parentSizer->GetItem(i)->GetWindow()->GetRect(); // Funciona sin getwindow ???
+
+                // Detectar si estamos por encima o por debajo del elemento actual.
+                if (currentPosition.y < childRect.y + childRect.height / 2)
+                {
+                    desiredPosition = i;
+                    thresholdTop = childRect.y - childRect.height / 3;    // 33% de altura arriba.
+                    thresholdBottom = childRect.y + childRect.height / 3; // 33% de altura abajo.
+
+                    // Si la posición actual del ratón está por encima o por debajo de los umbrales, realiza el cambio.
+                    if (currentPosition.y < thresholdTop || currentPosition.y > thresholdBottom) // FUNCIONA CON LIN Y MAC; DESHABILITAR CON WIN
+                    {
+                        MoveToDesiredPosition();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    void MoveToDesiredPosition()
+    {
+        int count = parentSizer->GetItemCount();
+
+        if (desiredPosition != -1 && desiredPosition < count)
+        {
+            int currentPos = GetItemPositionInSizer(parentSizer, this);
+
+            if (desiredPosition != currentPos)
+            {
+                parentSizer->Detach(this);
+                parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
+                parentSizer->Layout();
+                dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
+            }
+            desiredPosition = -1; // Resetea la posición deseada después de procesarla.
+        }
+    }
+
+    int GetItemPositionInSizer(wxBoxSizer *sizer, wxWindow *window)
+    {
+        for (size_t i = 0; i < sizer->GetItemCount(); ++i)
+        {
+            if (sizer->GetItem(i)->GetWindow() == window)
+            {
+                return i;
+            }
+        }
+        return -1; // No encontrado
+    }
+
+    void deleteVectorItem(std::vector<int> &vector, int item)
+    {
+        for (size_t i = 0; i < vector.size();)
+        {
+            if (vector[i] == item)
+            {
+                vector.erase(vector.begin() + i);
+                break;
+            }
+            else
+            {
+                ++i;
+            }
+        }
+    }
+
+private:
+    wxBoxSizer *parentSizer;
+    int desiredPosition = -1;
+    int thresholdTop = -1;
+    int thresholdBottom = -1;
+    int itemPosition;
+};
+
 class MyFrame : public wxFrame
 {
 public:
@@ -488,13 +651,17 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(positionsContainer);
+        nextNumber = firstEmpty(itemsContainer);
+        // nextNumber = firstEmpty(positionsContainer);
 
-        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
+        ItemTextList *newItemTextList = new ItemTextList(containerPanel, containerSizer, nextNumber, selectedText);
+        // TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
 
-        positionsContainer.push_back(nextNumber);
+        itemsContainer.push_back(nextNumber);
+        // positionsContainer.push_back(nextNumber);
 
-        containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
+        containerSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
+        // containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
         containerSizer->Layout();
         containerPanel->Layout();
