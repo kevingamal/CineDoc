@@ -29,8 +29,10 @@ std::vector<int> itemsContainer;
 // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
 
 // Posiciones de la lista
-int indexPosition;
-int panelPosition;
+int textIndexPosition;
+int itemIndexPosition;
+int textPanelPosition;
+int itemPanelPosition;
 
 class TitledTextBox : public wxPanel
 {
@@ -118,14 +120,14 @@ public:
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
         MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        textPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndownButtonClick(wxCommandEvent &event)
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
         MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        textPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OneditButtonClick(wxCommandEvent &event)
@@ -173,14 +175,14 @@ public:
         //   initialWindowPosition = GetPosition();
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
-        // panelPosition = GetItemPositionInSizer(parentSizer, this);
-        // indexPosition = itemPosition;
+        // textPanelPosition = GetItemPositionInSizer(parentSizer, this);
+        // textIndexPosition = itemPosition;
 
-        // panelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
+        // textPanelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
         // es inamovible e unico, sirve para saber su id en la BD
 
         // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        // evt.SetInt(panelPosition);
+        // evt.SetInt(textPanelPosition);
         // wxPostEvent(GetParent(), evt);
         // event.Skip();
     }
@@ -189,28 +191,28 @@ public:
     {
         // MoveToDesiredPosition();
         // wxLogMessage(wxT("OnMouseUp llamado"));
-        // panelPosition = GetItemPositionInSizer(parentSizer, this);
+        // textPanelPosition = GetItemPositionInSizer(parentSizer, this);
 
         // if (HasCapture())
         //     ReleaseMouse();
 
         // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        // evt.SetInt(panelPosition);
+        // evt.SetInt(textPanelPosition);
         // wxPostEvent(GetParent(), evt);
         //  event.Skip();
     }
 
     void OnMouseMove(wxMouseEvent &event)
     {
-        panelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        indexPosition = itemPosition;
+        textPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        textIndexPosition = itemPosition;
 
         wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
-        evta.SetInt(panelPosition);
+        evta.SetInt(textPanelPosition);
         wxPostEvent(GetParent(), evta);
 
         wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
-        evtb.SetInt(indexPosition);
+        evtb.SetInt(textIndexPosition);
         wxPostEvent(GetParent(), evtb);
 
         if (event.Dragging() && event.LeftIsDown())
@@ -341,14 +343,14 @@ public:
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
         MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        itemPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndownButtonClick(wxCommandEvent &event)
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
         MoveToDesiredPosition();
-        panelPosition = GetItemPositionInSizer(parentSizer, this);
+        itemPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndeleteButtonClick(wxCommandEvent &event)
@@ -365,15 +367,15 @@ public:
 
     void OnMouseMove(wxMouseEvent &event)
     {
-        panelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        indexPosition = itemPosition;
+        itemPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        itemIndexPosition = itemPosition;
 
         wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
-        evta.SetInt(panelPosition);
+        evta.SetInt(itemPanelPosition);
         wxPostEvent(GetParent(), evta);
 
         wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
-        evtb.SetInt(indexPosition);
+        evtb.SetInt(itemIndexPosition);
         wxPostEvent(GetParent(), evtb);
 
         if (event.Dragging() && event.LeftIsDown())
@@ -578,14 +580,14 @@ public:
         wxStaticBoxSizer *propertiesSizer = new wxStaticBoxSizer(propertiesBox, wxVERTICAL);
 
         // Crear itemIndexTextBox y añadirlo al propertiesSizer
-        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), indexPosition),
+        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemIndexPosition),
                                           wxDefaultPosition, wxSize(70, -1), 0,
                                           wxDefaultValidator, "itemIndexTextBox");
         // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
         propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
-        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), panelPosition),
+        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemPanelPosition),
                                              wxDefaultPosition, wxSize(70, -1), 0);
         // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
         propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
