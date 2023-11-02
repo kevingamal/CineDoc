@@ -533,7 +533,7 @@ public:
         wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
 
         // Derecho (VERTICAL)
-        wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
+        // wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
 
         wxString choices[] = {wxT("Opción 1"), wxT("Opción 2"), wxT("Opción 3")}; // wxT("cadena") forza a tomar como unicode el string cadena
 
@@ -557,7 +557,7 @@ public:
         leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
 
         wxButton *backButton = new wxButton(this, wxID_ANY, "Volver");
-        backButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this); // Dejamos asi por ahora, hasta crear el evento
+        backButton->Bind(wxEVT_BUTTON, &MyFrame::OnBackButtonClicked, this);
         buttonSizer->Add(backButton, 1, wxEXPAND | wxRIGHT, 5);
 
         wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
@@ -567,6 +567,7 @@ public:
         leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
         mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
 
+        /// PANEL CONTENEDOR 1
         containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
@@ -581,7 +582,7 @@ public:
 
         // Crear itemIndexTextBox y añadirlo al propertiesSizer
         itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemIndexPosition),
-                                          wxDefaultPosition, wxSize(70, -1), 0,
+                                          wxDefaultPosition, wxSize(100, -1), 0,
                                           wxDefaultValidator, "itemIndexTextBox");
         // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
         propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
@@ -592,7 +593,22 @@ public:
         // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
         propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
 
-        mainSizer->Add(propertiesSizer, 0, wxEXPAND | wxALL, 5);
+        // CAJITA BONITA PARA COSITAS BONITAS
+        wxStaticBox *miniBox = new wxStaticBox(propertiesBox, wxID_ANY, "Items");
+        // Crear un sizer vertical para los controles dentro del wxStaticBox
+        wxStaticBoxSizer *miniSizer = new wxStaticBoxSizer(miniBox, wxVERTICAL);
+
+        /// PANEL CONTENEDOR 2
+        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "itemsPanel");
+        itemsPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
+
+        itemsSizer = new wxBoxSizer(wxVERTICAL);
+        itemsPanel->SetSizer(itemsSizer);
+
+        miniSizer->Add(itemsPanel, 1, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(miniSizer, 1, wxEXPAND | wxALL, 5);
+
+        mainSizer->Add(propertiesSizer, 1, wxEXPAND | wxALL, 5);
 
         SetSizer(mainSizer);
 
@@ -653,22 +669,50 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(itemsContainer);
-        // nextNumber = firstEmpty(positionsContainer);
+        nextNumber = firstEmpty(positionsContainer);
 
-        ItemTextList *newItemTextList = new ItemTextList(containerPanel, containerSizer, nextNumber, selectedText);
-        // TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
-
-        itemsContainer.push_back(nextNumber);
-        // positionsContainer.push_back(nextNumber);
-
-        containerSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
-        // containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
+        TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
+        positionsContainer.push_back(nextNumber);
+        containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
         containerSizer->Layout();
         containerPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
         containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
+    }
+
+    void OnBackButtonClicked(wxCommandEvent &event)
+    {
+        if (!leftTextBox)
+        {
+            wxMessageBox("No se pudo obtener el cuadro de texto a la izquierda.", "Error", wxOK | wxICON_ERROR);
+            return;
+        }
+
+        wxString selectedText = leftTextBox->GetStringSelection();
+
+        if (!itemsPanel)
+        {
+            wxMessageBox("No se pudo obtener el contenedor de los cuadros de texto.", "Error", wxOK | wxICON_ERROR);
+            return;
+        }
+
+        if (!itemsSizer)
+        {
+            wxMessageBox("El contenedor no tiene un sizer asociado.", "Error", wxOK | wxICON_ERROR);
+            return;
+        }
+
+        nextNumber = firstEmpty(itemsContainer);
+
+        ItemTextList *newItemTextList = new ItemTextList(itemsPanel, itemsSizer, nextNumber, selectedText);
+        itemsContainer.push_back(nextNumber);
+        itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
+
+        itemsSizer->Layout();
+        itemsPanel->Layout();
+        // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
+        itemsPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
     }
 
     void OnUpdatePositionEvent(wxCommandEvent &event);
@@ -678,7 +722,9 @@ private:
     wxComboBox *itemSelector;
     wxTextCtrl *leftTextBox;
     wxScrolledWindow *containerPanel;
+    wxScrolledWindow *itemsPanel;
     wxBoxSizer *containerSizer;
+    wxBoxSizer *itemsSizer;
     wxTextCtrl *itemIndexTextBox;
     wxTextCtrl *itemPositionTextBox;
     int nextNumber;
