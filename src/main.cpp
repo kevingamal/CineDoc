@@ -585,15 +585,36 @@ public:
                                           wxDefaultPosition, wxSize(100, -1), 0,
                                           wxDefaultValidator, "itemIndexTextBox");
         // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
-        propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
+        propertiesSizer->Add(itemIndexTextBox, 0, wxEXPAND | wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
         itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemPanelPosition),
                                              wxDefaultPosition, wxSize(70, -1), 0);
         // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
-        propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
+        propertiesSizer->Add(itemPositionTextBox, 0, wxEXPAND | wxALL, 5);
 
-        // CAJITA BONITA PARA COSITAS BONITAS
+        // TIPO ESCENA (INT /EXT)
+        wxString types[] = {wxT("EXT"), wxT("INT")}; // wxT("cadena") forza a tomar como unicode el string cadena
+        typeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("EXT"), wxDefaultPosition, wxDefaultSize,
+                                      2, types, wxCB_DROPDOWN | wxCB_READONLY,
+                                      wxDefaultValidator, "typeSelector");
+        propertiesSizer->Add(typeSelector, 1, wxEXPAND | wxALL, 5);
+
+        // TIEMPO ESCENA (DAY /NIGHT)
+        wxString times[] = {wxT("DAY"), wxT("NIGHT")}; // wxT("cadena") forza a tomar como unicode el string cadena
+        timeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("DAY"), wxDefaultPosition, wxDefaultSize,
+                                      2, times, wxCB_DROPDOWN | wxCB_READONLY,
+                                      wxDefaultValidator, "timeSelector");
+        propertiesSizer->Add(timeSelector, 1, wxEXPAND | wxALL, 5);
+
+        // LOCACIONES
+        wxString locations[] = {wxT("HOME"), wxT("CAR")}; // wxT("cadena") forza a tomar como unicode el string cadena
+        locationSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("HOME"), wxDefaultPosition, wxDefaultSize,
+                                          2, locations, wxCB_DROPDOWN | wxCB_READONLY,
+                                          wxDefaultValidator, "timeSelector");
+        propertiesSizer->Add(locationSelector, 1, wxEXPAND | wxALL, 5);
+
+        // CAJA ELEMENTOS
         wxStaticBox *miniBox = new wxStaticBox(propertiesBox, wxID_ANY, "Items");
         // Crear un sizer vertical para los controles dentro del wxStaticBox
         wxStaticBoxSizer *miniSizer = new wxStaticBoxSizer(miniBox, wxVERTICAL);
@@ -720,6 +741,9 @@ public:
 
 private:
     wxComboBox *itemSelector;
+    wxComboBox *typeSelector;
+    wxComboBox *timeSelector;
+    wxComboBox *locationSelector;
     wxTextCtrl *leftTextBox;
     wxScrolledWindow *containerPanel;
     wxScrolledWindow *itemsPanel;
