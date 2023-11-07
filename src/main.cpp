@@ -577,42 +577,44 @@ public:
 
         // Crear un wxStaticBox con el título "Propiedades"
         wxStaticBox *propertiesBox = new wxStaticBox(this, wxID_ANY, "Propiedades");
+        // propertiesBox->SetSize(100, 500);
+
         // Crear un sizer vertical para los controles dentro del wxStaticBox
         wxStaticBoxSizer *propertiesSizer = new wxStaticBoxSizer(propertiesBox, wxVERTICAL);
 
         // Crear itemIndexTextBox y añadirlo al propertiesSizer
         itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemIndexPosition),
-                                          wxDefaultPosition, wxSize(100, -1), 0,
+                                          wxDefaultPosition, wxSize(200, -1), 0,
                                           wxDefaultValidator, "itemIndexTextBox");
         // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
-        propertiesSizer->Add(itemIndexTextBox, 0, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
         itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemPanelPosition),
-                                             wxDefaultPosition, wxSize(70, -1), 0);
+                                             wxDefaultPosition, wxSize(200, -1), 0);
         // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
-        propertiesSizer->Add(itemPositionTextBox, 0, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
 
         // TIPO ESCENA (INT /EXT)
         wxString types[] = {wxT("EXT"), wxT("INT")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        typeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("EXT"), wxDefaultPosition, wxDefaultSize,
+        typeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("EXT"), wxDefaultPosition, wxSize(200, 40),
                                       2, types, wxCB_DROPDOWN | wxCB_READONLY,
                                       wxDefaultValidator, "typeSelector");
-        propertiesSizer->Add(typeSelector, 1, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(typeSelector, 0, wxALL, 5);
 
         // TIEMPO ESCENA (DAY /NIGHT)
         wxString times[] = {wxT("DAY"), wxT("NIGHT")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        timeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("DAY"), wxDefaultPosition, wxDefaultSize,
+        timeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("DAY"), wxDefaultPosition, wxSize(200, 40),
                                       2, times, wxCB_DROPDOWN | wxCB_READONLY,
                                       wxDefaultValidator, "timeSelector");
-        propertiesSizer->Add(timeSelector, 1, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(timeSelector, 0, wxALL, 5);
 
         // LOCACIONES
         wxString locations[] = {wxT("HOME"), wxT("CAR")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        locationSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("HOME"), wxDefaultPosition, wxDefaultSize,
+        locationSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("HOME"), wxDefaultPosition, wxSize(200, 40),
                                           2, locations, wxCB_DROPDOWN | wxCB_READONLY,
                                           wxDefaultValidator, "timeSelector");
-        propertiesSizer->Add(locationSelector, 1, wxEXPAND | wxALL, 5);
+        propertiesSizer->Add(locationSelector, 0, wxALL, 5);
 
         // CAJA ELEMENTOS
         wxStaticBox *miniBox = new wxStaticBox(propertiesBox, wxID_ANY, "Items");
@@ -620,16 +622,16 @@ public:
         wxStaticBoxSizer *miniSizer = new wxStaticBoxSizer(miniBox, wxVERTICAL);
 
         /// PANEL CONTENEDOR 2
-        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "itemsPanel");
+        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxSize(190, 200), wxBORDER_SUNKEN, "itemsPanel");
         itemsPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         itemsSizer = new wxBoxSizer(wxVERTICAL);
         itemsPanel->SetSizer(itemsSizer);
 
-        miniSizer->Add(itemsPanel, 1, wxEXPAND | wxALL, 5);
-        propertiesSizer->Add(miniSizer, 1, wxEXPAND | wxALL, 5);
+        miniSizer->Add(itemsPanel, 1, wxALL, 5);
+        propertiesSizer->Add(miniSizer, 1, wxALL, 5);
 
-        mainSizer->Add(propertiesSizer, 1, wxEXPAND | wxALL, 5);
+        mainSizer->Add(propertiesSizer, 0, wxALL | wxEXPAND, 5);
 
         SetSizer(mainSizer);
 
