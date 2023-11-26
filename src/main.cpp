@@ -549,7 +549,7 @@ public:
 
         // itemSelector->SetValue(wxT("Opción 3"));
 
-        leftSizer->Add(itemSelector, 1, wxEXPAND | wxALL, 5);
+        leftSizer->Add(itemSelector, 0, wxEXPAND | wxALL, 5);
 
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                      wxDefaultPosition, wxSize(400, 600),
@@ -597,24 +597,24 @@ public:
 
         // TIPO ESCENA (INT /EXT)
         wxString types[] = {wxT("EXT"), wxT("INT")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        typeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("EXT"), wxDefaultPosition, wxSize(200, 40),
+        typeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("EXT"), wxDefaultPosition, wxDefaultSize,
                                       2, types, wxCB_DROPDOWN | wxCB_READONLY,
                                       wxDefaultValidator, "typeSelector");
-        propertiesSizer->Add(typeSelector, 0, wxALL, 5);
+        propertiesSizer->Add(typeSelector, 0, wxEXPAND | wxALL, 5);
 
         // TIEMPO ESCENA (DAY /NIGHT)
         wxString times[] = {wxT("DAY"), wxT("NIGHT")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        timeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("DAY"), wxDefaultPosition, wxSize(200, 40),
+        timeSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("DAY"), wxDefaultPosition, wxDefaultSize,
                                       2, times, wxCB_DROPDOWN | wxCB_READONLY,
                                       wxDefaultValidator, "timeSelector");
-        propertiesSizer->Add(timeSelector, 0, wxALL, 5);
+        propertiesSizer->Add(timeSelector, 0, wxEXPAND | wxALL, 5);
 
         // LOCACIONES
         wxString locations[] = {wxT("HOME"), wxT("CAR")}; // wxT("cadena") forza a tomar como unicode el string cadena
-        locationSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("HOME"), wxDefaultPosition, wxSize(200, 40),
+        locationSelector = new wxComboBox(propertiesBox, wxID_ANY, wxT("HOME"), wxDefaultPosition, wxDefaultSize,
                                           2, locations, wxCB_DROPDOWN | wxCB_READONLY,
                                           wxDefaultValidator, "timeSelector");
-        propertiesSizer->Add(locationSelector, 0, wxALL, 5);
+        propertiesSizer->Add(locationSelector, 0, wxEXPAND | wxALL, 5);
 
         // CAJA ELEMENTOS
         wxStaticBox *miniBox = new wxStaticBox(propertiesBox, wxID_ANY, "Items");
