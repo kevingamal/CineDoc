@@ -12,11 +12,14 @@ endif()
 
 set(wxWidgets_USE_STATIC 1)
 
+# Buscar wxWidgets y Boost
 find_package(wxWidgets REQUIRED)
+find_package(Boost 1.65 REQUIRED COMPONENTS serialization)
 
 set(SRCS main.cpp)
 
 include(${wxWidgets_USE_FILE})
+include_directories(${Boost_INCLUDE_DIRS})
 
 if(APPLE)
     # create bundle on apple compiles
@@ -31,4 +34,5 @@ else()
     add_executable(main WIN32 ${SRCS} main.exe.manifest)
 endif()
 
-target_link_libraries(main PRIVATE ${wxWidgets_LIBRARIES})
+# Vincular tanto las bibliotecas wxWidgets como las de Boost
+target_link_libraries(main PRIVATE ${wxWidgets_LIBRARIES} ${Boost_LIBRARIES})
