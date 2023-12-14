@@ -14,12 +14,13 @@ set(wxWidgets_USE_STATIC 1)
 
 # Buscar wxWidgets y Boost
 find_package(wxWidgets REQUIRED)
+cmake_policy(SET CMP0074 NEW)
 find_package(Boost 1.65 REQUIRED COMPONENTS serialization)
-
-set(SRCS main.cpp)
 
 include(${wxWidgets_USE_FILE})
 include_directories(${Boost_INCLUDE_DIRS})
+
+set(SRCS main.cpp)
 
 if(APPLE)
     # create bundle on apple compiles
