@@ -20,6 +20,7 @@ find_package(Boost 1.65 REQUIRED COMPONENTS serialization)
 include(${wxWidgets_USE_FILE})
 include_directories(${Boost_INCLUDE_DIRS})
 
+# Colocar cualquier otro nombre_de_archivo.cpp para conmutar el archivo a compilar
 set(SRCS main.cpp)
 
 if(APPLE)
