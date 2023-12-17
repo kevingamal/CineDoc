@@ -19,11 +19,11 @@ set(wxWidgets_USE_STATIC 1)
 # Buscar wxWidgets y Boost
 find_package(wxWidgets REQUIRED)
 
-if(WIN32)
-    set(BOOST_ROOT "C:/Boost")
-    set(Boost_INCLUDE_DIR "C:/Boost/include")
-    set(Boost_LIBRARY_DIR "C:/Boost/lib")
-endif()
+# if(WIN32)
+#     set(BOOST_ROOT "C:/Boost")
+#     set(Boost_INCLUDE_DIR "C:/Boost/include")
+#     set(Boost_LIBRARY_DIR "C:/Boost/lib")
+# endif()
 
 # cmake_policy(SET CMP0074 NEW)
 # find_package(Boost 1.83 REQUIRED COMPONENTS serialization)
