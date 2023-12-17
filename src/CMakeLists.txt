@@ -21,14 +21,14 @@ if(WIN32)
     set(Boost_LIBRARY_DIR "C:/Boost/lib")
 endif()
 
-cmake_policy(SET CMP0074 NEW)
-find_package(Boost 1.83 REQUIRED COMPONENTS serialization)
+# cmake_policy(SET CMP0074 NEW)
+# find_package(Boost 1.83 REQUIRED COMPONENTS serialization)
 
 include(${wxWidgets_USE_FILE})
-include_directories(${Boost_INCLUDE_DIRS})
+# include_directories(${Boost_INCLUDE_DIRS})
 
 # Colocar cualquier otro nombre_de_archivo.cpp para conmutar el archivo a compilar
-set(SRCS mainb.cpp)
+set(SRCS main.cpp)
 
 if(APPLE)
     # create bundle on apple compiles
@@ -44,4 +44,5 @@ else()
 endif()
 
 # Vincular tanto las bibliotecas wxWidgets como las de Boost
-target_link_libraries(main PRIVATE ${wxWidgets_LIBRARIES} ${Boost_LIBRARIES})
+# target_link_libraries(main PRIVATE ${wxWidgets_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(main PRIVATE ${wxWidgets_LIBRARIES})
