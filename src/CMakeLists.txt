@@ -37,7 +37,7 @@ include(${wxWidgets_USE_FILE})
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Colocar cualquier otro nombre_de_archivo.cpp para conmutar el archivo a compilar
-set(SRCS main.cpp)
+set(SRCS mainb.cpp)
 
 if(APPLE)
     # create bundle on apple compiles
@@ -52,11 +52,11 @@ else()
 
     # PARA GUI ( descomentar para compilar main.cpp -> linea 40 set(SRCS main.cpp) )
     # ( comentar para compilar mainb.cpp->set(SRCS mainb.cpp) )
-    add_executable(main WIN32 ${SRCS} main.exe.manifest)
+    #add_executable(main WIN32 ${SRCS} main.exe.manifest)
 
     # PARA CMD ( descomentar para compilar mainb.cpp->linea 40 set(SRCS mainb.cpp) )
     # ( comentar para compilar main.cpp -> set(SRCS main.cpp) )
-    # add_executable(main ${SRCS})
+    add_executable(main ${SRCS})
 endif()
 
 # Vincular tanto las bibliotecas wxWidgets como las de Boost

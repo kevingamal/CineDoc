@@ -1,0 +1,3 @@
+repository='https://github.com/wxWidgets/wxWidgets.git'
+module=''
+tag=''
