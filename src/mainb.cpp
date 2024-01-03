@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
 
 class Actor
 {
@@ -30,20 +31,20 @@ class Toma
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    std::string numero;
+    int escenaId;
+    std::string encuadre;
 
     Toma() {}
 
-    Toma(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Toma(int id, std::string numero, int escenaId, std::string encuadre)
+        : id(id), numero(numero), escenaId(escenaId), encuadre(encuadre) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & numero & escenaId & encuadre;
     }
 };
 
@@ -51,20 +52,22 @@ class Escena
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    std::string numero;
+    int guionId;
+    int locacionId;
+    std::string tipo;
+    std::string tiempo;
 
     Escena() {}
 
-    Escena(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Escena(int id, std::string numero, int guionId, int locacionId, std::string tipo, std::string tiempo)
+        : id(id), numero(numero), guionId(guionId), locacionId(locacionId), tipo(tipo), tipo(tiempo) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & numero & guionId & locacionId & tipo & tiempo;
     }
 };
 
@@ -72,20 +75,19 @@ class Actuacion
 {
 public:
     int id;
-    std::string nombre;
     int actorId;
-    std::string serie;
+    int escenaId;
 
     Actuacion() {}
 
-    Actuacion(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Actuacion(int id, int actorId, int escenaId)
+        : id(id), actorId(actorId), escenaId(escenaId) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & actorId & escenaId;
     }
 };
 
@@ -93,20 +95,19 @@ class Guion
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    int proyectoId;
+    std::string texto_plano;
 
     Guion() {}
 
-    Guion(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Guion(int id, int proyectoId, std::string texto_plano)
+        : id(id), proyectoId(proyectoId), texto_plano(texto_plano) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & proyectoId & texto_plano;
     }
 };
 
@@ -115,19 +116,21 @@ class Locacion
 public:
     int id;
     std::string nombre;
-    int actorId;
-    std::string serie;
+    std::string direccion;
+    std::string telefono;
+    std::string hospital_cer;
+    std::string estacionamiento;
 
     Locacion() {}
 
-    Locacion(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Locacion(int id, std::string nombre, std::string direccion, std::string telefono, std::string hospital_cer, std::string estacionamiento)
+        : id(id), nombre(nombre), direccion(direccion), telefono(telefono), hospital_cer(hospital_cer), estacionamiento(estacionamiento) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & nombre & direccion & telefono & hospital_cer & estacionamiento;
     }
 };
 
@@ -135,20 +138,19 @@ class Uso_Ficcional
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    int escenaId;
+    int objetoId;
 
     Uso_Ficcional() {}
 
-    Uso_Ficcional(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Uso_Ficcional(int id, int actorId, int objetoId)
+        : id(id), actorId(actorId), objetoId(objetoId) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & actorId & objetoId;
     }
 };
 
