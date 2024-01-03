@@ -159,20 +159,21 @@ class Objeto
 public:
     int id;
     std::string nombre;
-    int actorId;
-    std::string serie;
+    int proyectoId;
+    std::string descripcion;
+    std::string tipo;
 
     Objeto() {}
 
-    Objeto(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Objeto(int id, std::string nombre, int actorId, std::string descripcion, std::string tipo)
+        : id(id), nombre(nombre), actorId(actorId), descripcion(descripcion), tipo(tipo) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
 
-        ar & id & nombre & actorId & serie;
+        ar & id & nombre & actorId & descripcion & tipo;
     }
 };
 
@@ -180,20 +181,19 @@ class Uso_Tecnico
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    int tomaId;
+    int objetoId;
 
     Uso_Tecnico() {}
 
-    Uso_Tecnico(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Uso_Tecnico(int id, int tomaId, int objetoId)
+        : id(id), tomaId(tomaId), objetoId(objetoId) {}
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
 
-        ar & id & nombre & actorId & serie;
+        ar & id & tomaId & objetoId;
     }
 };
 
@@ -223,19 +223,18 @@ class Proyecto
 public:
     int id;
     std::string nombre;
-    int actorId;
-    std::string serie;
+    std::string row_1;
 
     Proyecto() {}
 
-    Proyecto(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Proyecto(int id, std::string nombre, std::string row_1)
+        : id(id), nombre(nombre), row_1(row_1) {}
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
 
-        ar & id & nombre & actorId & serie;
+        ar & id & nombre & actorId & row_1;
     }
 };
 
