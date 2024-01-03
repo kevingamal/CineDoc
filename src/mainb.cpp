@@ -26,6 +26,175 @@ public:
     }
 };
 
+class Toma
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Toma() {}
+
+    Toma(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Escena
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Escena() {}
+
+    Escena(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Actuacion
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Actuacion() {}
+
+    Actuacion(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Guion
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Guion() {}
+
+    Guion(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Locacion
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Locacion() {}
+
+    Locacion(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Uso_Ficcional
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Uso_Ficcional() {}
+
+    Uso_Ficcional(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Objeto
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Objeto() {}
+
+    Objeto(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Uso_Tecnico
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Uso_Tecnico() {}
+
+    Uso_Tecnico(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & nombre & actorId & serie;
+    }
+};
+
 class Personaje
 {
 public:
@@ -43,6 +212,27 @@ public:
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
+        ar & id & nombre & actorId & serie;
+    }
+};
+
+class Proyecto
+{
+public:
+    int id;
+    std::string nombre;
+    int actorId;
+    std::string serie;
+
+    Proyecto() {}
+
+    Proyecto(int id, std::string nombre, int actorId, std::string serie)
+        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
         ar & id & nombre & actorId & serie;
     }
 };
