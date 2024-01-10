@@ -227,6 +227,9 @@ public:
 };
 
 class Tech_use
+
+// define action and dialog classes
+
 {
 public:
     int id;
@@ -245,6 +248,20 @@ public:
         ar & id & takeId & objectId;
     }
 };
+
+// DATA ARRAYS
+
+std::vector<Script> Scripts = {};
+std::vector<Character> Characters = {};
+std::vector<Location> Locations = {};
+std::vector<Object> Objects = {};
+std::vector<Scene> Scenes = {};
+std::vector<Actor> Actors = {};
+std::vector<Take> Takes = {};
+std::vector<Use_case> Use_cases = {};
+std::vector<Tech_use> Tech_uses = {};
+
+// CONTROLS CLASSES
 
 class TitledTextBox : public wxPanel
 {
@@ -681,6 +698,8 @@ public:
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
         // menuProject->Append(ID_Hello, "&Hello...\tCtrl-H", "Hello mssg");
+        // El comentario en la statusbar "Hello mssg" obedece a la primra definicion del evento
+        // (si el mismo evento "ID_Hello" esta varias veces aparece el primer comentario que lo define y no obedece a los siguientes)
         // menuProject->AppendSeparator();
         menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
         menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
@@ -690,8 +709,7 @@ public:
 
         // MENU GUION
         wxMenu *menuScript = new wxMenu;
-        // menuScript->Append(ID_Hello, "&Hello...", "Test");
-        menuScript->Append(ID_SCRIPT_NEW, "&Nuevo...\tCtrl-L", "Nuevo guión");
+        menuScript->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo guión");
         menuScript->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar guión");
         menuScript->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar guión");
 
@@ -727,10 +745,10 @@ public:
         wxMenuBar *menuBar = new wxMenuBar;
         menuBar->Append(menuProject, "&Proyecto");
         menuBar->Append(menuScript, "&Guion");
-        // menuBar->Append(menuCharacter, "&Personaje");
-        // menuBar->Append(menuActor, "&Actor");
-        // menuBar->Append(menuLocation, "&Locacion");
-        // menuBar->Append(menuObject, "&Objeto");
+        menuBar->Append(menuCharacter, "&Personaje");
+        menuBar->Append(menuActor, "&Actor");
+        menuBar->Append(menuLocation, "&Locacion");
+        menuBar->Append(menuObject, "&Objeto");
         menuBar->Append(menuHelp, "&Ayuda");
         SetMenuBar(menuBar);
 
@@ -1015,6 +1033,8 @@ void MyFrame::OnHello(wxCommandEvent &event)
 
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
 }
+
+// UDMR EVENTS
 
 void MyFrame::OnNewScript(wxCommandEvent &event)
 {
