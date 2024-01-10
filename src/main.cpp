@@ -1,11 +1,16 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
 #include <wx/sizer.h>
 #include <wx/wxprec.h>
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
+#include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm> // para std::sort
 
@@ -33,6 +38,213 @@ int textIndexPosition;
 int itemIndexPosition;
 int textPanelPosition;
 int itemPanelPosition;
+
+// DATA CLASSES:
+
+class Script
+{
+public:
+    int id;
+    std::string plain_text;
+
+    Script() {}
+
+    Script(int id, std::string plain_text)
+        : id(id), plain_text(plain_text) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & plain_text;
+    }
+};
+
+class Character
+{
+public:
+    int id;
+    std::string first_name;
+    std::string last_name;
+    std::string surrname;
+
+    Character() {}
+
+    Character(int id, std::string first_name, std::string last_name, std::string surrname)
+        : id(id), first_name(first_name), last_name(last_name), surrname(surrname) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & first_name & last_name & surrname;
+    }
+};
+
+class Location
+{
+public:
+    int id;
+    std::string name;
+    std::string adress;
+    std::string phone;
+    std::string hospital;
+    std::string parking;
+
+    Location() {}
+
+    Location(int id, std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
+        : id(id), name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & name & adress & phone & hospital & parking;
+    }
+};
+
+class Object
+{
+public:
+    int id;
+    std::string name;
+    std::string description;
+    std::string type;
+
+    Object() {}
+
+    Object(int id, std::string name, std::string description, std::string type)
+        : id(id), name(name), description(description), type(type) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & name & description & type;
+    }
+};
+
+class Scene
+{
+public:
+    int id;
+    int number;
+    int scriptId;
+    int locationId;
+    int type;
+    int time;
+    int position;
+
+    Scene() {}
+
+    Scene(int id, int number, int scriptId, int locationId, int type, int time, int position)
+        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), position(position) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & number & scriptId & locationId & type & time & position;
+    }
+};
+
+class Actor
+{
+public:
+    int id;
+    int parentId;
+    int passport_id;
+    std::string first_name;
+    std::string last_name;
+    std::string surrname;
+    std::string birthdate;
+
+    Actor() {}
+
+    Actor(int id, int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
+        : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & passport_id & first_name & last_name & surrname & birthdate;
+    }
+};
+
+class Take
+{
+public:
+    int id;
+    int parentId;
+    int number;
+    int shot_size;
+    int movement;
+    int mount;
+    int camera;
+    int lens;
+    int sound;
+    int length;
+    std::string description;
+    std::string image;
+    std::string floor_plan;
+    int position;
+
+    Take() {}
+
+    Take(int id, int parentId, int number, int shot_size, int movement, int mount, int camera, int lens, int sound, int length, std::string description, std::string image, std::string floor_plan, int position)
+        : id(id), parentId(parentId), number(number), shot_size(shot_size), movement(movement), mount(mount), camera(camera), lens(lens), sound(sound), length(length), description(description), image(image), floor_plan(floor_plan), position(position) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & number & shot_size & movement & mount & camera & lens & sound & length & description & image & floor_plan & position;
+    }
+};
+
+class Use_case
+{
+public:
+    int id;
+    int parentId; // Relaciona actores y objetos con escenas, si es un objeto tendra un id en ojbectId, si es actor tendra un id en actorId
+    int actorId;
+    int objectId;
+
+    Use_case() {}
+
+    Use_case(int id, int parentId, int actorId, int objectId)
+        : id(id), parentId(parentId), actorId(actorId), objectId(objectId) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & actorId & objectId;
+    }
+};
+
+class Tech_use
+{
+public:
+    int id;
+    int takeId; // Relaciona objetos con tomas
+    int objectId;
+
+    Tech_use() {}
+
+    Tech_use(int id, int takeId, int objectId)
+        : id(id), takeId(takeId), objectId(objectId) {}
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & takeId & objectId;
+    }
+};
 
 class TitledTextBox : public wxPanel
 {
