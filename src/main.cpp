@@ -227,9 +227,6 @@ public:
 };
 
 class Tech_use
-
-// define action and dialog classes
-
 {
 public:
     int id;
@@ -249,8 +246,9 @@ public:
     }
 };
 
-// DATA ARRAYS
+// define action and dialog classes
 
+// DATA ARRAYS
 std::vector<Script> Scripts = {};
 std::vector<Character> Characters = {};
 std::vector<Location> Locations = {};
