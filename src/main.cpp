@@ -45,18 +45,19 @@ class Script
 {
 public:
     int id;
+    std::string title;
     std::string plain_text;
 
     Script() {}
 
-    Script(int id, std::string plain_text)
-        : id(id), plain_text(plain_text) {}
+    Script(int id, std::string title, std::string plain_text)
+        : id(id), title(title), plain_text(plain_text) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & plain_text;
+        ar & id & title & plain_text;
     }
 };
 
@@ -135,18 +136,19 @@ public:
     int locationId;
     int type;
     int time;
+    std::string plain_text;
     int position;
 
     Scene() {}
 
-    Scene(int id, int number, int scriptId, int locationId, int type, int time, int position)
-        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), position(position) {}
+    Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
+        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & number & scriptId & locationId & type & time & position;
+        ar & id & number & scriptId & locationId & type & time & plain_text & position;
     }
 };
 
@@ -249,15 +251,15 @@ public:
 // define action and dialog classes
 
 // DATA ARRAYS
-std::vector<Script> Scripts = {};
-std::vector<Character> Characters = {};
-std::vector<Location> Locations = {};
-std::vector<Object> Objects = {};
-std::vector<Scene> Scenes = {};
-std::vector<Actor> Actors = {};
-std::vector<Take> Takes = {};
-std::vector<Use_case> Use_cases = {};
-std::vector<Tech_use> Tech_uses = {};
+std::vector<Script> scripts = {};
+std::vector<Character> characters = {};
+std::vector<Location> locations = {};
+std::vector<Object> objects = {};
+std::vector<Scene> scenes = {};
+std::vector<Actor> actors = {};
+std::vector<Take> takes = {};
+std::vector<Use_case> use_cases = {};
+std::vector<Tech_use> tech_uses = {};
 
 // CONTROLS CLASSES
 

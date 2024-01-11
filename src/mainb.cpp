@@ -5,85 +5,90 @@
 #include <fstream>
 #include <vector>
 
-class Actor
+class Script
 {
 public:
     int id;
-    std::string nombre;
-    std::string apellido;
-    std::string fechaNacimiento;
+    std::string title;
+    std::string plain_text;
 
-    Actor() {}
+    Script() {}
 
-    Actor(int id, std::string nombre, std::string apellido, std::string fechaNacimiento)
-        : id(id), nombre(nombre), apellido(apellido), fechaNacimiento(fechaNacimiento) {}
+    Script(int id, std::string title, std::string plain_text)
+        : id(id), title(title), plain_text(plain_text) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & apellido & fechaNacimiento;
+        ar & id & title & plain_text;
     }
 };
 
-class Personaje
+class Scene
 {
 public:
     int id;
-    std::string nombre;
-    int actorId;
-    std::string serie;
+    int number;
+    int scriptId;
+    int locationId;
+    int type;
+    int time;
+    std::string plain_text;
+    int position;
 
-    Personaje() {}
+    Scene() {}
 
-    Personaje(int id, std::string nombre, int actorId, std::string serie)
-        : id(id), nombre(nombre), actorId(actorId), serie(serie) {}
+    Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
+        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & nombre & actorId & serie;
+        ar & id & number & scriptId & locationId & type & time & plain_text & position;
     }
 };
 
 int main()
 {
-    // Algunas instancias de Actores y Personajes
-    std::vector<Actor> actores = {
-        Actor(1, "John", "Doe", "01/01/1980"),
-        Actor(2, "Jane", "Smith", "02/02/1990")};
+    // Algunas instancias de Guiones y Escenas
+    std::vector<Script> scripts = {
+        Script(1, "Guion1", "ContenidoGuion1"),
+        Script(2, "Guion2", "ContenidoGuion1")};
 
-    std::vector<Personaje> personajes = {
-        Personaje(1, "Superhéroe", 1, "Serie A"),
-        Personaje(2, "Villano", 2, "Serie B")};
+    std::vector<Scene> scenes = {
+        Scene(1, 1, 1, 1, 0, 0, "Escena1Guion1", 1),
+        Scene(2, 2, 1, 1, 0, 0, "Escena2Guion1", 1),
+        Scene(3, 3, 2, 1, 0, 0, "Escena1Guion2", 1),
+        Scene(4, 4, 3, 1, 0, 0, "Escena2Guion2", 1)};
 
     // Serializamos las instancias a un archivo
-    std::ofstream ofs("datos.bin");
-    boost::archive::text_oarchive oa(ofs);
-    oa << actores;
-    oa << personajes;
-    ofs.close();
+    std::ofstream out_fs("datos.bin");
+    boost::archive::text_oarchive oa(out_fs);
+    oa << scripts;
+    oa << scenes;
+    out_fs.close();
 
     // Creamos nuevos vectores para recibir los datos desde el archivo
-    std::vector<Actor> actoresCargados;
-    std::vector<Personaje> personajesCargados;
+    std::vector<Script> loadedScripts;
+    std::vector<Scene> loadedScenes;
 
     // Deserializamos las instancias desde el archivo
-    std::ifstream ifs("datos.bin");
-    boost::archive::text_iarchive ia(ifs);
-    ia >> actoresCargados;
-    ia >> personajesCargados;
+    std::ifstream in_fs("datos.bin");
+    boost::archive::text_iarchive ia(in_fs);
+    ia >> loadedScripts;
+    ia >> loadedScenes;
 
     // Imprimirmos los datos de los nuevos vectores para verificar
-    for (const auto &actor : actoresCargados)
+    for (const auto &script : loadedScripts)
     {
-        std::cout << "Actor: " << actor.nombre << " " << actor.apellido << std::endl;
+        std::cout << "Guion: " << script.id << " Titulo: " << script.title << " Texto: " << script.plain_text << std::endl;
     }
 
-    for (const auto &personaje : personajesCargados)
+    for (const auto &scene : loadedScenes)
     {
-        std::cout << "Personaje: " << personaje.nombre << " en " << personaje.serie << std::endl;
+        std::cout << "Escena: " << scene.id << " Numero: " << scene.number << " Guion: " << scene.scriptId << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
     }
 
     return 0;
