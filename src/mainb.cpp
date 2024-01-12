@@ -14,6 +14,9 @@ public:
 
     Script() {}
 
+    Script(int id, std::string plain_text)
+        : id(id), plain_text(plain_text) {}
+
     Script(int id, std::string title, std::string plain_text)
         : id(id), title(title), plain_text(plain_text) {}
 
@@ -38,6 +41,9 @@ public:
     int position;
 
     Scene() {}
+
+    Scene(int id, std::string plain_text, int position)
+        : id(id), plain_text(plain_text), position(position) {}
 
     Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
         : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}

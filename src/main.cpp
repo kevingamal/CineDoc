@@ -50,6 +50,9 @@ public:
 
     Script() {}
 
+    Script(int id, std::string plain_text)
+        : id(id), plain_text(plain_text) {}
+
     Script(int id, std::string title, std::string plain_text)
         : id(id), title(title), plain_text(plain_text) {}
 
@@ -140,6 +143,9 @@ public:
     int position;
 
     Scene() {}
+
+    Scene(int id, std::string plain_text, int position)
+        : id(id), plain_text(plain_text), position(position) {}
 
     Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
         : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
@@ -703,7 +709,8 @@ public:
         // menuProject->AppendSeparator();
         menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
         menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
-        menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
+        // menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
+        menuProject->Append(ID_Hello, "&Guardar...", "Guardar proyecto"); /// FUNCION TEMPORAL!!!
         menuProject->Append(wxID_CLOSE, "&Cerrar...", "Cerrar proyecto");
         menuProject->Append(wxID_EXIT, "&Salir...", "Salir de CineDoc");
 
@@ -928,6 +935,9 @@ public:
         positionsContainer.push_back(nextNumber);
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
+        Scene newScene(nextNumber, selectedText.ToStdString(), nextNumber);
+        scenes.push_back(newScene);
+
         containerSizer->Layout();
         containerPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
@@ -1028,10 +1038,17 @@ void MyFrame::OnAbout(wxCommandEvent &event)
 }
 void MyFrame::OnHello(wxCommandEvent &event)
 {
-    wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
-                 "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+    // wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
+    //              "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
 
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+
+    // Serializamos las instancias a un archivo
+    std::ofstream out_fs("datos.bin");
+    boost::archive::text_oarchive oa(out_fs);
+    oa << scripts;
+    oa << scenes;
+    out_fs.close();
 }
 
 // UDMR EVENTS
