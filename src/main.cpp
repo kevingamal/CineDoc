@@ -26,8 +26,8 @@ enum
 };
 
 // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
-std::vector<int> positionsContainer;
-std::vector<int> itemsContainer;
+std::vector<int> textBoxsContainer;
+std::vector<int> itemsListContainer;
 // numeros.push_back(x); // Añade el numero x al final
 // int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
 // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
@@ -372,7 +372,7 @@ public:
 
     void OndeleteButtonClick(wxCommandEvent &event)
     {
-        deleteVectorItem(positionsContainer, itemPosition);
+        deleteVectorItem(textBoxsContainer, itemPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -590,7 +590,7 @@ public:
 
     void OndeleteButtonClick(wxCommandEvent &event)
     {
-        deleteVectorItem(itemsContainer, itemPosition);
+        deleteVectorItem(itemsListContainer, itemPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -907,6 +907,21 @@ public:
         return vector.back() + 1;
     }
 
+    int lastEmpty(std::vector<int> vector)
+    {
+        // Si el vector está vacío, el primer número faltante es 1
+        if (vector.empty())
+        {
+            return 1;
+        }
+
+        // Ordena el vector en orden ascendente
+        std::sort(vector.begin(), vector.end());
+
+        // Retorna el último número + 1
+        return vector.back() + 1;
+    }
+
     void OnAddButtonClicked(wxCommandEvent &event)
     {
         if (!leftTextBox)
@@ -929,13 +944,14 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(positionsContainer);
+        nextNumber = firstEmpty(textBoxsContainer);
+        lastNumber = lastEmpty(textBoxsContainer);
 
         TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
-        positionsContainer.push_back(nextNumber);
+        textBoxsContainer.push_back(nextNumber);
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
-        Scene newScene(nextNumber, selectedText.ToStdString(), nextNumber);
+        Scene newScene(nextNumber, selectedText.ToStdString(), lastNumber);
         scenes.push_back(newScene);
 
         containerSizer->Layout();
@@ -966,10 +982,11 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(itemsContainer);
+        nextNumber = firstEmpty(itemsListContainer);
+        lastNumber = lastEmpty(itemsListContainer);
 
         ItemTextList *newItemTextList = new ItemTextList(itemsPanel, itemsSizer, nextNumber, selectedText);
-        itemsContainer.push_back(nextNumber);
+        itemsListContainer.push_back(nextNumber);
         itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
 
         itemsSizer->Layout();
@@ -994,6 +1011,7 @@ private:
     wxTextCtrl *itemIndexTextBox;
     wxTextCtrl *itemPositionTextBox;
     int nextNumber;
+    int lastNumber;
     void OnHello(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
     void OnAbout(wxCommandEvent &event);
