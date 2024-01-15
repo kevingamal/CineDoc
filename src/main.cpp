@@ -135,7 +135,7 @@ class Scene
 public:
     int id;
     int number;
-    int scriptId;
+    int parentId;
     int locationId;
     int type;
     int time;
@@ -147,14 +147,14 @@ public:
     Scene(int id, std::string plain_text, int position)
         : id(id), plain_text(plain_text), position(position) {}
 
-    Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
-        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
+    Scene(int id, int number, int parentId, int locationId, int type, int time, std::string plain_text, int position)
+        : id(id), number(number), parentId(parentId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & number & scriptId & locationId & type & time & plain_text & position;
+        ar & id & number & parentId & locationId & type & time & plain_text & position;
     }
 };
 
@@ -238,19 +238,19 @@ class Tech_use
 {
 public:
     int id;
-    int takeId; // Relaciona objetos con tomas
+    int parentId; // Relaciona objetos con tomas
     int objectId;
 
     Tech_use() {}
 
-    Tech_use(int id, int takeId, int objectId)
-        : id(id), takeId(takeId), objectId(objectId) {}
+    Tech_use(int id, int parentId, int objectId)
+        : id(id), parentId(parentId), objectId(objectId) {}
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
 
-        ar & id & takeId & objectId;
+        ar & id & parentId & objectId;
     }
 };
 
@@ -309,6 +309,23 @@ void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination,
     }
 }
 
+void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Scene &scene)
+                                     {
+                                         return scene.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 3: Limpiar 'source'
+    source.clear();
+}
+
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -321,6 +338,23 @@ void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, in
             destination.push_back(take);
         }
     }
+}
+
+void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Take &take)
+                                     {
+                                         return take.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 3: Limpiar 'source'
+    source.clear();
 }
 
 void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
@@ -337,6 +371,23 @@ void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &desti
     }
 }
 
+void updateUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Use_case &use_case)
+                                     {
+                                         return use_case.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 3: Limpiar 'source'
+    source.clear();
+}
+
 void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -349,6 +400,23 @@ void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &desti
             destination.push_back(tech_use);
         }
     }
+}
+
+void updateTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Tech_use &tech_use)
+                                     {
+                                         return tech_use.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 3: Limpiar 'source'
+    source.clear();
 }
 
 void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
