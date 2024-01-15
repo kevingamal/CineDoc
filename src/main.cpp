@@ -790,11 +790,11 @@ public:
         itemPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
         itemIndexPosition = itemPosition;
 
-        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
+        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT); // se define en la linea 1063, 1186
         evta.SetInt(itemPanelPosition);
         wxPostEvent(GetParent(), evta);
 
-        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
+        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT); // se define en la linea 1064, 1187
         evtb.SetInt(itemIndexPosition);
         wxPostEvent(GetParent(), evtb);
 
@@ -838,6 +838,9 @@ public:
                 parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
                 dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
+
+                // For que recorra a todos y escriba para cada uno lo que devuelva GetItemPositionInSizer() a position en el arreglo temporal
+                // Dependiendo de un if que lea el nivel invocara a la funcion que corresponda
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
