@@ -254,7 +254,25 @@ public:
     }
 };
 
-// define action and dialog classes
+class Event // Contiene acciones y dialogos. Cual de los 2 es se define en type
+{
+public:
+    int id;
+    int parentId;
+    int type;
+
+    Event() {}
+
+    Event(int id, int parentId, int type)
+        : id(id), parentId(parentId), type(type) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & type;
+    }
+};
 
 // DATA ARRAYS
 std::vector<Script> scripts = {};
@@ -266,6 +284,105 @@ std::vector<Actor> actors = {};
 std::vector<Take> takes = {};
 std::vector<Use_case> use_cases = {};
 std::vector<Tech_use> tech_uses = {};
+std::vector<Event> events = {};
+
+// TEMP GUI DATA ARRAYS
+std::vector<Scene> scenesTemp = {};
+std::vector<Take> takesTemp = {};
+std::vector<Use_case> use_casesTemp = {};
+std::vector<Tech_use> tech_usesTemp = {};
+std::vector<Event> eventsTemp = {};
+
+// ARRAYS FUNCTIONS
+
+void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
+{
+    // Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    for (const auto &scene : source)
+    {
+        if (scene.parentId == specificParentId)
+        {
+            destination.push_back(scene);
+        }
+    }
+}
+
+void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
+{
+    // Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    for (const auto &take : source)
+    {
+        if (take.parentId == specificParentId)
+        {
+            destination.push_back(take);
+        }
+    }
+}
+
+void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
+{
+    // Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    for (const auto &use_case : source)
+    {
+        if (use_case.parentId == specificParentId)
+        {
+            destination.push_back(use_case);
+        }
+    }
+}
+
+void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+{
+    // Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    for (const auto &tech_use : source)
+    {
+        if (tech_use.parentId == specificParentId)
+        {
+            destination.push_back(tech_use);
+        }
+    }
+}
+
+void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
+{
+    // Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    for (const auto &event : source)
+    {
+        if (event.parentId == specificParentId)
+        {
+            destination.push_back(event);
+        }
+    }
+}
+// transferEvents(events, eventsTemp, specificParentId);
+
+void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Event &event)
+                                     {
+                                         return event.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 3: Limpiar 'source'
+    source.clear();
+}
+// updateEvents(eventsTemp, events, specificParentId);
 
 // CONTROLS CLASSES
 
