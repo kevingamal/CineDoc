@@ -246,7 +246,7 @@ public:
     Tech_use() {}
 
     Tech_use(int id, int parentId, int objectId, int position)
-        : id(id), parentId(parentId), objectId(objectId) position(position) {}
+        : id(id), parentId(parentId), objectId(objectId), position(position) {}
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
@@ -505,12 +505,12 @@ public:
         collapseButton->Bind(wxEVT_BUTTON, &TitledTextBox::OncollapseButtonClick, this);
 
         // Botón de arriba
-        wxButton *upButton = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *upButton = new wxButton(this, wxID_ANY, L"\u2191", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
         titleSizer->Add(upButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         upButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnupButtonClick, this);
 
         // Botón de abajo
-        wxButton *downButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *downButton = new wxButton(this, wxID_ANY, L"\u2193", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
         titleSizer->Add(downButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         downButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndownButtonClick, this);
 
@@ -520,7 +520,7 @@ public:
         titleSizer->Add(titleLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
         // Boton de edicion >
-        wxButton *editButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *editButton = new wxButton(this, wxID_ANY, L"\u2192", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // u270F
         titleSizer->Add(editButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
         editButton->Bind(wxEVT_BUTTON, &TitledTextBox::OneditButtonClick, this);
 
@@ -763,12 +763,12 @@ public:
         wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
 
         // Botón de arriba
-        wxButton *upButton = new wxButton(this, wxID_ANY, "<", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *upButton = new wxButton(this, wxID_ANY, L"\u2191", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
         titleSizer->Add(upButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         upButton->Bind(wxEVT_BUTTON, &ItemTextList::OnupButtonClick, this);
 
         // Botón de abajo
-        wxButton *downButton = new wxButton(this, wxID_ANY, ">", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *downButton = new wxButton(this, wxID_ANY, L"\u2193", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
         titleSizer->Add(downButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         downButton->Bind(wxEVT_BUTTON, &ItemTextList::OndownButtonClick, this);
 
