@@ -220,17 +220,18 @@ public:
     int parentId; // Relaciona actores y objetos con escenas, si es un objeto tendra un id en ojbectId, si es actor tendra un id en actorId
     int actorId;
     int objectId;
+    int position;
 
     Use_case() {}
 
-    Use_case(int id, int parentId, int actorId, int objectId)
-        : id(id), parentId(parentId), actorId(actorId), objectId(objectId) {}
+    Use_case(int id, int parentId, int actorId, int objectId, int position)
+        : id(id), parentId(parentId), actorId(actorId), objectId(objectId), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & parentId & actorId & objectId;
+        ar & id & parentId & actorId & objectId & position;
     }
 };
 
@@ -240,17 +241,18 @@ public:
     int id;
     int parentId; // Relaciona objetos con tomas
     int objectId;
+    int position;
 
     Tech_use() {}
 
-    Tech_use(int id, int parentId, int objectId)
-        : id(id), parentId(parentId), objectId(objectId) {}
+    Tech_use(int id, int parentId, int objectId, int position)
+        : id(id), parentId(parentId), objectId(objectId) position(position) {}
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
 
-        ar & id & parentId & objectId;
+        ar & id & parentId & objectId & position;
     }
 };
 
@@ -260,17 +262,18 @@ public:
     int id;
     int parentId;
     int type;
+    int position;
 
     Event() {}
 
-    Event(int id, int parentId, int type)
-        : id(id), parentId(parentId), type(type) {}
+    Event(int id, int parentId, int type, int position)
+        : id(id), parentId(parentId), type(type), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & parentId & type;
+        ar & id & parentId & type & position;
     }
 };
 
@@ -295,6 +298,7 @@ std::vector<Event> eventsTemp = {};
 
 // ARRAYS FUNCTIONS
 
+// SCENES
 void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -326,6 +330,7 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
     source.clear();
 }
 
+// TAKES
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -357,6 +362,7 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
     source.clear();
 }
 
+// USE CASES (ACTING AND OBJECT)
 void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -388,6 +394,7 @@ void updateUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destina
     source.clear();
 }
 
+// TECH USE
 void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -419,6 +426,7 @@ void updateTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destina
     source.clear();
 }
 
+// EVENTS
 void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
 {
     // Limpia el vector de destino antes de transferir los nuevos elementos
@@ -451,6 +459,31 @@ void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, i
     source.clear();
 }
 // updateEvents(eventsTemp, events, specificParentId);
+
+void updateEventPosition(std::vector<Event> &array, int specificParentId, int specificId, int newPosition)
+{
+    for (auto &event : array)
+    {
+        if (event.parentId == specificParentId && event.id == specificId)
+        {
+            event.position = newPosition;
+            break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+}
+// updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
+
+void removeEvent(std::vector<Event> &array, int specificParentId, int specificId)
+{
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    array.erase(std::remove_if(array.begin(), array.end(),
+                               [specificParentId, specificId](const Event &event)
+                               {
+                                   return event.parentId == specificParentId && event.id == specificId;
+                               }),
+                array.end());
+}
+// removeEvent(eventsTemp, specificParentId, specificId);
 
 // CONTROLS CLASSES
 
