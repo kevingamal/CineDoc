@@ -492,7 +492,7 @@ void removeUse_Case(std::vector<Use_case> &array, int specificParentId, int spec
 }
 
 // TECH USE
-void transferTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -511,7 +511,7 @@ void transferTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &dest
     }
 }
 
-void updateTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -532,7 +532,7 @@ void updateTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &destin
     source.clear();
 }
 
-void updateTech_UsePosition(std::vector<Tech_Use> &array, int specificParentId, int specificId, int newPosition)
+void updateTech_usePosition(std::vector<Tech_use> &array, int specificParentId, int specificId, int newPosition)
 {
     for (auto &tech_use : array)
     {
@@ -544,11 +544,11 @@ void updateTech_UsePosition(std::vector<Tech_Use> &array, int specificParentId, 
     }
 }
 
-void removeTech_Use(std::vector<Tech_Use> &array, int specificParentId, int specificId)
+void removeTech_use(std::vector<Tech_use> &array, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Tech_Use &tech_use)
+                               [specificParentId, specificId](const Tech_use &tech_use)
                                {
                                    return tech_use.parentId == specificParentId && tech_use.id == specificId;
                                }),
