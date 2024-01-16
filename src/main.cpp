@@ -426,6 +426,10 @@ void updateScenePosition(std::vector<Scene> &array, int specificParentId, int sp
             scene.position = newPosition;
             break; // Salir del bucle una vez que se actualice el elemento
         }
+
+        // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+        std::sort(array.begin(), array.end(), [](const Scene &a, const Scene &b)
+                  { return a.position < b.position; });
     }
 }
 
@@ -491,6 +495,10 @@ void updateTakePosition(std::vector<Take> &array, int specificParentId, int spec
             break; // Salir del bucle una vez que se actualice el elemento
         }
     }
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(array.begin(), array.end(), [](const Take &a, const Take &b)
+              { return a.position < b.position; });
 }
 
 void removeTake(std::vector<Take> &array, int specificParentId, int specificId)
@@ -555,6 +563,10 @@ void updateUse_CasePosition(std::vector<Use_case> &array, int specificParentId, 
             break; // Salir del bucle una vez que se actualice el elemento
         }
     }
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(array.begin(), array.end(), [](const Use_case &a, const Use_case &b)
+              { return a.position < b.position; });
 }
 
 void removeUse_Case(std::vector<Use_case> &array, int specificParentId, int specificId)
@@ -619,6 +631,10 @@ void updateTech_usePosition(std::vector<Tech_use> &array, int specificParentId, 
             break; // Salir del bucle una vez que se actualice el elemento
         }
     }
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(array.begin(), array.end(), [](const Tech_use &a, const Tech_use &b)
+              { return a.position < b.position; });
 }
 
 void removeTech_use(std::vector<Tech_use> &array, int specificParentId, int specificId)
@@ -685,6 +701,10 @@ void updateEventPosition(std::vector<Event> &array, int specificParentId, int sp
             break; // Salir del bucle una vez que se actualice el elemento
         }
     }
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(array.begin(), array.end(), [](const Event &a, const Event &b)
+              { return a.position < b.position; });
 }
 // updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
 
