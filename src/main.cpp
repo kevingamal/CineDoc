@@ -439,7 +439,6 @@ void removeScene(std::vector<Scene> &array, int specificParentId, int specificId
                                }),
                 array.end());
 }
-// removeScene(scenesTemp, specificParentId, specificId);
 
 // TAKES
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
@@ -815,6 +814,16 @@ public:
         {
             dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
         }
+
+        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        for (int i = 0; i < textBoxsContainer.size(); ++i)
+        {
+            int specificId = textBoxsContainer[i];
+            int newPosition = i; // La posición en textBoxsContainer es la nueva posición.
+
+            // Actualizar la posición de la escena con specificId en el vector scenes
+            updateScenePosition(scenes, 1, specificId, newPosition);
+        }
     }
 
     void OnMouseWheel(wxMouseEvent &event)
@@ -930,6 +939,16 @@ public:
                 // Actualiza la posicion de si mismo y de los demas dentro del vector
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
+        }
+
+        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        for (int i = 0; i < textBoxsContainer.size(); ++i)
+        {
+            int specificId = textBoxsContainer[i];
+            int newPosition = i; // La posición en textBoxsContainer es la nueva posición.
+
+            // Actualizar la posición de la escena con specificId en el vector scenes
+            updateScenePosition(scenes, 1, specificId, newPosition);
         }
     }
 
