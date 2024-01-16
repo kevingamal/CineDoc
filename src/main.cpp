@@ -301,9 +301,14 @@ std::vector<Event> eventsTemp = {};
 // SCENES
 void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
 {
-    // Limpia el vector de destino antes de transferir los nuevos elementos
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
 
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Scene &a, const Scene &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     for (const auto &scene : source)
     {
         if (scene.parentId == specificParentId)
@@ -323,10 +328,14 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
                                      }),
                       destination.end());
 
-    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Scene &a, const Scene &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     destination.insert(destination.end(), source.begin(), source.end());
 
-    // Paso 3: Limpiar 'source'
+    // Paso 4: Limpiar 'source'
     source.clear();
 }
 
@@ -357,9 +366,14 @@ void removeScene(std::vector<Scene> &array, int specificParentId, int specificId
 // TAKES
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
 {
-    // Limpia el vector de destino antes de transferir los nuevos elementos
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
 
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Take &a, const Take &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     for (const auto &take : source)
     {
         if (take.parentId == specificParentId)
@@ -379,19 +393,28 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
                                      }),
                       destination.end());
 
-    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Take &a, const Take &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     destination.insert(destination.end(), source.begin(), source.end());
 
-    // Paso 3: Limpiar 'source'
+    // Paso 4: Limpiar 'source'
     source.clear();
 }
 
 // USE CASES (ACTING AND OBJECT)
 void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
 {
-    // Limpia el vector de destino antes de transferir los nuevos elementos
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
 
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Use_case &a, const Use_case &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     for (const auto &use_case : source)
     {
         if (use_case.parentId == specificParentId)
@@ -411,19 +434,28 @@ void updateUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destina
                                      }),
                       destination.end());
 
-    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Use_case &a, const Use_case &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     destination.insert(destination.end(), source.begin(), source.end());
 
-    // Paso 3: Limpiar 'source'
+    // Paso 4: Limpiar 'source'
     source.clear();
 }
 
 // TECH USE
 void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
-    // Limpia el vector de destino antes de transferir los nuevos elementos
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
 
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     for (const auto &tech_use : source)
     {
         if (tech_use.parentId == specificParentId)
@@ -443,19 +475,28 @@ void updateTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destina
                                      }),
                       destination.end());
 
-    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     destination.insert(destination.end(), source.begin(), source.end());
 
-    // Paso 3: Limpiar 'source'
+    // Paso 4: Limpiar 'source'
     source.clear();
 }
 
 // EVENTS
 void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
 {
-    // Limpia el vector de destino antes de transferir los nuevos elementos
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
 
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Event &a, const Event &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     for (const auto &event : source)
     {
         if (event.parentId == specificParentId)
@@ -476,10 +517,14 @@ void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, i
                                      }),
                       destination.end());
 
-    // Paso 2: Transferir todos los elementos de 'source' a 'destination'
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Event &a, const Event &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
     destination.insert(destination.end(), source.begin(), source.end());
 
-    // Paso 3: Limpiar 'source'
+    // Paso 4: Limpiar 'source'
     source.clear();
 }
 // updateEvents(eventsTemp, events, specificParentId);
