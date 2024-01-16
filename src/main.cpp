@@ -25,7 +25,7 @@ enum
     ID_SCRIPT_DEL = 4
 };
 
-// VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
+// VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
 std::vector<int> itemsListContainer;
 
@@ -59,6 +59,11 @@ int firstEmpty(std::vector<int> vector)
     // Si no encontraste ningún número faltante, retorna el último número + 1
     return vector.back() + 1;
 }
+// LA PROXIMA POSICION LIBRE (SIEMPRE SERA LA ULTIMA YA QUE EL VECTOR SE COLAPSA SOBRE SI MISMO AL ELIMINAR ALGO DE EL)
+int lastEmpty(const std::vector<int> vector)
+{
+    return vector.size();
+}
 
 void deleteVectorItem(std::vector<int> &vector, int item)
 {
@@ -73,30 +78,6 @@ void deleteVectorItem(std::vector<int> &vector, int item)
         {
             ++i;
         }
-    }
-}
-
-int lastEmpty(std::vector<int> vector)
-{
-    // Si el vector está vacío, el primer número faltante es 1
-    if (vector.empty())
-    {
-        return 1;
-    }
-
-    // Ordena el vector en orden ascendente
-    std::sort(vector.begin(), vector.end());
-
-    // Retorna el último número + 1
-    return vector.back() + 1;
-}
-
-void removeElementById(std::vector<int> &vector, int id)
-{
-    auto it = std::find(vector.begin(), vector.end(), id);
-    if (it != vector.end())
-    {
-        vector.erase(it);
     }
 }
 
@@ -944,6 +925,9 @@ public:
                 parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
                 dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
+                // (itemPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
+                updateElementPosition(textBoxsContainer, itemPosition, desiredPosition);
+                // Actualiza la posicion de si mismo y de los demas dentro del vector
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
@@ -1109,22 +1093,6 @@ public:
             }
         }
         return -1; // No encontrado
-    }
-
-    void deleteVectorItem(std::vector<int> &vector, int item)
-    {
-        for (size_t i = 0; i < vector.size();)
-        {
-            if (vector[i] == item)
-            {
-                vector.erase(vector.begin() + i);
-                break;
-            }
-            else
-            {
-                ++i;
-            }
-        }
     }
 
 private:
