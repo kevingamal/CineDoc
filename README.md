@@ -37,8 +37,8 @@ This will create a copy of the template's directory structure in `directory`, re
 
 Thanks to Luke (from Luke's Dev Tutorials) for helping us to set up the cross-platform development environment.
 
-For more details, see the [blog post](https://www.justdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X.
-Check out his blog for more! [www.justdevtutorials.com](https://www.justdevtutorials.com)
+For more details, see the [blog post](https://www.lukesdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X.
+Check out his blog for more! [www.lukesdevtutorials.com](https://www.lukesdevtutorials.com)
 
 
 
