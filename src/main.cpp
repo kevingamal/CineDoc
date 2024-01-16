@@ -144,8 +144,8 @@ public:
 
     Scene() {}
 
-    Scene(int id, std::string plain_text, int position)
-        : id(id), plain_text(plain_text), position(position) {}
+    Scene(int id, int parentId, std::string plain_text, int position)
+        : id(id), parentId(parentId), plain_text(plain_text), position(position) {}
 
     Scene(int id, int number, int parentId, int locationId, int type, int time, std::string plain_text, int position)
         : id(id), number(number), parentId(parentId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
@@ -329,6 +329,30 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
     // Paso 3: Limpiar 'source'
     source.clear();
 }
+
+void updateScenePosition(std::vector<Scene> &array, int specificParentId, int specificId, int newPosition)
+{
+    for (auto &scene : array)
+    {
+        if (scene.parentId == specificParentId && scene.id == specificId)
+        {
+            scene.position = newPosition;
+            break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+}
+
+void removeScene(std::vector<Scene> &array, int specificParentId, int specificId)
+{
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    array.erase(std::remove_if(array.begin(), array.end(),
+                               [specificParentId, specificId](const Scene &scene)
+                               {
+                                   return scene.parentId == specificParentId && scene.id == specificId;
+                               }),
+                array.end());
+}
+// removeScene(scenesTemp, specificParentId, specificId);
 
 // TAKES
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
@@ -591,6 +615,7 @@ public:
     void OndeleteButtonClick(wxCommandEvent &event)
     {
         deleteVectorItem(textBoxsContainer, itemPosition);
+        removeScene(scenes, 1, itemPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -1172,7 +1197,8 @@ public:
         textBoxsContainer.push_back(nextNumber);
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
-        Scene newScene(nextNumber, selectedText.ToStdString(), lastNumber);
+        // nextNumber es la posicion dentro del arreglo (id); lastNumber es la posicion dentro del contenedor
+        Scene newScene(nextNumber, 1, selectedText.ToStdString(), lastNumber);
         scenes.push_back(newScene);
 
         containerSizer->Layout();
