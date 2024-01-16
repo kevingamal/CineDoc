@@ -28,6 +28,103 @@ enum
 // VECTOR (solo para almacenar temporalmente los indices y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
 std::vector<int> itemsListContainer;
+
+// ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
+int firstEmpty(std::vector<int> vector)
+{
+    // Si el vector está vacío, el primer número faltante es 1
+    if (vector.empty())
+    {
+        return 1;
+    }
+
+    // Ordena el vector en orden ascendente
+    std::sort(vector.begin(), vector.end());
+
+    // Si el primer número no es 1, entonces 1 es el número faltante
+    if (vector[0] != 1)
+    {
+        return 1;
+    }
+
+    // Recorre el vector y busca el primer número faltante
+    for (size_t i = 0; i < vector.size() - 1; ++i)
+    {
+        if (vector[i + 1] - vector[i] > 1)
+        {
+            return vector[i] + 1;
+        }
+    }
+
+    // Si no encontraste ningún número faltante, retorna el último número + 1
+    return vector.back() + 1;
+}
+
+void deleteVectorItem(std::vector<int> &vector, int item)
+{
+    for (size_t i = 0; i < vector.size();)
+    {
+        if (vector[i] == item)
+        {
+            vector.erase(vector.begin() + i);
+            break;
+        }
+        else
+        {
+            ++i;
+        }
+    }
+}
+
+int lastEmpty(std::vector<int> vector)
+{
+    // Si el vector está vacío, el primer número faltante es 1
+    if (vector.empty())
+    {
+        return 1;
+    }
+
+    // Ordena el vector en orden ascendente
+    std::sort(vector.begin(), vector.end());
+
+    // Retorna el último número + 1
+    return vector.back() + 1;
+}
+
+void removeElementById(std::vector<int> &vector, int id)
+{
+    auto it = std::find(vector.begin(), vector.end(), id);
+    if (it != vector.end())
+    {
+        vector.erase(it);
+    }
+}
+
+void updateElementPosition(std::vector<int> &vector, int id, int newPosition)
+{
+    auto it = std::find(vector.begin(), vector.end(), id);
+
+    if (it == vector.end())
+    {
+        // El ID no se encuentra en el mapa, manejar este caso según sea necesario
+        return;
+    }
+
+    int oldPosition = std::distance(vector.begin(), it);
+
+    // Eliminar el elemento de su posición actual
+    vector.erase(it);
+
+    // Ajustar newPosition en caso de que el elemento se mueva hacia abajo
+    if (newPosition > oldPosition)
+    {
+        newPosition--;
+    }
+
+    // Insertar el elemento en la nueva posición
+    vector.insert(vector.begin() + newPosition, id);
+}
+
 // numeros.push_back(x); // Añade el numero x al final
 // int primerNumero = numeros[0]; // Obtenemos el numero en la primera posicion
 // size_t cantidad = numeros.size(); // Obtenemos la cantidad de items en el vector
@@ -864,22 +961,6 @@ public:
         return -1; // No encontrado
     }
 
-    void deleteVectorItem(std::vector<int> &vector, int item)
-    {
-        for (size_t i = 0; i < vector.size();)
-        {
-            if (vector[i] == item)
-            {
-                vector.erase(vector.begin() + i);
-                break;
-            }
-            else
-            {
-                ++i;
-            }
-        }
-    }
-
 private:
     wxTextCtrl *textBox;
     wxBoxSizer *parentSizer;
@@ -1234,52 +1315,6 @@ public:
 
         Bind(wxEVT_UPDATE_POSITION_EVENT, &MyFrame::OnUpdatePositionEvent, this);
         Bind(wxEVT_UPDATE_INDEX_EVENT, &MyFrame::OnUpdateIndexEvent, this);
-    }
-
-    // ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
-    int firstEmpty(std::vector<int> vector)
-    {
-        // Si el vector está vacío, el primer número faltante es 1
-        if (vector.empty())
-        {
-            return 1;
-        }
-
-        // Ordena el vector en orden ascendente
-        std::sort(vector.begin(), vector.end());
-
-        // Si el primer número no es 1, entonces 1 es el número faltante
-        if (vector[0] != 1)
-        {
-            return 1;
-        }
-
-        // Recorre el vector y busca el primer número faltante
-        for (size_t i = 0; i < vector.size() - 1; ++i)
-        {
-            if (vector[i + 1] - vector[i] > 1)
-            {
-                return vector[i] + 1;
-            }
-        }
-
-        // Si no encontraste ningún número faltante, retorna el último número + 1
-        return vector.back() + 1;
-    }
-
-    int lastEmpty(std::vector<int> vector)
-    {
-        // Si el vector está vacío, el primer número faltante es 1
-        if (vector.empty())
-        {
-            return 1;
-        }
-
-        // Ordena el vector en orden ascendente
-        std::sort(vector.begin(), vector.end());
-
-        // Retorna el último número + 1
-        return vector.back() + 1;
     }
 
     void OnAddButtonClicked(wxCommandEvent &event)
