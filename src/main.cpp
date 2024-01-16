@@ -404,6 +404,29 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
     source.clear();
 }
 
+void updateTakePosition(std::vector<Take> &array, int specificParentId, int specificId, int newPosition)
+{
+    for (auto &take : array)
+    {
+        if (take.parentId == specificParentId && take.id == specificId)
+        {
+            take.position = newPosition;
+            break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+}
+
+void removeTake(std::vector<Take> &array, int specificParentId, int specificId)
+{
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    array.erase(std::remove_if(array.begin(), array.end(),
+                               [specificParentId, specificId](const Take &take)
+                               {
+                                   return take.parentId == specificParentId && take.id == specificId;
+                               }),
+                array.end());
+}
+
 // USE CASES (ACTING AND OBJECT)
 void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
 {
@@ -424,7 +447,7 @@ void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &desti
     }
 }
 
-void updateUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
+void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -445,8 +468,31 @@ void updateUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destina
     source.clear();
 }
 
+void updateUse_CasePosition(std::vector<Use_case> &array, int specificParentId, int specificId, int newPosition)
+{
+    for (auto &use_case : array)
+    {
+        if (use_case.parentId == specificParentId && use_case.id == specificId)
+        {
+            use_case.position = newPosition;
+            break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+}
+
+void removeUse_Case(std::vector<Use_case> &array, int specificParentId, int specificId)
+{
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    array.erase(std::remove_if(array.begin(), array.end(),
+                               [specificParentId, specificId](const Use_case &use_case)
+                               {
+                                   return use_case.parentId == specificParentId && use_case.id == specificId;
+                               }),
+                array.end());
+}
+
 // TECH USE
-void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void transferTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -465,7 +511,7 @@ void transferTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &desti
     }
 }
 
-void updateTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void updateTech_Use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -484,6 +530,29 @@ void updateTechUse(std::vector<Tech_use> &source, std::vector<Tech_use> &destina
 
     // Paso 4: Limpiar 'source'
     source.clear();
+}
+
+void updateTech_UsePosition(std::vector<Tech_Use> &array, int specificParentId, int specificId, int newPosition)
+{
+    for (auto &tech_use : array)
+    {
+        if (tech_use.parentId == specificParentId && tech_use.id == specificId)
+        {
+            tech_use.position = newPosition;
+            break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+}
+
+void removeTech_Use(std::vector<Tech_Use> &array, int specificParentId, int specificId)
+{
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    array.erase(std::remove_if(array.begin(), array.end(),
+                               [specificParentId, specificId](const Tech_Use &tech_use)
+                               {
+                                   return tech_use.parentId == specificParentId && tech_use.id == specificId;
+                               }),
+                array.end());
 }
 
 // EVENTS
