@@ -425,12 +425,21 @@ void updateScenePosition(std::vector<Scene> &source, int specificParentId, int s
         if (scene.parentId == specificParentId && scene.id == specificId)
         {
             scene.position = newPosition;
-            break; // Salir del bucle una vez que se actualice el elemento
+            // break; // Salir del bucle una vez que se actualice el elemento
         }
 
         // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-        std::sort(source.begin(), source.end(), [](const Scene &a, const Scene &b)
-                  { return a.position < b.position; });
+        for (size_t i = 0; i < source.size(); ++i)
+        {
+            for (size_t j = 0; j < source.size() - i - 1; ++j)
+            {
+                if (source[j].position > source[j + 1].position)
+                {
+                    // Intercambiar elementos
+                    std::swap(source[j], source[j + 1]);
+                }
+            }
+        }
     }
 }
 
