@@ -418,9 +418,9 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
     source.clear();
 }
 
-void updateScenePosition(std::vector<Scene> &array, int specificParentId, int specificId, int newPosition)
+void updateScenePosition(std::vector<Scene> &source, int specificParentId, int specificId, int newPosition)
 {
-    for (auto &scene : array)
+    for (auto &scene : source)
     {
         if (scene.parentId == specificParentId && scene.id == specificId)
         {
@@ -429,20 +429,20 @@ void updateScenePosition(std::vector<Scene> &array, int specificParentId, int sp
         }
 
         // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-        std::sort(array.begin(), array.end(), [](const Scene &a, const Scene &b)
+        std::sort(source.begin(), source.end(), [](const Scene &a, const Scene &b)
                   { return a.position < b.position; });
     }
 }
 
-void removeScene(std::vector<Scene> &array, int specificParentId, int specificId)
+void removeScene(std::vector<Scene> &source, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Scene &scene)
-                               {
-                                   return scene.parentId == specificParentId && scene.id == specificId;
-                               }),
-                array.end());
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Scene &scene)
+                                {
+                                    return scene.parentId == specificParentId && scene.id == specificId;
+                                }),
+                 source.end());
 }
 
 // TAKES
@@ -486,9 +486,9 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
     source.clear();
 }
 
-void updateTakePosition(std::vector<Take> &array, int specificParentId, int specificId, int newPosition)
+void updateTakePosition(std::vector<Take> &source, int specificParentId, int specificId, int newPosition)
 {
-    for (auto &take : array)
+    for (auto &take : source)
     {
         if (take.parentId == specificParentId && take.id == specificId)
         {
@@ -498,19 +498,19 @@ void updateTakePosition(std::vector<Take> &array, int specificParentId, int spec
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(array.begin(), array.end(), [](const Take &a, const Take &b)
+    std::sort(source.begin(), source.end(), [](const Take &a, const Take &b)
               { return a.position < b.position; });
 }
 
-void removeTake(std::vector<Take> &array, int specificParentId, int specificId)
+void removeTake(std::vector<Take> &source, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Take &take)
-                               {
-                                   return take.parentId == specificParentId && take.id == specificId;
-                               }),
-                array.end());
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Take &take)
+                                {
+                                    return take.parentId == specificParentId && take.id == specificId;
+                                }),
+                 source.end());
 }
 
 // USE CASES (ACTING AND OBJECT)
@@ -554,9 +554,9 @@ void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destin
     source.clear();
 }
 
-void updateUse_CasePosition(std::vector<Use_case> &array, int specificParentId, int specificId, int newPosition)
+void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId, int specificId, int newPosition)
 {
-    for (auto &use_case : array)
+    for (auto &use_case : source)
     {
         if (use_case.parentId == specificParentId && use_case.id == specificId)
         {
@@ -566,19 +566,19 @@ void updateUse_CasePosition(std::vector<Use_case> &array, int specificParentId, 
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(array.begin(), array.end(), [](const Use_case &a, const Use_case &b)
+    std::sort(source.begin(), source.end(), [](const Use_case &a, const Use_case &b)
               { return a.position < b.position; });
 }
 
-void removeUse_Case(std::vector<Use_case> &array, int specificParentId, int specificId)
+void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Use_case &use_case)
-                               {
-                                   return use_case.parentId == specificParentId && use_case.id == specificId;
-                               }),
-                array.end());
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Use_case &use_case)
+                                {
+                                    return use_case.parentId == specificParentId && use_case.id == specificId;
+                                }),
+                 source.end());
 }
 
 // TECH USE
@@ -622,9 +622,9 @@ void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destin
     source.clear();
 }
 
-void updateTech_usePosition(std::vector<Tech_use> &array, int specificParentId, int specificId, int newPosition)
+void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId, int specificId, int newPosition)
 {
-    for (auto &tech_use : array)
+    for (auto &tech_use : source)
     {
         if (tech_use.parentId == specificParentId && tech_use.id == specificId)
         {
@@ -634,19 +634,19 @@ void updateTech_usePosition(std::vector<Tech_use> &array, int specificParentId, 
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(array.begin(), array.end(), [](const Tech_use &a, const Tech_use &b)
+    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
               { return a.position < b.position; });
 }
 
-void removeTech_use(std::vector<Tech_use> &array, int specificParentId, int specificId)
+void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Tech_use &tech_use)
-                               {
-                                   return tech_use.parentId == specificParentId && tech_use.id == specificId;
-                               }),
-                array.end());
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Tech_use &tech_use)
+                                {
+                                    return tech_use.parentId == specificParentId && tech_use.id == specificId;
+                                }),
+                 source.end());
 }
 
 // EVENTS
@@ -692,9 +692,9 @@ void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, i
 }
 // updateEvents(eventsTemp, events, specificParentId);
 
-void updateEventPosition(std::vector<Event> &array, int specificParentId, int specificId, int newPosition)
+void updateEventPosition(std::vector<Event> &source, int specificParentId, int specificId, int newPosition)
 {
-    for (auto &event : array)
+    for (auto &event : source)
     {
         if (event.parentId == specificParentId && event.id == specificId)
         {
@@ -704,20 +704,20 @@ void updateEventPosition(std::vector<Event> &array, int specificParentId, int sp
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(array.begin(), array.end(), [](const Event &a, const Event &b)
+    std::sort(source.begin(), source.end(), [](const Event &a, const Event &b)
               { return a.position < b.position; });
 }
 // updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
 
-void removeEvent(std::vector<Event> &array, int specificParentId, int specificId)
+void removeEvent(std::vector<Event> &source, int specificParentId, int specificId)
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    array.erase(std::remove_if(array.begin(), array.end(),
-                               [specificParentId, specificId](const Event &event)
-                               {
-                                   return event.parentId == specificParentId && event.id == specificId;
-                               }),
-                array.end());
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Event &event)
+                                {
+                                    return event.parentId == specificParentId && event.id == specificId;
+                                }),
+                 source.end());
 }
 // removeEvent(eventsTemp, specificParentId, specificId);
 
