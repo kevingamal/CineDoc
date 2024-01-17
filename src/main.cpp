@@ -726,7 +726,7 @@ class TitledTextBox : public wxPanel
 {
 public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
-        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), itemPosition(index)
+        : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), indexPosition(index)
     {
         // this->SetFocus();
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
@@ -825,8 +825,8 @@ public:
 
     void OndeleteButtonClick(wxCommandEvent &event)
     {
-        deleteVectorItem(textBoxsContainer, itemPosition);
-        removeScene(scenes, 1, itemPosition);
+        deleteVectorItem(textBoxsContainer, indexPosition);
+        removeScene(scenes, 1, indexPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -875,7 +875,7 @@ public:
 
         // IMPRESION DEL Nº DE ITEM EN PANTALLA
         // textPanelPosition = GetItemPositionInSizer(parentSizer, this);
-        // textIndexPosition = itemPosition;
+        // textIndexPosition = indexPosition;
 
         // textPanelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
         // es inamovible e unico, sirve para saber su id en la BD
@@ -904,7 +904,7 @@ public:
     void OnMouseMove(wxMouseEvent &event)
     {
         textPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        textIndexPosition = itemPosition;
+        textIndexPosition = indexPosition;
 
         wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
         evta.SetInt(textPanelPosition);
@@ -954,8 +954,8 @@ public:
                 parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
                 dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
-                // (itemPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
-                updateElementPosition(textBoxsContainer, itemPosition, desiredPosition);
+                // (indexPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
+                updateElementPosition(textBoxsContainer, indexPosition, desiredPosition);
                 // Actualiza la posicion de si mismo y de los demas dentro del vector
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
@@ -990,14 +990,14 @@ private:
     int desiredPosition = -1;
     int thresholdTop = -1;
     int thresholdBottom = -1;
-    int itemPosition;
+    int indexPosition;
 };
 
 class ItemTextList : public wxPanel
 {
 public:
     ItemTextList(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
-        : wxPanel(parent, wxID_ANY), parentSizer(sizer), itemPosition(index)
+        : wxPanel(parent, wxID_ANY), parentSizer(sizer), indexPosition(index)
     {
         // this->SetFocus();
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
@@ -1051,7 +1051,7 @@ public:
 
     void OndeleteButtonClick(wxCommandEvent &event)
     {
-        deleteVectorItem(itemsListContainer, itemPosition);
+        deleteVectorItem(itemsListContainer, indexPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -1064,7 +1064,7 @@ public:
     void OnMouseMove(wxMouseEvent &event)
     {
         itemPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        itemIndexPosition = itemPosition;
+        itemIndexPosition = indexPosition;
 
         wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT); // se define en la linea 1063, 1186
         evta.SetInt(itemPanelPosition);
@@ -1139,7 +1139,7 @@ private:
     int desiredPosition = -1;
     int thresholdTop = -1;
     int thresholdBottom = -1;
-    int itemPosition;
+    int indexPosition;
 };
 
 class MyFrame : public wxFrame
