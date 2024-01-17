@@ -37,8 +37,13 @@ This will create a copy of the template's directory structure in `directory`, re
 
 For details, see the [blog post](https://www.lukesdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X. 
 
+<<<<<<< HEAD
 ---
 Check out the blog for more! [www.lukesdevtutorials.com](https://www.lukesdevtutorials.com)
+=======
+For more details, see the [blog post](https://www.lukesdevtutorials.com/post/wxwidgets-cmake/) and the [video](https://www.youtube.com/watch?v=MfuBS9n5_aY) tutorial showcasing the installation on Linux, Windows, and Mac OS X.
+Check out his blog for more! [www.lukesdevtutorials.com](https://www.lukesdevtutorials.com)
+>>>>>>> 18cbca13dfe543fd176d1da9bea36b23f25f8da6
 
 
 
