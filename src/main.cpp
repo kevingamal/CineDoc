@@ -87,20 +87,21 @@ void updateElementPosition(std::vector<int> &vector, int id, int newPosition)
 
     if (it == vector.end())
     {
-        // El ID no se encuentra en el mapa, manejar este caso según sea necesario
+        // El ID no se encuentra en el vector, manejar este caso según sea necesario
         return;
     }
 
     int oldPosition = std::distance(vector.begin(), it);
 
+    // Verificar que newPosition esté dentro de los límites válidos del vector
+    if (newPosition < 0 || newPosition >= vector.size())
+    {
+        // Manejar el caso en que newPosition es inválido
+        return;
+    }
+
     // Eliminar el elemento de su posición actual
     vector.erase(it);
-
-    // Ajustar newPosition en caso de que el elemento se mueva hacia abajo
-    if (newPosition > oldPosition)
-    {
-        newPosition--;
-    }
 
     // Insertar el elemento en la nueva posición
     vector.insert(vector.begin() + newPosition, id);
