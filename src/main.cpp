@@ -502,13 +502,22 @@ void updateTakePosition(std::vector<Take> &source, int specificParentId, int spe
         if (take.parentId == specificParentId && take.id == specificId)
         {
             take.position = newPosition;
-            break; // Salir del bucle una vez que se actualice el elemento
+            // break; // Salir del bucle una vez que se actualice el elemento
         }
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Take &a, const Take &b)
-              { return a.position < b.position; });
+    for (size_t i = 0; i < source.size(); ++i)
+    {
+        for (size_t j = 0; j < source.size() - i - 1; ++j)
+        {
+            if (source[j].position > source[j + 1].position)
+            {
+                // Intercambiar elementos
+                std::swap(source[j], source[j + 1]);
+            }
+        }
+    }
 }
 
 void removeTake(std::vector<Take> &source, int specificParentId, int specificId)
@@ -570,13 +579,22 @@ void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId,
         if (use_case.parentId == specificParentId && use_case.id == specificId)
         {
             use_case.position = newPosition;
-            break; // Salir del bucle una vez que se actualice el elemento
+            // break; // Salir del bucle una vez que se actualice el elemento
         }
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Use_case &a, const Use_case &b)
-              { return a.position < b.position; });
+    for (size_t i = 0; i < source.size(); ++i)
+    {
+        for (size_t j = 0; j < source.size() - i - 1; ++j)
+        {
+            if (source[j].position > source[j + 1].position)
+            {
+                // Intercambiar elementos
+                std::swap(source[j], source[j + 1]);
+            }
+        }
+    }
 }
 
 void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int specificId)
@@ -638,13 +656,22 @@ void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId,
         if (tech_use.parentId == specificParentId && tech_use.id == specificId)
         {
             tech_use.position = newPosition;
-            break; // Salir del bucle una vez que se actualice el elemento
+            // break; // Salir del bucle una vez que se actualice el elemento
         }
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
-              { return a.position < b.position; });
+    for (size_t i = 0; i < source.size(); ++i)
+    {
+        for (size_t j = 0; j < source.size() - i - 1; ++j)
+        {
+            if (source[j].position > source[j + 1].position)
+            {
+                // Intercambiar elementos
+                std::swap(source[j], source[j + 1]);
+            }
+        }
+    }
 }
 
 void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int specificId)
@@ -708,13 +735,22 @@ void updateEventPosition(std::vector<Event> &source, int specificParentId, int s
         if (event.parentId == specificParentId && event.id == specificId)
         {
             event.position = newPosition;
-            break; // Salir del bucle una vez que se actualice el elemento
+            // break; // Salir del bucle una vez que se actualice el elemento
         }
     }
 
     // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Event &a, const Event &b)
-              { return a.position < b.position; });
+    for (size_t i = 0; i < source.size(); ++i)
+    {
+        for (size_t j = 0; j < source.size() - i - 1; ++j)
+        {
+            if (source[j].position > source[j + 1].position)
+            {
+                // Intercambiar elementos
+                std::swap(source[j], source[j + 1]);
+            }
+        }
+    }
 }
 // updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
 
