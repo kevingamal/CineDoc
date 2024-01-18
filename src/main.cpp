@@ -912,41 +912,6 @@ public:
         }
     }
 
-    void OnMouseDown(wxMouseEvent &event)
-    {
-        // wxLogMessage(wxT("OnMouseDown llamado"));
-        //  CaptureMouse();
-        //   dragStartPosition = ClientToScreen(event.GetPosition());
-        //   initialWindowPosition = GetPosition();
-
-        // IMPRESION DEL Nº DE ITEM EN PANTALLA
-        // textPanelPosition = GetItemPositionInSizer(parentSizer, this);
-        // textIndexPosition = indexPosition;
-
-        // textPanelPosition se averigua cada vez que se selecciona el panel, para saber donde está (ya que puede cambiarse)
-        // es inamovible e unico, sirve para saber su id en la BD
-
-        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        // evt.SetInt(textPanelPosition);
-        // wxPostEvent(GetParent(), evt);
-        // event.Skip();
-    }
-
-    void OnMouseUp(wxMouseEvent &event)
-    {
-        // MoveToDesiredPosition();
-        // wxLogMessage(wxT("OnMouseUp llamado"));
-        // textPanelPosition = GetItemPositionInSizer(parentSizer, this);
-
-        // if (HasCapture())
-        //     ReleaseMouse();
-
-        // wxCommandEvent evt(wxEVT_UPDATE_POSITION_EVENT);
-        // evt.SetInt(textPanelPosition);
-        // wxPostEvent(GetParent(), evt);
-        //  event.Skip();
-    }
-
     void OnMouseMove(wxMouseEvent &event)
     {
         textPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
@@ -1098,12 +1063,23 @@ public:
     void OndeleteButtonClick(wxCommandEvent &event)
     {
         deleteVectorItem(itemsListContainer, indexPosition);
+        removeTake(takes, 1, indexPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
         if (wxDynamicCast(parentWindow, wxScrolledWindow))
         {
             dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
+        }
+
+        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        for (int i = 0; i < itemsListContainer.size(); ++i)
+        {
+            int specificId = itemsListContainer[i];
+            int newPosition = i; // La posición en itemsListContainer es la nueva posición.
+
+            // Actualizar la posición de la escena con specificId en el vector takes
+            updateTakePosition(takes, 1, specificId, newPosition);
         }
     }
 
@@ -1160,11 +1136,21 @@ public:
                 parentSizer->Insert(desiredPosition, this, 0, wxEXPAND | wxALL, 5);
                 parentSizer->Layout();
                 dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
-
-                // For que recorra a todos y escriba para cada uno lo que devuelva GetItemPositionInSizer() a position en el arreglo temporal
-                // Dependiendo de un if que lea el nivel invocara a la funcion que corresponda
+                // (indexPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
+                updateElementPosition(itemsListContainer, indexPosition, desiredPosition);
+                // Actualiza la posicion de si mismo y de los demas dentro del vector
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
+        }
+
+        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        for (int i = 0; i < itemsListContainer.size(); ++i)
+        {
+            int specificId = itemsListContainer[i];
+            int newPosition = i; // La posición en itemsListContainer es la nueva posición.
+
+            // Actualizar la posición de la escena con specificId en el vector takes
+            updateTakePosition(takes, 1, specificId, newPosition);
         }
     }
 
@@ -1437,6 +1423,10 @@ public:
         ItemTextList *newItemTextList = new ItemTextList(itemsPanel, itemsSizer, nextNumber, selectedText);
         itemsListContainer.push_back(nextNumber);
         itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
+
+        // nextNumber es la posicion dentro del arreglo (id); lastNumber es la posicion dentro del contenedor
+        Take newTake(nextNumber, 1, selectedText.ToStdString(), lastNumber);
+        takes.push_back(newTake);
 
         itemsSizer->Layout();
         itemsPanel->Layout();
