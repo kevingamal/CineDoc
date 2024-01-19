@@ -281,6 +281,9 @@ public:
 
     Take() {}
 
+    Take(int id, int parentId, std::string description, int position)
+        : id(id), parentId(parentId), description(description), position(position) {}
+
     Take(int id, int parentId, int number, int shot_size, int movement, int mount, int camera, int lens, int sound, int length, std::string description, std::string image, std::string floor_plan, int position)
         : id(id), parentId(parentId), number(number), shot_size(shot_size), movement(movement), mount(mount), camera(camera), lens(lens), sound(sound), length(length), description(description), image(image), floor_plan(floor_plan), position(position) {}
 
@@ -829,8 +832,6 @@ public:
         SetSizer(sizerLocal);
 
         // Añade los eventos de ratón
-        Bind(wxEVT_LEFT_DOWN, &TitledTextBox::OnMouseDown, this);
-        Bind(wxEVT_LEFT_UP, &TitledTextBox::OnMouseUp, this);
         Bind(wxEVT_MOTION, &TitledTextBox::OnMouseMove, this);
     }
 
@@ -1503,8 +1504,8 @@ void MyFrame::OnHello(wxCommandEvent &event)
     // Serializamos las instancias a un archivo
     std::ofstream out_fs("datos.bin");
     boost::archive::text_oarchive oa(out_fs);
-    oa << scripts;
     oa << scenes;
+    oa << takes;
     out_fs.close();
 }
 

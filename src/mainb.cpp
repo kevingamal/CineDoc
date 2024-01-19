@@ -53,6 +53,9 @@ public:
 
     Take() {}
 
+    Take(int id, int parentId, std::string description, int position)
+        : id(id), parentId(parentId), description(description), position(position) {}
+
     Take(int id, int parentId, int number, int shot_size, int movement, int mount, int camera, int lens, int sound, int length, std::string description, std::string image, std::string floor_plan, int position)
         : id(id), parentId(parentId), number(number), shot_size(shot_size), movement(movement), mount(mount), camera(camera), lens(lens), sound(sound), length(length), description(description), image(image), floor_plan(floor_plan), position(position) {}
 
@@ -67,29 +70,28 @@ public:
 int main()
 {
     // Algunas instancias de Escenas y Tomas
+    // std::vector<Scene> scenes =
+    //     {
+    //         Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
+    //         Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
+    //         Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
+    //         Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
 
-    std::vector<Scene> scenes =
-        {
-            Scene(1, 1, 1, 1, 0, 0, "Escena1Guion1", 1),
-            Scene(2, 2, 1, 1, 0, 0, "Escena2Guion1", 1),
-            Scene(3, 3, 2, 1, 0, 0, "Escena1Guion2", 1),
-            Scene(4, 4, 3, 1, 0, 0, "Escena2Guion2", 1)
+    //     };
 
-        };
+    // std::vector<Take> takes =
+    //     {
+    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
+    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
 
-    std::vector<Take> takes =
-        {
-            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
-            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
+    //     };
 
-        };
-
-    // Serializamos las instancias a un archivo
-    std::ofstream out_fs("datos.bin");
-    boost::archive::text_oarchive oa(out_fs);
-    oa << takes;
-    oa << scenes;
-    out_fs.close();
+    // // Serializamos las instancias a un archivo
+    // std::ofstream out_fs("datos.bin");
+    // boost::archive::text_oarchive oa(out_fs);
+    // oa << takes;
+    // oa << scenes;
+    // out_fs.close();
 
     // Creamos nuevos vectores para recibir los datos desde el archivo
     std::vector<Take> loadedTakes;
@@ -102,14 +104,14 @@ int main()
     ia >> loadedScenes;
 
     // Imprimirmos los datos de los nuevos vectores para verificar
-    for (const auto &take : loadedTakes)
-    {
-        std::cout << "Padre: " << take.parentId << " Id: " << take.id << " Descripcion: " << take.description << std::endl;
-    }
-
     for (const auto &scene : loadedScenes)
     {
         std::cout << "Escena: " << scene.id << " Numero: " << scene.number << " Guion: " << scene.scriptId << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
+    }
+
+    for (const auto &take : loadedTakes)
+    {
+        std::cout << "Padre: " << take.parentId << " Id: " << take.id << " Descripcion: " << take.description << std::endl;
     }
 
     return 0;
