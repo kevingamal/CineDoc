@@ -70,28 +70,28 @@ public:
 int main()
 {
     // Algunas instancias de Escenas y Tomas
-    std::vector<Scene> scenes =
-        {
-            Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
-            Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
-            Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
-            Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
+    // std::vector<Scene> scenes =
+    //     {
+    //         Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
+    //         Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
+    //         Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
+    //         Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
 
-        };
+    //     };
 
-    std::vector<Take> takes =
-        {
-            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
-            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
+    // std::vector<Take> takes =
+    //     {
+    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
+    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
 
-        };
+    //     };
 
-    // Serializamos las instancias a un archivo
-    std::ofstream out_fs("datos.bin");
-    boost::archive::text_oarchive oa(out_fs);
-    oa << takes;
-    oa << scenes;
-    out_fs.close();
+    // // Serializamos las instancias a un archivo
+    // std::ofstream out_fs("datos.bin");
+    // boost::archive::text_oarchive oa(out_fs);
+    // oa << scenes;
+    // oa << takes;
+    // out_fs.close();
 
     // Creamos nuevos vectores para recibir los datos desde el archivo
     std::vector<Take> loadedTakes;
@@ -100,8 +100,8 @@ int main()
     // Deserializamos las instancias desde el archivo
     std::ifstream in_fs("datos.bin");
     boost::archive::text_iarchive ia(in_fs);
-    ia >> loadedTakes;
     ia >> loadedScenes;
+    ia >> loadedTakes;
 
     // Imprimirmos los datos de los nuevos vectores para verificar
     for (const auto &scene : loadedScenes)
