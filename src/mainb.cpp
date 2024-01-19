@@ -10,7 +10,7 @@ class Scene
 public:
     int id;
     int number;
-    int scriptId;
+    int parentId;
     int locationId;
     int type;
     int time;
@@ -19,17 +19,17 @@ public:
 
     Scene() {}
 
-    Scene(int id, std::string plain_text, int position)
-        : id(id), plain_text(plain_text), position(position) {}
+    Scene(int id, int parentId, std::string plain_text, int position)
+        : id(id), parentId(parentId), plain_text(plain_text), position(position) {}
 
-    Scene(int id, int number, int scriptId, int locationId, int type, int time, std::string plain_text, int position)
-        : id(id), number(number), scriptId(scriptId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
+    Scene(int id, int number, int parentId, int locationId, int type, int time, std::string plain_text, int position)
+        : id(id), number(number), parentId(parentId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & number & scriptId & locationId & type & time & plain_text & position;
+        ar & id & number & parentId & locationId & type & time & plain_text & position;
     }
 };
 
@@ -70,28 +70,28 @@ public:
 int main()
 {
     // Algunas instancias de Escenas y Tomas
-    // std::vector<Scene> scenes =
-    //     {
-    //         Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
-    //         Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
-    //         Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
-    //         Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
+    std::vector<Scene> scenes =
+        {
+            Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
+            Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
+            Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
+            Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
 
-    //     };
+        };
 
-    // std::vector<Take> takes =
-    //     {
-    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
-    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
+    std::vector<Take> takes =
+        {
+            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
+            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
 
-    //     };
+        };
 
-    // // Serializamos las instancias a un archivo
-    // std::ofstream out_fs("datos.bin");
-    // boost::archive::text_oarchive oa(out_fs);
-    // oa << takes;
-    // oa << scenes;
-    // out_fs.close();
+    // Serializamos las instancias a un archivo
+    std::ofstream out_fs("datos.bin");
+    boost::archive::text_oarchive oa(out_fs);
+    oa << takes;
+    oa << scenes;
+    out_fs.close();
 
     // Creamos nuevos vectores para recibir los datos desde el archivo
     std::vector<Take> loadedTakes;
@@ -106,7 +106,7 @@ int main()
     // Imprimirmos los datos de los nuevos vectores para verificar
     for (const auto &scene : loadedScenes)
     {
-        std::cout << "Escena: " << scene.id << " Numero: " << scene.number << " Guion: " << scene.scriptId << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
+        std::cout << "Escena: " << scene.id << " Numero: " << scene.number << " Guion: " << scene.parentId << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
     }
 
     for (const auto &take : loadedTakes)
