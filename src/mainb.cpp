@@ -70,28 +70,28 @@ public:
 int main()
 {
     // Algunas instancias de Escenas y Tomas
-    // std::vector<Scene> scenes =
-    //     {
-    //         Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
-    //         Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
-    //         Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
-    //         Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
+    std::vector<Scene> scenes =
+        {
+            Scene(1, 1, 1, 1, 0, 0, "Escena1 - Guion1", 1),
+            Scene(2, 2, 1, 1, 0, 0, "Escena2 - Guion1", 1),
+            Scene(3, 3, 2, 1, 0, 0, "Escena1 - Guion2", 1),
+            Scene(4, 4, 3, 1, 0, 0, "Escena2 - Guion2", 1)
 
-    //     };
+        };
 
-    // std::vector<Take> takes =
-    //     {
-    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
-    //         Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
+    std::vector<Take> takes =
+        {
+            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion1", "imagen1", "plano1", 1),
+            Take(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, "Descripcion2", "imagen2", "plano2", 1)
 
-    //     };
+        };
 
-    // // Serializamos las instancias a un archivo
-    // std::ofstream out_fs("datos.bin");
-    // boost::archive::text_oarchive oa(out_fs);
-    // oa << scenes;
-    // oa << takes;
-    // out_fs.close();
+    // Serializamos las instancias a un archivo
+    std::ofstream out_fs("datos.bin");
+    boost::archive::text_oarchive oa(out_fs);
+    oa << scenes;
+    oa << takes;
+    out_fs.close();
 
     // Creamos nuevos vectores para recibir los datos desde el archivo
     std::vector<Take> loadedTakes;
@@ -106,12 +106,12 @@ int main()
     // Imprimirmos los datos de los nuevos vectores para verificar
     for (const auto &scene : loadedScenes)
     {
-        std::cout << "Escena: " << scene.id << " Numero: " << scene.number << " Guion: " << scene.parentId << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
+        std::cout << " Padre: " << scene.parentId << " Escena ID: " << scene.id << " Texto: " << scene.plain_text << " Posicion: " << scene.position << std::endl;
     }
 
     for (const auto &take : loadedTakes)
     {
-        std::cout << "Padre: " << take.parentId << " Id: " << take.id << " Descripcion: " << take.description << std::endl;
+        std::cout << " Padre: " << take.parentId << " Toma ID: " << take.id << " Texto: " << take.description << " Posicion: " << take.position << std::endl;
     }
 
     return 0;
