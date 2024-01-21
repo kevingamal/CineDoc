@@ -14,15 +14,26 @@
 #include <vector>
 #include <algorithm> // para std::sort
 
+// FILE DATA
+bool opf;
+bool mod;
+wxString file;
+
 wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 enum
 {
-    ID_Hello = 1,
-    ID_SCRIPT_NEW = 2,
-    ID_SCRIPT_EDIT = 3,
-    ID_SCRIPT_DEL = 4
+    ID_NEW = 1,
+    ID_OPEN = 2,
+    ID_SAVE = 3,
+    ID_SAVE_AS = 4,
+    ID_CLOSE = 5,
+    ID_EXIT = 6,
+    ID_SCRIPT_NEW = 7,
+    ID_SCRIPT_EDIT = 8,
+    ID_SCRIPT_DEL = 9,
+    ID_Hello = 10
 };
 
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
@@ -1190,8 +1201,8 @@ public:
         // menuProject->AppendSeparator();
         menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
         menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
-        // menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
-        menuProject->Append(ID_Hello, "&Guardar...", "Guardar proyecto"); /// FUNCION TEMPORAL!!!
+        menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
+        menuProject->Append(ID_Hello, "&Guardar como...\tCtrl-K", "Guardar proyecto"); /// FUNCION TEMPORAL!!!
         menuProject->Append(wxID_CLOSE, "&Cerrar...", "Cerrar proyecto");
         menuProject->Append(wxID_EXIT, "&Salir...", "Salir de CineDoc");
 
@@ -1203,27 +1214,27 @@ public:
 
         // MENU PERSONAJE
         wxMenu *menuCharacter = new wxMenu;
-        menuCharacter->Append(ID_Hello, "&Nuevo...", "Nuevo personaje");
-        menuCharacter->Append(ID_Hello, "&Editar...", "Editar personaje");
-        menuCharacter->Append(ID_Hello, "&Eliminar...", "Eliminar personaje");
+        menuCharacter->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo personaje");
+        menuCharacter->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar personaje");
+        menuCharacter->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar personaje");
 
         // MENU ACTOR
         wxMenu *menuActor = new wxMenu;
-        menuActor->Append(ID_Hello, "&Nuevo...", "Nuevo actor");
-        menuActor->Append(ID_Hello, "&Editar...", "Editar actor");
-        menuActor->Append(ID_Hello, "&Eliminar...", "Eliminar actor");
+        menuActor->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo actor");
+        menuActor->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar actor");
+        menuActor->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar actor");
 
         // MENU LOCACION
         wxMenu *menuLocation = new wxMenu;
-        menuLocation->Append(ID_Hello, "&Nuevo...", "Nueva locación");
-        menuLocation->Append(ID_Hello, "&Editar...", "Editar locación");
-        menuLocation->Append(ID_Hello, "&Eliminar...", "Eliminar locación");
+        menuLocation->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nueva locación");
+        menuLocation->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar locación");
+        menuLocation->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar locación");
 
         // MENU OBJETO
         wxMenu *menuObject = new wxMenu;
-        menuObject->Append(ID_Hello, "&Nuevo...", "Nuevo objeto");
-        menuObject->Append(ID_Hello, "&Editar...", "Editar objeto");
-        menuObject->Append(ID_Hello, "&Eliminar...", "Eliminar objeto");
+        menuObject->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo objeto");
+        menuObject->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar objeto");
+        menuObject->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar objeto");
 
         // MENU AYUDA
         wxMenu *menuHelp = new wxMenu;
@@ -1452,10 +1463,22 @@ private:
     wxTextCtrl *itemPositionTextBox;
     int nextNumber;
     int lastNumber;
-    void OnHello(wxCommandEvent &event);
+
+    // File menu Events
+    void OnNewFile(wxCommandEvent &event);
+    void OnOpenFile(wxCommandEvent &event);
+    void OnSaveFile(wxCommandEvent &event);
+    void OnSaveAsFile(wxCommandEvent &event);
+    void OnCloseFile(wxCommandEvent &event);
     void OnExit(wxCommandEvent &event);
-    void OnAbout(wxCommandEvent &event);
+
+    // Script Menu Events
     void OnNewScript(wxCommandEvent &event);
+    void OnScriptEdit(wxCommandEvent &event);
+    void OnScriptDel(wxCommandEvent &event);
+
+    void OnHello(wxCommandEvent &event);
+    void OnAbout(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
 };
 
@@ -1475,20 +1498,21 @@ wxDEFINE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
 
-    EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-        EVT_MENU(ID_SCRIPT_NEW, MyFrame::OnNewScript)
-            EVT_MENU(ID_SCRIPT_EDIT, MyFrame::OnHello)
-                EVT_MENU(ID_SCRIPT_DEL, MyFrame::OnHello)
+    EVT_MENU(wxID_NEW, MyFrame::OnNewFile)
+        EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
+            EVT_MENU(wxID_SAVE, MyFrame::OnSaveFile)
+                EVT_MENU(ID_SAVE_AS, MyFrame::OnSaveAsFile)
+                    EVT_MENU(wxID_CLOSE, MyFrame::OnCloseFile)
+                        EVT_MENU(wxID_EXIT, MyFrame::OnExit)
+                            EVT_MENU(ID_SCRIPT_NEW, MyFrame::OnNewScript)
+                                EVT_MENU(ID_SCRIPT_EDIT, MyFrame::OnScriptEdit)
+                                    EVT_MENU(ID_SCRIPT_DEL, MyFrame::OnScriptDel)
 
-                    EVT_MENU(ID_Hello, MyFrame::OnHello)
-                        EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
-                            wxEND_EVENT_TABLE()
-                                wxIMPLEMENT_APP(MyApp);
+                                        EVT_MENU(ID_Hello, MyFrame::OnHello)
+                                            EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+                                                wxEND_EVENT_TABLE()
+                                                    wxIMPLEMENT_APP(MyApp);
 
-void MyFrame::OnExit(wxCommandEvent &event)
-{
-    Close(true);
-}
 void MyFrame::OnAbout(wxCommandEvent &event)
 {
     wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
@@ -1509,8 +1533,42 @@ void MyFrame::OnHello(wxCommandEvent &event)
     out_fs.close();
 }
 
-// UDMR EVENTS
+// FILE MENU
+void MyFrame::OnNewFile(wxCommandEvent &event)
+{
+}
 
+void MyFrame::OnOpenFile(wxCommandEvent &event)
+{
+}
+
+void MyFrame::OnSaveFile(wxCommandEvent &event)
+{
+}
+
+void MyFrame::OnSaveAsFile(wxCommandEvent &event)
+{
+}
+
+void MyFrame::OnCloseFile(wxCommandEvent &event)
+{
+}
+
+void MyFrame::OnExit(wxCommandEvent &event)
+{
+    Close(true);
+}
+
+// SCRIPT MENU
+void MyFrame::OnScriptEdit(wxCommandEvent &event)
+{
+}
+
+void MyFrame::OnScriptDel(wxCommandEvent &event)
+{
+}
+
+// UDMR EVENTS
 void MyFrame::OnNewScript(wxCommandEvent &event)
 {
     wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
