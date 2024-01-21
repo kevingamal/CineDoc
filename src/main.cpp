@@ -16,7 +16,7 @@
 
 // FILE DATA
 bool opf = false;
-bool mod = true; // CAMBIAR AL FALSE LUEGO!!!!!
+bool mod = false;
 wxString filename;
 
 wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
@@ -904,6 +904,8 @@ public:
             // Actualizar la posición de la escena con specificId en el vector scenes
             updateScenePosition(scenes, 1, specificId, newPosition);
         }
+
+        mod = true;
     }
 
     void OnMouseWheel(wxMouseEvent &event)
@@ -982,6 +984,8 @@ public:
                 // (indexPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
                 updateElementPosition(textBoxsContainer, indexPosition, desiredPosition);
                 // Actualiza la posicion de si mismo y de los demas dentro del vector
+
+                mod = true;
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
@@ -1095,6 +1099,8 @@ public:
             // Actualizar la posición de la escena con specificId en el vector takes
             updateTakePosition(takes, 1, specificId, newPosition);
         }
+
+        mod = true;
     }
 
     void OnMouseMove(wxMouseEvent &event)
@@ -1153,6 +1159,8 @@ public:
                 // (indexPosition es en realidad el ID, desiredPosition es la posicion en relacion a los demás)
                 updateElementPosition(itemsListContainer, indexPosition, desiredPosition);
                 // Actualiza la posicion de si mismo y de los demas dentro del vector
+
+                mod = true;
             }
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
@@ -1408,6 +1416,8 @@ public:
         containerPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
         containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
+
+        mod = true;
     }
 
     void OnBackButtonClicked(wxCommandEvent &event)
@@ -1447,6 +1457,8 @@ public:
         itemsPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
         itemsPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
+
+        mod = true;
     }
 
     void OnUpdatePositionEvent(wxCommandEvent &event);
@@ -1524,8 +1536,9 @@ void MainWindow::OnNewFile(wxCommandEvent &event)
 {
     wxCommandEvent closeEvent;
     OnCloseFile(closeEvent);
-    filename = AskFile();
+
     mod = true;
+    opf = false;
 }
 
 void MainWindow::OnOpenFile(wxCommandEvent &event)
@@ -1542,12 +1555,12 @@ void MainWindow::OnOpenFile(wxCommandEvent &event)
 
 void MainWindow::OnSaveFile(wxCommandEvent &event)
 {
-    if (!opf)
+    if (!opf) // Si no hay un achivo abierto, preguntar el nombre
     {
         filename = AskFile();
     }
 
-    if (!filename.IsEmpty())
+    if (!filename.IsEmpty()) // si se escribio algun nombre, guardar, sino volver
     {
         writeFile();
 
@@ -1626,6 +1639,12 @@ void MainWindow::OnExit(wxCommandEvent &event)
             Close(true);
         }
     }
+
+    else
+    {
+        Close(true);
+    }
+
     // wxCommandEvent closeEvent;
     // OnCloseFile(closeEvent);
 
