@@ -1,24 +1,29 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif
+
+// #include <wx/wxprec.h>
+#include <wx/filedlg.h>
+
+// BOOST INCLUDES
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/serialization/vector.hpp>
+
+// Resto de los includes
 #include <wx/sizer.h>
-#include <wx/wxprec.h>
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
-#include <wx/filedlg.h>
+
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm> // para std::sort
+#include <algorithm>
 
 // FILE DATA
 bool opf = false;
 bool mod = false;
-wxString filename;
 
 wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
@@ -1466,6 +1471,7 @@ public:
     void OnUpdateIndexEvent(wxCommandEvent &event);
 
 private:
+    wxString filename;
     wxComboBox *itemSelector;
     wxComboBox *typeSelector;
     wxComboBox *timeSelector;
@@ -1486,7 +1492,7 @@ private:
     void OnSaveFile(wxCommandEvent &event);
     void OnSaveAsFile(wxCommandEvent &event);
     void OnCloseFile(wxCommandEvent &event);
-    void writeFile();
+    void writeFile(const wxString &filename);
     void OnExit(wxCommandEvent &event);
 
     // Script Menu Events
@@ -1562,7 +1568,7 @@ void MainWindow::OnOpenFile(wxCommandEvent &event)
     // El usuario seleccionó un archivo, actualiza la variable filename
     filename = openFileDialog.GetPath();
 
-    // s llama a la futura funcion openFile();
+    // Se llama a la futura funcion openFile();
 
     mod = false;
     opf = true;
@@ -1586,7 +1592,7 @@ void MainWindow::OnSaveFile(wxCommandEvent &event)
         // El usuario seleccionó un archivo, actualiza la variable filename
         filename = saveFileDialog.GetPath();
 
-        writeFile();
+        writeFile(filename);
 
         mod = false;
         opf = true;
@@ -1594,7 +1600,7 @@ void MainWindow::OnSaveFile(wxCommandEvent &event)
 
     if (opf) // Si SI hay un achivo abierto, escribir directamente
     {
-        writeFile();
+        writeFile(filename);
 
         mod = false;
     }
@@ -1617,7 +1623,7 @@ void MainWindow::OnSaveAsFile(wxCommandEvent &event)
     // El usuario seleccionó un archivo, actualiza la variable filename
     filename = saveFileDialog.GetPath();
 
-    writeFile();
+    writeFile(filename);
 
     mod = false;
     opf = true;
@@ -1648,7 +1654,7 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
             }
 
             // CON EL NUEVO NOMBRE O EL QUE YA TENIA ESCRIBIR
-            writeFile(); // Se guarda el archivo
+            writeFile(filename); // Se guarda el archivo
 
             // Se resetean las variables (YA SE GUARDO)
             mod = false;
@@ -1692,7 +1698,7 @@ void MainWindow::OnExit(wxCommandEvent &event)
             }
 
             // CON EL NUEVO NOMBRE O EL QUE YA TENIA ESCRIBIR
-            writeFile(); // Se guarda el archivo
+            writeFile(filename); // Se guarda el archivo
             Close(true);
         }
 
@@ -1714,15 +1720,9 @@ void MainWindow::OnExit(wxCommandEvent &event)
     // Close(true);
 }
 
-void MainWindow::writeFile()
+void MainWindow::writeFile(const wxString &filename)
 {
-    // wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
-    //              "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
-
-    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
-
-    // Serializamos las instancias a un archivo
-    std::ofstream out_fs(filename);
+    std::ofstream out_fs(filename.ToStdString()); // Convierte wxString a std::string
     boost::archive::text_oarchive outArchive(out_fs);
     outArchive << scenes;
     outArchive << takes;
