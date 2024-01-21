@@ -9,6 +9,7 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
+#include <wx/filedlg.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -1485,7 +1486,6 @@ private:
     void OnSaveFile(wxCommandEvent &event);
     void OnSaveAsFile(wxCommandEvent &event);
     void OnCloseFile(wxCommandEvent &event);
-    wxString AskFile();
     void writeFile();
     void OnExit(wxCommandEvent &event);
 
@@ -1534,6 +1534,7 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 // FILE MENU
 void MainWindow::OnNewFile(wxCommandEvent &event)
 {
+    // GUARDAR PRIMERO SI ES QUE HABIA ALGO
     wxCommandEvent closeEvent;
     OnCloseFile(closeEvent);
 
@@ -1543,11 +1544,25 @@ void MainWindow::OnNewFile(wxCommandEvent &event)
 
 void MainWindow::OnOpenFile(wxCommandEvent &event)
 {
+    // GUARDAR PRIMERO SI ES QUE HABIA ALGO
     wxCommandEvent closeEvent;
     OnCloseFile(closeEvent);
-    filename = AskFile();
 
-    // openFile();
+    wxString defaultDir = wxEmptyString; // Directorio inicial (puede ser wxEmptyString para usar el directorio actual)
+    wxString wildcard = "Archivos de CineDoc (*.cdc)|*.cdc|Todos los archivos (*.*)|*.*";
+
+    wxFileDialog openFileDialog(this, "Abrir archivo", defaultDir, wxEmptyString, wildcard, wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (openFileDialog.ShowModal() == wxID_CANCEL)
+    {
+        // El usuario canceló la operación, no se seleccionó ningún archivo
+        return;
+    }
+
+    // El usuario seleccionó un archivo, actualiza la variable filename
+    filename = openFileDialog.GetPath();
+
+    // s llama a la futura funcion openFile();
 
     mod = false;
     opf = true;
@@ -1555,31 +1570,57 @@ void MainWindow::OnOpenFile(wxCommandEvent &event)
 
 void MainWindow::OnSaveFile(wxCommandEvent &event)
 {
-    if (!opf) // Si no hay un achivo abierto, preguntar el nombre
+    if (!opf) // Si NO hay un achivo abierto, preguntar el nombre
     {
-        filename = AskFile();
-    }
+        wxString defaultDir = wxEmptyString; // Directorio inicial (puede ser wxEmptyString para usar el directorio actual)
+        wxString wildcard = "Archivos de CineDoc (*.cdc)|*.cdc|Todos los archivos (*.*)|*.*";
 
-    if (!filename.IsEmpty()) // si se escribio algun nombre, guardar, sino volver
-    {
+        wxFileDialog saveFileDialog(this, "Guardar archivo", defaultDir, wxEmptyString, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+        if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        {
+            // El usuario canceló la operación, no se guardará ningún archivo
+            return;
+        }
+
+        // El usuario seleccionó un archivo, actualiza la variable filename
+        filename = saveFileDialog.GetPath();
+
         writeFile();
 
         mod = false;
         opf = true;
+    }
+
+    if (opf) // Si SI hay un achivo abierto, escribir directamente
+    {
+        writeFile();
+
+        mod = false;
     }
 }
 
 void MainWindow::OnSaveAsFile(wxCommandEvent &event)
 {
-    filename = AskFile();
 
-    if (!filename.IsEmpty())
+    wxString defaultDir = wxEmptyString; // Directorio inicial (puede ser wxEmptyString para usar el directorio actual)
+    wxString wildcard = "Archivos de CineDoc (*.cdc)|*.cdc|Todos los archivos (*.*)|*.*";
+
+    wxFileDialog saveFileDialog(this, "Guardar archivo", defaultDir, wxEmptyString, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
     {
-        writeFile();
-
-        mod = false;
-        opf = true;
+        // El usuario canceló la operación, no se guardará ningún archivo
+        return;
     }
+
+    // El usuario seleccionó un archivo, actualiza la variable filename
+    filename = saveFileDialog.GetPath();
+
+    writeFile();
+
+    mod = false;
+    opf = true;
 }
 
 void MainWindow::OnCloseFile(wxCommandEvent &event)
@@ -1590,21 +1631,34 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
 
         if (response == wxYES)
         {
-            if (filename.IsEmpty())
+            if (filename.IsEmpty()) // SI NO SE GUARDO ANTES PREGUNTAR EL NOMBRE
             {
-                filename = AskFile();
+                wxString defaultDir = wxEmptyString; // Directorio inicial (puede ser wxEmptyString para usar el directorio actual)
+                wxString wildcard = "Archivos de CineDoc (*.cdc)|*.cdc|Todos los archivos (*.*)|*.*";
+
+                wxFileDialog saveFileDialog(this, "Guardar archivo", defaultDir, wxEmptyString, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+                if (saveFileDialog.ShowModal() == wxID_CANCEL)
+                {
+                    // El usuario canceló la operación, no se guardará ningún archivo, volver antes
+                    return;
+                }
+
+                filename = saveFileDialog.GetPath();
             }
 
+            // CON EL NUEVO NOMBRE O EL QUE YA TENIA ESCRIBIR
             writeFile(); // Se guarda el archivo
 
-            // Se resetean las variables
+            // Se resetean las variables (YA SE GUARDO)
             mod = false;
             opf = false;
             filename = "";
         }
+
         else if (response == wxNO)
         {
-            // No se desea guardar los cambios, se resetean las variables
+            // Se resetean las variables (SE DESCARTAN LOS CAMBIOS)
             mod = false;
             opf = false;
             filename = "";
@@ -1621,16 +1675,25 @@ void MainWindow::OnExit(wxCommandEvent &event)
 
         if (response == wxYES)
         {
-            if (filename.IsEmpty())
+            if (filename.IsEmpty()) // SI NO SE GUARDO ANTES PREGUNTAR EL NOMBRE
             {
-                filename = AskFile();
+                wxString defaultDir = wxEmptyString; // Directorio inicial (puede ser wxEmptyString para usar el directorio actual)
+                wxString wildcard = "Archivos de CineDoc (*.cdc)|*.cdc|Todos los archivos (*.*)|*.*";
+
+                wxFileDialog saveFileDialog(this, "Guardar archivo", defaultDir, wxEmptyString, wildcard, wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+                if (saveFileDialog.ShowModal() == wxID_CANCEL)
+                {
+                    // El usuario canceló la operación, no se guardará ningún archivo, volver antes
+                    return;
+                }
+
+                filename = saveFileDialog.GetPath();
             }
 
-            if (!filename.IsEmpty())
-            {
-                writeFile();
-                Close(true);
-            }
+            // CON EL NUEVO NOMBRE O EL QUE YA TENIA ESCRIBIR
+            writeFile(); // Se guarda el archivo
+            Close(true);
         }
 
         else if (response == wxNO)
@@ -1649,20 +1712,6 @@ void MainWindow::OnExit(wxCommandEvent &event)
     // OnCloseFile(closeEvent);
 
     // Close(true);
-}
-
-wxString MainWindow::AskFile()
-{
-    wxTextEntryDialog dialog(this, "Introduce el nombre:", "Nombre del proyecto", wxEmptyString, wxOK | wxCANCEL);
-
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxString enteredText = dialog.GetValue();
-        // wxMessageBox("Texto ingresado: " + enteredText, "Resultado", wxOK | wxICON_INFORMATION);
-        return enteredText;
-    }
-
-    return wxEmptyString;
 }
 
 void MainWindow::writeFile()
