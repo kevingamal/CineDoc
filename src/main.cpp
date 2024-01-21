@@ -1627,7 +1627,7 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
 {
     if (mod)
     {
-        int response = wxMessageBox("¿Deseas guardar los cambios?", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
+        int response = wxMessageBox("Hay cambios sin guardar en el proyecto!", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
 
         if (response == wxYES)
         {
@@ -1729,7 +1729,16 @@ void MainWindow::writeFile()
     out_fs.close();
 }
 
+//// UDMR EVENTS ////
 // SCRIPT MENU
+void MainWindow::OnNewScript(wxCommandEvent &event)
+{
+    wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
+                 "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+    SetStatusText("StatusBar overide");
+    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+}
+
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
 }
@@ -1738,22 +1747,7 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
 {
 }
 
-// HELP MENU
-
-void MainWindow::OnAbout(wxCommandEvent &event)
-{
-    wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
-                 "About CineDoc", wxOK | wxICON_INFORMATION);                // TITULO VENTANA POP UP
-}
-
-// UDMR EVENTS
-void MainWindow::OnNewScript(wxCommandEvent &event)
-{
-    wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
-                 "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
-    SetStatusText("StatusBar overide");
-    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
-}
+//// CONTROL MSSG EVENTS ////
 
 void MainWindow::OnUpdatePositionEvent(wxCommandEvent &event)
 {
@@ -1773,4 +1767,12 @@ void MainWindow::OnUpdateIndexEvent(wxCommandEvent &event)
     itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), receivedNumber));
     // itemIndexTextBox->Refresh();
     // itemIndexTextBox->Update();
+}
+
+// HELP MENU
+
+void MainWindow::OnAbout(wxCommandEvent &event)
+{
+    wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
+                 "About CineDoc", wxOK | wxICON_INFORMATION);                // TITULO VENTANA POP UP
 }
