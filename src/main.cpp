@@ -1602,10 +1602,34 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
 
 void MainWindow::OnExit(wxCommandEvent &event)
 {
-    wxCommandEvent closeEvent;
-    OnCloseFile(closeEvent);
+    if (mod)
+    {
+        int response = wxMessageBox("¿Deseas guardar los cambios?", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
 
-    Close(true);
+        if (response == wxYES)
+        {
+            if (filename.IsEmpty())
+            {
+                filename = AskFile();
+            }
+
+            if (!filename.IsEmpty())
+            {
+                writeFile();
+                Close(true);
+            }
+        }
+
+        else if (response == wxNO)
+        {
+            // No se desea guardar los cambios, se cierra
+            Close(true);
+        }
+    }
+    // wxCommandEvent closeEvent;
+    // OnCloseFile(closeEvent);
+
+    // Close(true);
 }
 
 wxString MainWindow::AskFile()
