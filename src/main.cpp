@@ -15,25 +15,27 @@
 #include <algorithm> // para std::sort
 
 // FILE DATA
-bool opf;
-bool mod;
-wxString file;
+bool opf = false;
+bool mod = true; // CAMBIAR AL FALSE LUEGO!!!!!
+wxString filename;
 
 wxDECLARE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
 enum
 {
-    ID_NEW = 1,
-    ID_OPEN = 2,
-    ID_SAVE = 3,
-    ID_SAVE_AS = 4,
-    ID_CLOSE = 5,
-    ID_EXIT = 6,
-    ID_SCRIPT_NEW = 7,
-    ID_SCRIPT_EDIT = 8,
-    ID_SCRIPT_DEL = 9,
-    ID_Hello = 10
+    // ID_NEW = 1, (PARECE QUE ANDA IGUAL AUNQUE ID_SAVE_AS EMPIECE EN 4)
+    // ID_OPEN = 2,
+    // ID_SAVE = 3,
+    ID_SAVE_AS = 1,
+    //  ID_CLOSE = 5,
+    ID_EXIT = 2,
+    ID_SCRIPT_NEW = 3,
+    ID_SCRIPT_EDIT = 4,
+    ID_SCRIPT_DEL = 5,
+    ID_Hello = 6,
+    // ID_ABOUT = 11,
+    ID_HELP = 7
 };
 
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
@@ -1186,10 +1188,10 @@ private:
     int indexPosition;
 };
 
-class MyFrame : public wxFrame
+class MainWindow : public wxFrame
 {
 public:
-    MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size)
+    MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
         // MENU PROYECTO
@@ -1202,9 +1204,9 @@ public:
         menuProject->Append(wxID_NEW, "&Nuevo...", "Nuevo proyecto");
         menuProject->Append(wxID_OPEN, "&Abrir...", "Abrir proyecto");
         menuProject->Append(wxID_SAVE, "&Guardar...", "Guardar proyecto");
-        menuProject->Append(ID_Hello, "&Guardar como...\tCtrl-K", "Guardar proyecto"); /// FUNCION TEMPORAL!!!
+        menuProject->Append(ID_SAVE_AS, "&Guardar como...\tCtrl-K", "Guardar proyecto como"); /// FUNCION TEMPORAL!!!
         menuProject->Append(wxID_CLOSE, "&Cerrar...", "Cerrar proyecto");
-        menuProject->Append(wxID_EXIT, "&Salir...", "Salir de CineDoc");
+        menuProject->Append(ID_EXIT, "&Salir...\tCtrl-Q", "Salir de CineDoc");
 
         // MENU GUION
         wxMenu *menuScript = new wxMenu;
@@ -1238,7 +1240,8 @@ public:
 
         // MENU AYUDA
         wxMenu *menuHelp = new wxMenu;
-        menuHelp->Append(wxID_ABOUT, "&Ayuda...\tCtrl-H", "Buscar ayuda");
+        menuHelp->Append(ID_HELP, "&Ayuda...\tCtrl-H", "Buscar ayuda");
+        menuHelp->Append(wxID_ABOUT, "Acerca de...", "Acerca de CineDoc");
 
         // CARGA MENUES
         wxMenuBar *menuBar = new wxMenuBar;
@@ -1286,11 +1289,11 @@ public:
         leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
 
         wxButton *backButton = new wxButton(this, wxID_ANY, "Volver");
-        backButton->Bind(wxEVT_BUTTON, &MyFrame::OnBackButtonClicked, this);
+        backButton->Bind(wxEVT_BUTTON, &MainWindow::OnBackButtonClicked, this);
         buttonSizer->Add(backButton, 1, wxEXPAND | wxRIGHT, 5);
 
         wxButton *addButton = new wxButton(this, wxID_ANY, "Agregar");
-        addButton->Bind(wxEVT_BUTTON, &MyFrame::OnAddButtonClicked, this);
+        addButton->Bind(wxEVT_BUTTON, &MainWindow::OnAddButtonClicked, this);
         buttonSizer->Add(addButton, 2, wxEXPAND, 0);
 
         leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
@@ -1364,8 +1367,8 @@ public:
 
         SetSizer(mainSizer);
 
-        Bind(wxEVT_UPDATE_POSITION_EVENT, &MyFrame::OnUpdatePositionEvent, this);
-        Bind(wxEVT_UPDATE_INDEX_EVENT, &MyFrame::OnUpdateIndexEvent, this);
+        Bind(wxEVT_UPDATE_POSITION_EVENT, &MainWindow::OnUpdatePositionEvent, this);
+        Bind(wxEVT_UPDATE_INDEX_EVENT, &MainWindow::OnUpdateIndexEvent, this);
     }
 
     void OnAddButtonClicked(wxCommandEvent &event)
@@ -1470,6 +1473,8 @@ private:
     void OnSaveFile(wxCommandEvent &event);
     void OnSaveAsFile(wxCommandEvent &event);
     void OnCloseFile(wxCommandEvent &event);
+    wxString AskFile();
+    void writeFile();
     void OnExit(wxCommandEvent &event);
 
     // Script Menu Events
@@ -1477,7 +1482,7 @@ private:
     void OnScriptEdit(wxCommandEvent &event);
     void OnScriptDel(wxCommandEvent &event);
 
-    void OnHello(wxCommandEvent &event);
+    //
     void OnAbout(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
 };
@@ -1487,7 +1492,7 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        MyFrame *frame = new MyFrame("CineDoc", wxPoint(50, 50), wxSize(800, 600));
+        MainWindow *frame = new MainWindow("CineDoc", wxPoint(50, 50), wxSize(800, 600));
         frame->Show(true);
         return true;
     }
@@ -1496,29 +1501,128 @@ public:
 wxDEFINE_EVENT(wxEVT_UPDATE_POSITION_EVENT, wxCommandEvent);
 wxDEFINE_EVENT(wxEVT_UPDATE_INDEX_EVENT, wxCommandEvent);
 
-wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
+wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
 
-    EVT_MENU(wxID_NEW, MyFrame::OnNewFile)
-        EVT_MENU(wxID_OPEN, MyFrame::OnOpenFile)
-            EVT_MENU(wxID_SAVE, MyFrame::OnSaveFile)
-                EVT_MENU(ID_SAVE_AS, MyFrame::OnSaveAsFile)
-                    EVT_MENU(wxID_CLOSE, MyFrame::OnCloseFile)
-                        EVT_MENU(wxID_EXIT, MyFrame::OnExit)
-                            EVT_MENU(ID_SCRIPT_NEW, MyFrame::OnNewScript)
-                                EVT_MENU(ID_SCRIPT_EDIT, MyFrame::OnScriptEdit)
-                                    EVT_MENU(ID_SCRIPT_DEL, MyFrame::OnScriptDel)
+    EVT_MENU(wxID_NEW, MainWindow::OnNewFile)
+        EVT_MENU(wxID_OPEN, MainWindow::OnOpenFile)
+            EVT_MENU(wxID_SAVE, MainWindow::OnSaveFile)
+                EVT_MENU(ID_SAVE_AS, MainWindow::OnSaveAsFile)
+                    EVT_MENU(wxID_CLOSE, MainWindow::OnCloseFile)
+                        EVT_MENU(ID_EXIT, MainWindow::OnExit)
 
-                                        EVT_MENU(ID_Hello, MyFrame::OnHello)
-                                            EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
+                            EVT_MENU(ID_SCRIPT_NEW, MainWindow::OnNewScript)
+                                EVT_MENU(ID_SCRIPT_EDIT, MainWindow::OnScriptEdit)
+                                    EVT_MENU(ID_SCRIPT_DEL, MainWindow::OnScriptDel)
+
+                                        EVT_MENU(ID_HELP, MainWindow::OnAbout)
+                                            EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
                                                 wxEND_EVENT_TABLE()
                                                     wxIMPLEMENT_APP(MyApp);
 
-void MyFrame::OnAbout(wxCommandEvent &event)
+// FILE MENU
+void MainWindow::OnNewFile(wxCommandEvent &event)
 {
-    wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
-                 "About CineDoc", wxOK | wxICON_INFORMATION);                // TITULO VENTANA POP UP
+    wxCommandEvent closeEvent;
+    OnCloseFile(closeEvent);
+    filename = AskFile();
+    mod = true;
 }
-void MyFrame::OnHello(wxCommandEvent &event)
+
+void MainWindow::OnOpenFile(wxCommandEvent &event)
+{
+    wxCommandEvent closeEvent;
+    OnCloseFile(closeEvent);
+    filename = AskFile();
+
+    // openFile();
+
+    mod = false;
+    opf = true;
+}
+
+void MainWindow::OnSaveFile(wxCommandEvent &event)
+{
+    if (!opf)
+    {
+        filename = AskFile();
+    }
+
+    if (!filename.IsEmpty())
+    {
+        writeFile();
+
+        mod = false;
+        opf = true;
+    }
+}
+
+void MainWindow::OnSaveAsFile(wxCommandEvent &event)
+{
+    filename = AskFile();
+
+    if (!filename.IsEmpty())
+    {
+        writeFile();
+
+        mod = false;
+        opf = true;
+    }
+}
+
+void MainWindow::OnCloseFile(wxCommandEvent &event)
+{
+    if (mod)
+    {
+        int response = wxMessageBox("¿Deseas guardar los cambios?", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
+
+        if (response == wxYES)
+        {
+            if (filename.IsEmpty())
+            {
+                filename = AskFile();
+            }
+
+            writeFile(); // Se guarda el archivo
+
+            // Se resetean las variables
+            mod = false;
+            opf = false;
+            filename = "";
+        }
+        else if (response == wxNO)
+        {
+            // No se desea guardar los cambios, se resetean las variables
+            mod = false;
+            opf = false;
+            filename = "";
+        }
+        // Si el usuario cierra la ventana de mensaje, no se realiza ninguna acción adicional
+    }
+}
+
+void MainWindow::OnExit(wxCommandEvent &event)
+{
+    wxCommandEvent closeEvent;
+    OnCloseFile(closeEvent);
+
+    Close(true);
+}
+
+wxString MainWindow::AskFile()
+{
+    wxTextEntryDialog dialog(this, "Introduce el nombre:", "Nombre del proyecto", wxEmptyString, wxOK | wxCANCEL);
+
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString enteredText = dialog.GetValue();
+        // wxMessageBox("Texto ingresado: " + enteredText, "Resultado", wxOK | wxICON_INFORMATION);
+        return enteredText;
+    }
+
+    return wxEmptyString;
+}
+
+void MainWindow::writeFile()
 {
     // wxMessageBox("Welcome to CineDoc",                   // CONTENIDO VENTANA POP UP
     //              "Hi there", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
@@ -1526,50 +1630,32 @@ void MyFrame::OnHello(wxCommandEvent &event)
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
 
     // Serializamos las instancias a un archivo
-    std::ofstream out_fs("datos.bin");
-    boost::archive::text_oarchive oa(out_fs);
-    oa << scenes;
-    oa << takes;
+    std::ofstream out_fs(filename);
+    boost::archive::text_oarchive outArchive(out_fs);
+    outArchive << scenes;
+    outArchive << takes;
     out_fs.close();
 }
 
-// FILE MENU
-void MyFrame::OnNewFile(wxCommandEvent &event)
-{
-}
-
-void MyFrame::OnOpenFile(wxCommandEvent &event)
-{
-}
-
-void MyFrame::OnSaveFile(wxCommandEvent &event)
-{
-}
-
-void MyFrame::OnSaveAsFile(wxCommandEvent &event)
-{
-}
-
-void MyFrame::OnCloseFile(wxCommandEvent &event)
-{
-}
-
-void MyFrame::OnExit(wxCommandEvent &event)
-{
-    Close(true);
-}
-
 // SCRIPT MENU
-void MyFrame::OnScriptEdit(wxCommandEvent &event)
+void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
 }
 
-void MyFrame::OnScriptDel(wxCommandEvent &event)
+void MainWindow::OnScriptDel(wxCommandEvent &event)
 {
+}
+
+// HELP MENU
+
+void MainWindow::OnAbout(wxCommandEvent &event)
+{
+    wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
+                 "About CineDoc", wxOK | wxICON_INFORMATION);                // TITULO VENTANA POP UP
 }
 
 // UDMR EVENTS
-void MyFrame::OnNewScript(wxCommandEvent &event)
+void MainWindow::OnNewScript(wxCommandEvent &event)
 {
     wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
                  "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
@@ -1577,7 +1663,7 @@ void MyFrame::OnNewScript(wxCommandEvent &event)
     // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
 }
 
-void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
+void MainWindow::OnUpdatePositionEvent(wxCommandEvent &event)
 {
     // wxLogMessage(wxT("Evento Position corriendo"));
     int receivedNumber = event.GetInt();
@@ -1587,7 +1673,7 @@ void MyFrame::OnUpdatePositionEvent(wxCommandEvent &event)
     // itemPositionTextBox->Update();
 }
 
-void MyFrame::OnUpdateIndexEvent(wxCommandEvent &event)
+void MainWindow::OnUpdateIndexEvent(wxCommandEvent &event)
 {
     // wxLogMessage(wxT("Evento Position corriendo"));
     int receivedNumber = event.GetInt();
