@@ -44,11 +44,14 @@ enum
     ID_HELP = 7
 };
 
+std::vector<int> root; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
+std::vector<int> tree; // Vector para almacenar el parentId actual
+
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
 std::vector<int> itemsListContainer;
 
-// ORDENAMIENTO DEL VECTOR PARA ENCONTRAR POTENCIALES LUGARES LIBRES (SI SE BORRARON Y QUEDARON HUECOS)
+// FUNCION PARA ENCONTRAR POTENCIALES LUGARES LIBRES EN UN VECTOR (SI SE BORRARON Y QUEDARON HUECOS)
 int firstEmpty(std::vector<int> vector)
 {
     // Si el vector está vacío, el primer número faltante es 1
@@ -142,16 +145,14 @@ int itemPanelPosition;
 class Script
 {
 public:
-    int id;
+    std::vector<int> id;
     std::string title;
     std::string plain_text;
 
-    Script() {}
-
-    Script(int id, std::string plain_text)
+    Script(std::vector<int> id, std::string plain_text)
         : id(id), plain_text(plain_text) {}
 
-    Script(int id, std::string title, std::string plain_text)
+    Script(std::vector<int> id, std::string title, std::string plain_text)
         : id(id), title(title), plain_text(plain_text) {}
 
     // Función de serialización
@@ -169,8 +170,6 @@ public:
     std::string first_name;
     std::string last_name;
     std::string surrname;
-
-    Character() {}
 
     Character(int id, std::string first_name, std::string last_name, std::string surrname)
         : id(id), first_name(first_name), last_name(last_name), surrname(surrname) {}
@@ -193,8 +192,6 @@ public:
     std::string hospital;
     std::string parking;
 
-    Location() {}
-
     Location(int id, std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
         : id(id), name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
 
@@ -214,8 +211,6 @@ public:
     std::string description;
     std::string type;
 
-    Object() {}
-
     Object(int id, std::string name, std::string description, std::string type)
         : id(id), name(name), description(description), type(type) {}
 
@@ -231,28 +226,29 @@ public:
 class Scene
 {
 public:
-    int id;
-    int number;
-    int parentId;
+    std::vector<int> id;
+    std::vector<int> parentId;
     int locationId;
     int type;
     int time;
     std::string plain_text;
     int position;
 
-    Scene() {}
+    Scene(int idTail, std::vector<int> parentId, std::string plain_text, int position)
+        : parentId(parentId), plain_text(plain_text), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
 
-    Scene(int id, int parentId, std::string plain_text, int position)
-        : id(id), parentId(parentId), plain_text(plain_text), position(position) {}
-
-    Scene(int id, int number, int parentId, int locationId, int type, int time, std::string plain_text, int position)
-        : id(id), number(number), parentId(parentId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
+    Scene(std::vector<int> id, std::vector<int> parentId, int locationId, int type, int time, std::string plain_text, int position)
+        : id(id), parentId(parentId), locationId(locationId), type(type), time(time), plain_text(plain_text), position(position) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & number & parentId & locationId & type & time & plain_text & position;
+        ar & id & parentId & locationId & type & time & plain_text & position;
     }
 };
 
@@ -266,8 +262,6 @@ public:
     std::string last_name;
     std::string surrname;
     std::string birthdate;
-
-    Actor() {}
 
     Actor(int id, int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
         : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
@@ -283,8 +277,8 @@ public:
 class Take
 {
 public:
-    int id;
-    int parentId;
+    std::vector<int> id;
+    std::vector<int> parentId;
     int number;
     int shot_size;
     int movement;
@@ -298,12 +292,14 @@ public:
     std::string floor_plan;
     int position;
 
-    Take() {}
+    Take(int idTail, std::vector<int> parentId, std::string description, int position)
+        : parentId(parentId), description(description), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
 
-    Take(int id, int parentId, std::string description, int position)
-        : id(id), parentId(parentId), description(description), position(position) {}
-
-    Take(int id, int parentId, int number, int shot_size, int movement, int mount, int camera, int lens, int sound, int length, std::string description, std::string image, std::string floor_plan, int position)
+    Take(std::vector<int> id, std::vector<int> parentId, int number, int shot_size, int movement, int mount, int camera, int lens, int sound, int length, std::string description, std::string image, std::string floor_plan, int position)
         : id(id), parentId(parentId), number(number), shot_size(shot_size), movement(movement), mount(mount), camera(camera), lens(lens), sound(sound), length(length), description(description), image(image), floor_plan(floor_plan), position(position) {}
 
     // Función de serialización
@@ -317,16 +313,18 @@ public:
 class Use_case
 {
 public:
-    int id;
-    int parentId; // Relaciona actores y objetos con escenas, si es un objeto tendra un id en ojbectId, si es actor tendra un id en actorId
+    std::vector<int> id;
+    std::vector<int> parentId; // Relaciona actores y objetos con escenas, si es un objeto tendra un id en ojbectId, si es actor tendra un id en actorId
     int actorId;
     int objectId;
     int position;
 
-    Use_case() {}
-
-    Use_case(int id, int parentId, int actorId, int objectId, int position)
-        : id(id), parentId(parentId), actorId(actorId), objectId(objectId), position(position) {}
+    Use_case(int idTail, std::vector<int> parentId, int actorId, int objectId, int position)
+        : parentId(parentId), actorId(actorId), objectId(objectId), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
 
     // Función de serialización
     template <class Archive>
@@ -339,15 +337,17 @@ public:
 class Tech_use
 {
 public:
-    int id;
-    int parentId; // Relaciona objetos con tomas
+    std::vector<int> id;
+    std::vector<int> parentId; // Relaciona objetos con tomas
     int objectId;
     int position;
 
-    Tech_use() {}
-
-    Tech_use(int id, int parentId, int objectId, int position)
-        : id(id), parentId(parentId), objectId(objectId), position(position) {}
+    Tech_use(int idTail, std::vector<int> parentId, int objectId, int position)
+        : parentId(parentId), objectId(objectId), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
@@ -360,15 +360,17 @@ public:
 class Event // Contiene acciones y dialogos. Cual de los 2 es se define en type
 {
 public:
-    int id;
-    int parentId;
+    std::vector<int> id;
+    std::vector<int> parentId;
     int type;
     int position;
 
-    Event() {}
-
-    Event(int id, int parentId, int type, int position)
-        : id(id), parentId(parentId), type(type), position(position) {}
+    Event(int idTail, std::vector<int> parentId, int type, int position)
+        : parentId(parentId), type(type), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
 
     // Función de serialización
     template <class Archive>
@@ -400,7 +402,7 @@ std::vector<Event> eventsTemp = {};
 // ARRAYS FUNCTIONS
 
 // SCENES
-void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
+void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -419,7 +421,7 @@ void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination,
     }
 }
 
-void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId)
+void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -440,7 +442,7 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
     source.clear();
 }
 
-void updateScenePosition(std::vector<Scene> &source, int specificParentId, int specificId, int newPosition)
+void updateScenePosition(std::vector<Scene> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
 {
     for (auto &scene : source)
     {
@@ -465,7 +467,7 @@ void updateScenePosition(std::vector<Scene> &source, int specificParentId, int s
     }
 }
 
-void removeScene(std::vector<Scene> &source, int specificParentId, int specificId)
+void removeScene(std::vector<Scene> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
@@ -477,7 +479,7 @@ void removeScene(std::vector<Scene> &source, int specificParentId, int specificI
 }
 
 // TAKES
-void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
+void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -496,7 +498,7 @@ void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, in
     }
 }
 
-void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId)
+void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -517,7 +519,7 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
     source.clear();
 }
 
-void updateTakePosition(std::vector<Take> &source, int specificParentId, int specificId, int newPosition)
+void updateTakePosition(std::vector<Take> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
 {
     for (auto &take : source)
     {
@@ -542,7 +544,7 @@ void updateTakePosition(std::vector<Take> &source, int specificParentId, int spe
     }
 }
 
-void removeTake(std::vector<Take> &source, int specificParentId, int specificId)
+void removeTake(std::vector<Take> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
@@ -554,7 +556,7 @@ void removeTake(std::vector<Take> &source, int specificParentId, int specificId)
 }
 
 // USE CASES (ACTING AND OBJECT)
-void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
+void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -573,7 +575,7 @@ void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &desti
     }
 }
 
-void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId)
+void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -594,7 +596,7 @@ void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destin
     source.clear();
 }
 
-void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId, int specificId, int newPosition)
+void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
 {
     for (auto &use_case : source)
     {
@@ -619,7 +621,7 @@ void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId,
     }
 }
 
-void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int specificId)
+void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
@@ -631,7 +633,7 @@ void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int spe
 }
 
 // TECH USE
-void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -650,7 +652,7 @@ void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &dest
     }
 }
 
-void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId)
+void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -671,7 +673,7 @@ void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destin
     source.clear();
 }
 
-void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId, int specificId, int newPosition)
+void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
 {
     for (auto &tech_use : source)
     {
@@ -696,7 +698,7 @@ void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId,
     }
 }
 
-void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int specificId)
+void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
@@ -708,7 +710,7 @@ void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int spe
 }
 
 // EVENTS
-void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
+void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -728,7 +730,7 @@ void transferEvents(std::vector<Event> &source, std::vector<Event> &destination,
 }
 // transferEvents(events, eventsTemp, specificParentId);
 
-void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId)
+void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -750,7 +752,7 @@ void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, i
 }
 // updateEvents(eventsTemp, events, specificParentId);
 
-void updateEventPosition(std::vector<Event> &source, int specificParentId, int specificId, int newPosition)
+void updateEventPosition(std::vector<Event> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
 {
     for (auto &event : source)
     {
@@ -776,7 +778,7 @@ void updateEventPosition(std::vector<Event> &source, int specificParentId, int s
 }
 // updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
 
-void removeEvent(std::vector<Event> &source, int specificParentId, int specificId)
+void removeEvent(std::vector<Event> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
 {
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
@@ -892,7 +894,7 @@ public:
     void OndeleteButtonClick(wxCommandEvent &event)
     {
         deleteVectorItem(textBoxsContainer, indexPosition);
-        removeScene(scenes, 1, indexPosition);
+        removeScene(scenes, tree, indexPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -901,14 +903,14 @@ public:
             dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
         }
 
-        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        // ACTUALIZA POSICIONES DEL VECTOR A LOS ELEMENTOS DE LA CLASE
         for (int i = 0; i < textBoxsContainer.size(); ++i)
         {
-            int specificId = textBoxsContainer[i];
-            int newPosition = i; // La posición en textBoxsContainer es la nueva posición.
+            int specificId = textBoxsContainer[i]; // El id de cada elemento se recupera de textBoxsContainer uno por uno.
+            int newPosition = i;                   // La posición en textBoxsContainer es la nueva posición (el i va iterando).
 
             // Actualizar la posición de la escena con specificId en el vector scenes
-            updateScenePosition(scenes, 1, specificId, newPosition);
+            updateScenePosition(scenes, tree, specificId, newPosition);
         }
 
         mod = true;
@@ -996,14 +998,14 @@ public:
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
 
-        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        // ACTUALIZA POSICIONES DEL VECTOR A LOS ELEMENTOS DE LA CLASE
         for (int i = 0; i < textBoxsContainer.size(); ++i)
         {
-            int specificId = textBoxsContainer[i];
-            int newPosition = i; // La posición en textBoxsContainer es la nueva posición.
+            int specificId = textBoxsContainer[i]; // El id de cada elemento se recupera de textBoxsContainer uno por uno.
+            int newPosition = i;                   // La posición en textBoxsContainer es la nueva posición (el i va iterando).
 
             // Actualizar la posición de la escena con specificId en el vector scenes
-            updateScenePosition(scenes, 1, specificId, newPosition);
+            updateScenePosition(scenes, tree, specificId, newPosition);
         }
     }
 
@@ -1087,7 +1089,7 @@ public:
     void OndeleteButtonClick(wxCommandEvent &event)
     {
         deleteVectorItem(itemsListContainer, indexPosition);
-        removeTake(takes, 1, indexPosition);
+        removeTake(takes, tree, indexPosition);
         wxWindow *parentWindow = GetParent(); // Guardar referencia al padre antes de destruir
         Destroy();
         parentWindow->Layout(); // Llamar al Layout del padre
@@ -1096,14 +1098,14 @@ public:
             dynamic_cast<wxScrolledWindow *>(parentWindow)->FitInside();
         }
 
-        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        // ACTUALIZA POSICIONES DEL VECTOR A LOS ELEMENTOS DE LA CLASE
         for (int i = 0; i < itemsListContainer.size(); ++i)
         {
-            int specificId = itemsListContainer[i];
-            int newPosition = i; // La posición en itemsListContainer es la nueva posición.
+            int specificId = itemsListContainer[i]; // El id de cada elemento se recupera de textBoxsContainer uno por uno.
+            int newPosition = i;                    // La posición en textBoxsContainer es la nueva posición (el i va iterando).
 
             // Actualizar la posición de la escena con specificId en el vector takes
-            updateTakePosition(takes, 1, specificId, newPosition);
+            updateTakePosition(takes, tree, specificId, newPosition);
         }
 
         mod = true;
@@ -1171,14 +1173,14 @@ public:
             desiredPosition = -1; // Resetea la posición deseada después de procesarla.
         }
 
-        // ACTUALIZA POSICIONES AL VECTOR DE ELEMENTOS
+        // ACTUALIZA POSICIONES DEL VECTOR A LOS ELEMENTOS DE LA CLASE
         for (int i = 0; i < itemsListContainer.size(); ++i)
         {
-            int specificId = itemsListContainer[i];
-            int newPosition = i; // La posición en itemsListContainer es la nueva posición.
+            int specificId = itemsListContainer[i]; // El id de cada elemento se recupera de textBoxsContainer uno por uno.
+            int newPosition = i;                    // La posición en textBoxsContainer es la nueva posición (el i va iterando).
 
             // Actualizar la posición de la escena con specificId en el vector takes
-            updateTakePosition(takes, 1, specificId, newPosition);
+            updateTakePosition(takes, tree, specificId, newPosition);
         }
     }
 
@@ -1407,15 +1409,16 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(textBoxsContainer);
-        lastNumber = lastEmpty(textBoxsContainer);
+        nextNumber = firstEmpty(textBoxsContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
+        lastNumber = lastEmpty(textBoxsContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
 
         TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
         textBoxsContainer.push_back(nextNumber);
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
-        // nextNumber es la posicion dentro del arreglo (id); lastNumber es la posicion dentro del contenedor
-        Scene newScene(nextNumber, 1, selectedText.ToStdString(), lastNumber);
+        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
+        // lastNumber es la posicion dentro del contenedor, el ordenamiento (last por que se inserta siempre al final)
+        Scene newScene(nextNumber, tree, selectedText.ToStdString(), lastNumber);
         scenes.push_back(newScene);
 
         containerSizer->Layout();
@@ -1448,14 +1451,15 @@ public:
             return;
         }
 
-        nextNumber = firstEmpty(itemsListContainer);
-        lastNumber = lastEmpty(itemsListContainer);
+        nextNumber = firstEmpty(itemsListContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
+        lastNumber = lastEmpty(itemsListContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
 
         ItemTextList *newItemTextList = new ItemTextList(itemsPanel, itemsSizer, nextNumber, selectedText);
         itemsListContainer.push_back(nextNumber);
         itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
 
-        // nextNumber es la posicion dentro del arreglo (id); lastNumber es la posicion dentro del contenedor
+        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
+        // lastNumber es la posicion dentro del contenedor, el ordenamiento (last por que se inserta siempre al final)
         Take newTake(nextNumber, 1, selectedText.ToStdString(), lastNumber);
         takes.push_back(newTake);
 
