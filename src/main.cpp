@@ -46,6 +46,8 @@ enum
 
 std::vector<int> root; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
 std::vector<int> tree; // Vector para almacenar el parentId actual
+// (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
+// Para crear un nuevo guion se le pregunta firstEmpty a root y se reemplaza el elemento en la posicion 0 con ese numero
 
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
@@ -149,9 +151,6 @@ public:
     std::string title;
     std::string plain_text;
 
-    Script(std::vector<int> id, std::string plain_text)
-        : id(id), plain_text(plain_text) {}
-
     Script(std::vector<int> id, std::string title, std::string plain_text)
         : id(id), title(title), plain_text(plain_text) {}
 
@@ -171,8 +170,8 @@ public:
     std::string last_name;
     std::string surrname;
 
-    Character(int id, std::string first_name, std::string last_name, std::string surrname)
-        : id(id), first_name(first_name), last_name(last_name), surrname(surrname) {}
+    Character(std::string first_name, std::string last_name, std::string surrname)
+        : first_name(first_name), last_name(last_name), surrname(surrname) {}
 
     // Función de serialización
     template <class Archive>
@@ -192,8 +191,11 @@ public:
     std::string hospital;
     std::string parking;
 
-    Location(int id, std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
-        : id(id), name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
+    Location(std::string name, std::string adress)
+        : name(name), adress(adress) {}
+
+    Location(std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
+        : name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
 
     // Función de serialización
     template <class Archive>
@@ -211,8 +213,8 @@ public:
     std::string description;
     std::string type;
 
-    Object(int id, std::string name, std::string description, std::string type)
-        : id(id), name(name), description(description), type(type) {}
+    Object(std::string name, std::string description, std::string type)
+        : name(name), description(description), type(type) {}
 
     // Función de serialización
     template <class Archive>
@@ -263,7 +265,7 @@ public:
     std::string surrname;
     std::string birthdate;
 
-    Actor(int id, int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
+    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
         : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
 
     // Función de serialización
@@ -402,7 +404,7 @@ std::vector<Event> eventsTemp = {};
 // ARRAYS FUNCTIONS
 
 // SCENES
-void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
+void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -421,7 +423,7 @@ void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination,
     }
 }
 
-void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
+void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -442,8 +444,12 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, i
     source.clear();
 }
 
-void updateScenePosition(std::vector<Scene> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
+void updateScenePosition(std::vector<Scene> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     for (auto &scene : source)
     {
         if (scene.parentId == specificParentId && scene.id == specificId)
@@ -467,8 +473,12 @@ void updateScenePosition(std::vector<Scene> &source, int specificParentId, int s
     }
 }
 
-void removeScene(std::vector<Scene> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
+void removeScene(std::vector<Scene> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
                                 [specificParentId, specificId](const Scene &scene)
@@ -479,7 +489,7 @@ void removeScene(std::vector<Scene> &source, int specificParentId, int specificI
 }
 
 // TAKES
-void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
+void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -498,7 +508,7 @@ void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, in
     }
 }
 
-void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
+void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -519,8 +529,12 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, int 
     source.clear();
 }
 
-void updateTakePosition(std::vector<Take> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
+void updateTakePosition(std::vector<Take> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     for (auto &take : source)
     {
         if (take.parentId == specificParentId && take.id == specificId)
@@ -544,8 +558,12 @@ void updateTakePosition(std::vector<Take> &source, int specificParentId, int spe
     }
 }
 
-void removeTake(std::vector<Take> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
+void removeTake(std::vector<Take> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
                                 [specificParentId, specificId](const Take &take)
@@ -556,7 +574,7 @@ void removeTake(std::vector<Take> &source, int specificParentId, int specificId)
 }
 
 // USE CASES (ACTING AND OBJECT)
-void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
+void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -575,7 +593,7 @@ void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &desti
     }
 }
 
-void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
+void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -596,8 +614,12 @@ void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destin
     source.clear();
 }
 
-void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
+void updateUse_CasePosition(std::vector<Use_case> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     for (auto &use_case : source)
     {
         if (use_case.parentId == specificParentId && use_case.id == specificId)
@@ -621,8 +643,12 @@ void updateUse_CasePosition(std::vector<Use_case> &source, int specificParentId,
     }
 }
 
-void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
+void removeUse_Case(std::vector<Use_case> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
                                 [specificParentId, specificId](const Use_case &use_case)
@@ -633,7 +659,7 @@ void removeUse_Case(std::vector<Use_case> &source, int specificParentId, int spe
 }
 
 // TECH USE
-void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
+void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -652,7 +678,7 @@ void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &dest
     }
 }
 
-void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
+void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -673,8 +699,12 @@ void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destin
     source.clear();
 }
 
-void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
+void updateTech_usePosition(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     for (auto &tech_use : source)
     {
         if (tech_use.parentId == specificParentId && tech_use.id == specificId)
@@ -698,8 +728,12 @@ void updateTech_usePosition(std::vector<Tech_use> &source, int specificParentId,
     }
 }
 
-void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
+void removeTech_use(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
                                 [specificParentId, specificId](const Tech_use &tech_use)
@@ -710,7 +744,7 @@ void removeTech_use(std::vector<Tech_use> &source, int specificParentId, int spe
 }
 
 // EVENTS
-void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId) // Transfiere todos los de un padre -> TEMP
+void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
     // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
     destination.clear();
@@ -730,7 +764,7 @@ void transferEvents(std::vector<Event> &source, std::vector<Event> &destination,
 }
 // transferEvents(events, eventsTemp, specificParentId);
 
-void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, int specificParentId) // Transfiere todos los de un padre -> MAIN
+void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
     // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
     destination.erase(std::remove_if(destination.begin(), destination.end(),
@@ -752,8 +786,12 @@ void updateEvents(std::vector<Event> &source, std::vector<Event> &destination, i
 }
 // updateEvents(eventsTemp, events, specificParentId);
 
-void updateEventPosition(std::vector<Event> &source, int specificParentId, int specificId, int newPosition) // Usar SOLO EN TEMP!!
+void updateEventPosition(std::vector<Event> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     for (auto &event : source)
     {
         if (event.parentId == specificParentId && event.id == specificId)
@@ -778,8 +816,12 @@ void updateEventPosition(std::vector<Event> &source, int specificParentId, int s
 }
 // updateEventsPosition(eventsTemp, specificParentId, specificId, newPosition);
 
-void removeEvent(std::vector<Event> &source, int specificParentId, int specificId) // Usar SOLO EN TEMP!!
+void removeEvent(std::vector<Event> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
     // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
     source.erase(std::remove_if(source.begin(), source.end(),
                                 [specificParentId, specificId](const Event &event)
@@ -1460,7 +1502,7 @@ public:
 
         // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
         // lastNumber es la posicion dentro del contenedor, el ordenamiento (last por que se inserta siempre al final)
-        Take newTake(nextNumber, 1, selectedText.ToStdString(), lastNumber);
+        Take newTake(nextNumber, tree, selectedText.ToStdString(), lastNumber);
         takes.push_back(newTake);
 
         itemsSizer->Layout();
