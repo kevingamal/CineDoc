@@ -137,10 +137,11 @@ void updateElementPosition(std::vector<int> &vector, int id, int newPosition)
 // std::sort(numeros.begin(), numeros.end()); // Ordena ascendentemente (se puede usar al revés)
 
 // Posiciones de la lista
-int textIndexPosition;
-int itemIndexPosition;
-int textPanelPosition;
-int itemPanelPosition;
+//  t/i   [indx/panl]pos
+int TextBoxIndexPosition;  // TitledTextBox (used in move (evta))
+int TextBoxPanelPosition;  // TitledTextBox (used in up, down, move (evtb))
+int TextListIndexPosition; // ItemTextList  (used in move (evta))
+int TextListPanelPosition; // ItemTextList  (used in up, down, move (evtb))
 
 // DATA CLASSES:
 
@@ -918,14 +919,14 @@ public:
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
         MoveToDesiredPosition();
-        textPanelPosition = GetItemPositionInSizer(parentSizer, this);
+        TextBoxPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndownButtonClick(wxCommandEvent &event)
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
         MoveToDesiredPosition();
-        textPanelPosition = GetItemPositionInSizer(parentSizer, this);
+        TextBoxPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OneditButtonClick(wxCommandEvent &event)
@@ -980,15 +981,15 @@ public:
 
     void OnMouseMove(wxMouseEvent &event)
     {
-        textPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        textIndexPosition = indexPosition;
+        TextBoxPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        TextBoxIndexPosition = indexPosition;
 
-        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT);
-        evta.SetInt(textPanelPosition);
+        wxCommandEvent evta(wxEVT_UPDATE_INDEX_EVENT);
+        evta.SetInt(TextBoxIndexPosition);
         wxPostEvent(GetParent(), evta);
 
-        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT);
-        evtb.SetInt(textIndexPosition);
+        wxCommandEvent evtb(wxEVT_UPDATE_POSITION_EVENT);
+        evtb.SetInt(TextBoxPanelPosition);
         wxPostEvent(GetParent(), evtb);
 
         if (event.Dragging() && event.LeftIsDown())
@@ -1118,14 +1119,14 @@ public:
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) - 1;
         MoveToDesiredPosition();
-        itemPanelPosition = GetItemPositionInSizer(parentSizer, this);
+        TextListPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndownButtonClick(wxCommandEvent &event)
     {
         desiredPosition = GetItemPositionInSizer(parentSizer, this) + 1;
         MoveToDesiredPosition();
-        itemPanelPosition = GetItemPositionInSizer(parentSizer, this);
+        TextListPanelPosition = GetItemPositionInSizer(parentSizer, this);
     }
 
     void OndeleteButtonClick(wxCommandEvent &event)
@@ -1155,15 +1156,15 @@ public:
 
     void OnMouseMove(wxMouseEvent &event)
     {
-        itemPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
-        itemIndexPosition = indexPosition;
+        TextListPanelPosition = GetItemPositionInSizer(parentSizer, this) + 1;
+        TextListIndexPosition = indexPosition;
 
-        wxCommandEvent evta(wxEVT_UPDATE_POSITION_EVENT); // se define en la linea 1063, 1186
-        evta.SetInt(itemPanelPosition);
+        wxCommandEvent evta(wxEVT_UPDATE_INDEX_EVENT);
+        evta.SetInt(TextListIndexPosition);
         wxPostEvent(GetParent(), evta);
 
-        wxCommandEvent evtb(wxEVT_UPDATE_INDEX_EVENT); // se define en la linea 1064, 1187
-        evtb.SetInt(itemIndexPosition);
+        wxCommandEvent evtb(wxEVT_UPDATE_POSITION_EVENT);
+        evtb.SetInt(TextListPanelPosition);
         wxPostEvent(GetParent(), evtb);
 
         if (event.Dragging() && event.LeftIsDown())
@@ -1373,16 +1374,15 @@ public:
         wxStaticBoxSizer *propertiesSizer = new wxStaticBoxSizer(propertiesBox, wxVERTICAL);
 
         // Crear itemIndexTextBox y añadirlo al propertiesSizer
-        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemIndexPosition),
-                                          wxDefaultPosition, wxSize(200, -1), 0,
-                                          wxDefaultValidator, "itemIndexTextBox");
-        // itemIndexTextBox->SetValue(wxString::Format(wxT("%d"), indexPosition));
+        itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
+                                          wxDefaultPosition, wxSize(200, -1), 0);
+
         propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
-        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), itemPanelPosition),
+        itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
                                              wxDefaultPosition, wxSize(200, -1), 0);
-        // itemPositionTextBox->SetValue(wxString::Format(wxT("%d"), panelPosition));
+
         propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
 
         // TIPO ESCENA (INT /EXT)
@@ -1459,7 +1459,7 @@ public:
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
 
         // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
-        // lastNumber es la posicion dentro del contenedor, el ordenamiento (last por que se inserta siempre al final)
+        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
         Scene newScene(nextNumber, tree, selectedText.ToStdString(), lastNumber);
         scenes.push_back(newScene);
 
@@ -1501,7 +1501,7 @@ public:
         itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
 
         // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
-        // lastNumber es la posicion dentro del contenedor, el ordenamiento (last por que se inserta siempre al final)
+        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
         Take newTake(nextNumber, tree, selectedText.ToStdString(), lastNumber);
         takes.push_back(newTake);
 
