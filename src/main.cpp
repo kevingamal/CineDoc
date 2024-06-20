@@ -848,17 +848,17 @@ public:
         wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
 
         // Botón de colapsar
-        wxButton *collapseButton = new wxButton(this, wxID_ANY, "-", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // Cambiado "^" por "-"
+        wxButton *collapseButton = new wxButton(this, wxID_ANY, "-", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // L"\uf4f4"
         titleSizer->Add(collapseButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         collapseButton->Bind(wxEVT_BUTTON, &TitledTextBox::OncollapseButtonClick, this);
 
         // Botón de arriba
-        wxButton *upButton = new wxButton(this, wxID_ANY, L"\u2191", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *upButton = new wxButton(this, wxID_ANY, L"\u2191", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // u2191 (flecha) // 06f8 (Arabe) // uf0aa // L"\uebff"
         titleSizer->Add(upButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         upButton->Bind(wxEVT_BUTTON, &TitledTextBox::OnupButtonClick, this);
 
         // Botón de abajo
-        wxButton *downButton = new wxButton(this, wxID_ANY, L"\u2193", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *downButton = new wxButton(this, wxID_ANY, L"\u2193", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // u2193 (flecha) // u06f7 (Arabe) // uf0ab // L"\uebfc"
         titleSizer->Add(downButton, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 5);
         downButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndownButtonClick, this);
 
@@ -868,14 +868,24 @@ public:
         titleSizer->Add(titleLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
         // Boton de edicion >
-        wxButton *editButton = new wxButton(this, wxID_ANY, L"\u2192", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // u270F
+        wxButton *editButton = new wxButton(this, wxID_ANY, L"\u2192", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // u270F (Lapiz) // u2192 (flecha) // L"\uf044"
         titleSizer->Add(editButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
         editButton->Bind(wxEVT_BUTTON, &TitledTextBox::OneditButtonClick, this);
 
         // Boton de eliminar
-        wxButton *deleteButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE);
+        wxButton *deleteButton = new wxButton(this, wxID_ANY, "x", wxDefaultPosition, wxSize(25, 25), wxBORDER_NONE); // L"\uf52f"
         titleSizer->Add(deleteButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
         deleteButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndeleteButtonClick, this);
+
+        // Crear un objeto wxFont con la fuente deseada
+        // wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Symbols Nerd Font Mono");
+
+        // Aplicar la fuente al botón
+        // collapseButton->SetFont(font);
+        // upButton->SetFont(font);
+        // downButton->SetFont(font);
+        // editButton->SetFont(font);
+        // deleteButton->SetFont(font);
 
         // CUADRO DE TEXTO
         textBox = new wxTextCtrl(this, wxID_ANY, text,
@@ -909,7 +919,8 @@ public:
         {
             // Si el textBox ahora está mostrándose, cambia el símbolo a "-"
             // De lo contrario, cambia el símbolo a "+"
-            btn->SetLabel(textBox->IsShown() ? "-" : "+");
+            //                                      -    :    +
+            btn->SetLabel(textBox->IsShown() ? "-" : "+"); // L"\uf4f4" : L"\uf501"
         }
         Layout();
         dynamic_cast<wxScrolledWindow *>(GetParent())->FitInside();
