@@ -182,6 +182,28 @@ public:
     }
 };
 
+class Actor
+{
+public:
+    int id;
+    int parentId;
+    int passport_id;
+    std::string first_name;
+    std::string last_name;
+    std::string surrname;
+    std::string birthdate;
+
+    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
+        : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & passport_id & first_name & last_name & surrname & birthdate;
+    }
+};
+
 class Location
 {
 public:
@@ -252,28 +274,6 @@ public:
     void serialize(Archive &ar, const unsigned int version)
     {
         ar & id & parentId & locationId & type & time & plain_text & position;
-    }
-};
-
-class Actor
-{
-public:
-    int id;
-    int parentId;
-    int passport_id;
-    std::string first_name;
-    std::string last_name;
-    std::string surrname;
-    std::string birthdate;
-
-    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
-        : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
-
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar & id & parentId & passport_id & first_name & last_name & surrname & birthdate;
     }
 };
 
@@ -386,10 +386,10 @@ public:
 // DATA ARRAYS
 std::vector<Script> scripts = {};
 std::vector<Character> characters = {};
+std::vector<Actor> actors = {};
 std::vector<Location> locations = {};
 std::vector<Object> objects = {};
 std::vector<Scene> scenes = {};
-std::vector<Actor> actors = {};
 std::vector<Take> takes = {};
 std::vector<Use_case> use_cases = {};
 std::vector<Tech_use> tech_uses = {};
