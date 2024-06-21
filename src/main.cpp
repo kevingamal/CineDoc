@@ -1264,6 +1264,7 @@ public:
     MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
+        SetBackgroundColour(wxColour(255, 255, 255));
         // MENU PROYECTO
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
@@ -1370,7 +1371,7 @@ public:
         mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
 
         /// PANEL CONTENEDOR 1
-        containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SUNKEN, "containerPanel");
+        containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         containerSizer = new wxBoxSizer(wxVERTICAL);
@@ -1388,13 +1389,13 @@ public:
         itemIndexTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
                                           wxDefaultPosition, wxSize(200, -1), 0);
 
-        propertiesSizer->Add(itemIndexTextBox, 0, wxALL, 5);
+        propertiesSizer->Add(itemIndexTextBox, 0, wxEXPAND | wxALL, 5);
 
         // Crear itemPositionTextBox y añadirlo al propertiesSizer
         itemPositionTextBox = new wxTextCtrl(propertiesBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
                                              wxDefaultPosition, wxSize(200, -1), 0);
 
-        propertiesSizer->Add(itemPositionTextBox, 0, wxALL, 5);
+        propertiesSizer->Add(itemPositionTextBox, 0, wxEXPAND | wxALL, 5);
 
         // TIPO ESCENA (INT /EXT)
         wxString types[] = {wxT("EXT"), wxT("INT")}; // wxT("cadena") forza a tomar como unicode el string cadena
@@ -1423,7 +1424,7 @@ public:
         wxStaticBoxSizer *miniSizer = new wxStaticBoxSizer(miniBox, wxVERTICAL);
 
         /// PANEL CONTENEDOR 2
-        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxSize(190, 200), wxBORDER_SUNKEN, "itemsPanel");
+        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxSize(190, 200), wxBORDER_THEME, "itemsPanel");
         itemsPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         itemsSizer = new wxBoxSizer(wxVERTICAL);
