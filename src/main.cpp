@@ -1331,12 +1331,9 @@ public:
         // Principal (HORIZONTAL)
         wxBoxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
-        // Izquierdo (VERTICAL)
+        ///////////////////////// PARTE IZQUIERDA /////////////////////////
         wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-
-        // Derecho (VERTICAL)
-        // wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
 
         wxString choices[] = {wxT("Opción 1"), wxT("Opción 2"), wxT("Opción 3")}; // wxT("cadena") forza a tomar como unicode el string cadena
 
@@ -1370,13 +1367,32 @@ public:
         leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
         mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
 
-        /// PANEL CONTENEDOR 1
-        containerPanel = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_THEME, "containerPanel");
+        ///////////////////////// PARTE CENTRAL /////////////////////////
+
+        // Crear un wxStaticBox con el título "Escenas"
+        wxStaticBox *bigBox = new wxStaticBox(this, wxID_ANY, "Escenas");
+        // bigBox->SetSize(100, 800);
+
+        // Crear un sizer vertical para los controles dentro del wxStaticBox
+        wxStaticBoxSizer *bigSizer = new wxStaticBoxSizer(bigBox, wxVERTICAL);
+
+        // Crear itemIndexTextBox y añadirlo al propertiesSizer
+        itemTextBox = new wxTextCtrl(bigBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
+                                     wxDefaultPosition, wxSize(400, -1), 0);
+
+        bigSizer->Add(itemTextBox, 0, wxEXPAND | wxALL, 5);
+
+        /// PANEL CONTENEDOR
+        containerPanel = new wxScrolledWindow(bigBox, wxID_ANY, wxDefaultPosition, wxSize(400, -1), wxBORDER_THEME, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         containerSizer = new wxBoxSizer(wxVERTICAL);
         containerPanel->SetSizer(containerSizer);
-        mainSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
+
+        bigSizer->Add(containerPanel, 0, wxEXPAND | wxALL, 5);
+        mainSizer->Add(bigSizer, 0, wxEXPAND | wxALL, 5); ////////////////////////////////////
+
+        ///////////////////////// PARTE DERECHA /////////////////////////
 
         // Crear un wxStaticBox con el título "Propiedades"
         wxStaticBox *propertiesBox = new wxStaticBox(this, wxID_ANY, "Propiedades");
@@ -1423,8 +1439,8 @@ public:
         // Crear un sizer vertical para los controles dentro del wxStaticBox
         wxStaticBoxSizer *miniSizer = new wxStaticBoxSizer(miniBox, wxVERTICAL);
 
-        /// PANEL CONTENEDOR 2
-        itemsPanel = new wxScrolledWindow(propertiesBox, wxID_ANY, wxDefaultPosition, wxSize(190, 200), wxBORDER_THEME, "itemsPanel");
+        /// PANEL CONTENEDOR
+        itemsPanel = new wxScrolledWindow(miniBox, wxID_ANY, wxDefaultPosition, wxSize(190, 200), wxBORDER_NONE, "itemsPanel");
         itemsPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         itemsSizer = new wxBoxSizer(wxVERTICAL);
@@ -1433,7 +1449,7 @@ public:
         miniSizer->Add(itemsPanel, 1, wxALL, 5);
         propertiesSizer->Add(miniSizer, 1, wxALL, 5);
 
-        mainSizer->Add(propertiesSizer, 0, wxALL | wxEXPAND, 5);
+        mainSizer->Add(propertiesSizer, 0, wxALL | wxEXPAND, 5); ////////////////////////////////////
 
         SetSizer(mainSizer);
 
@@ -1540,6 +1556,7 @@ private:
     wxBoxSizer *containerSizer;
     wxBoxSizer *itemsSizer;
     wxTextCtrl *itemIndexTextBox;
+    wxTextCtrl *itemTextBox; //////////////////////////////////////////////////
     wxTextCtrl *itemPositionTextBox;
     int nextNumber;
     int lastNumber;
@@ -1568,7 +1585,7 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        MainWindow *frame = new MainWindow("CineDoc", wxPoint(50, 50), wxSize(800, 600));
+        MainWindow *frame = new MainWindow("CineDoc", wxPoint(50, 50), wxSize(1500, 600));
         frame->Show(true);
         return true;
     }
