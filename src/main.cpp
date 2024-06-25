@@ -841,8 +841,8 @@ public:
     TitledTextBox(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
         : wxPanel(parent, wxID_ANY), textBox(nullptr), parentSizer(sizer), indexPosition(index)
     {
-        // this->SetFocus();
-        wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
+        wxStaticBox *staticBox = new wxStaticBox(this, wxID_ANY, "");
+        wxBoxSizer *sizerLocal = new wxStaticBoxSizer(staticBox, wxVERTICAL);
 
         // Sizer horizontal para el título y los botones
         wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -877,6 +877,8 @@ public:
         titleSizer->Add(deleteButton, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
         deleteButton->Bind(wxEVT_BUTTON, &TitledTextBox::OndeleteButtonClick, this);
 
+        sizerLocal->Add(titleSizer, 0, wxEXPAND | wxBOTTOM, 7);
+
         // Crear un objeto wxFont con la fuente deseada
         // wxFont font(12, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "Symbols Nerd Font Mono");
 
@@ -891,8 +893,6 @@ public:
         textBox = new wxTextCtrl(this, wxID_ANY, text,
                                  wxDefaultPosition, wxDefaultSize,
                                  wxTE_MULTILINE | wxTE_READONLY);
-
-        sizerLocal->Add(titleSizer, 0, wxEXPAND);
 
         // Establecer el cursor a la flecha estándar
         textBox->SetCursor(wxCURSOR_ARROW);
@@ -909,7 +909,7 @@ public:
         Bind(wxEVT_MOTION, &TitledTextBox::OnMouseMove, this);
     }
 
-    wxTextCtrl *GetTextBox() const { return textBox; }
+    // wxTextCtrl *GetTextBox() const { return textBox; } /////////////////// NO IDEA !!!!!!!! ///////////
 
     void OncollapseButtonClick(wxCommandEvent &event)
     {
@@ -1090,7 +1090,6 @@ public:
     ItemTextList(wxWindow *parent, wxBoxSizer *sizer, int index, const wxString &text)
         : wxPanel(parent, wxID_ANY), parentSizer(sizer), indexPosition(index)
     {
-        // this->SetFocus();
         wxBoxSizer *sizerLocal = new wxBoxSizer(wxVERTICAL);
 
         // Sizer horizontal para el título y los botones
