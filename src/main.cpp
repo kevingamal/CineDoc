@@ -1352,7 +1352,7 @@ public:
         leftSizer->Add(itemSelector, 0, wxEXPAND | wxALL, 5);
 
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
-                                     wxDefaultPosition, wxSize(400, 600),
+                                     wxDefaultPosition, wxDefaultSize,
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
         leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
 
@@ -1365,7 +1365,7 @@ public:
         buttonSizer->Add(addButton, 2, wxEXPAND, 0);
 
         leftSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 5);
-        mainSizer->Add(leftSizer, 0, wxEXPAND | wxALL, 5);
+        mainSizer->Add(leftSizer, 1, wxEXPAND | wxALL, 5);
 
         ///////////////////////// PARTE CENTRAL /////////////////////////
 
@@ -1376,21 +1376,15 @@ public:
         // Crear un sizer vertical para los controles dentro del wxStaticBox
         wxStaticBoxSizer *bigSizer = new wxStaticBoxSizer(bigBox, wxVERTICAL);
 
-        // Crear itemIndexTextBox y añadirlo al propertiesSizer
-        itemTextBox = new wxTextCtrl(bigBox, wxID_ANY, wxString::Format(wxT("%d"), 0), // 0 Es el valor inicial!!!
-                                     wxDefaultPosition, wxSize(400, -1), 0);
-
-        bigSizer->Add(itemTextBox, 0, wxEXPAND | wxALL, 5);
-
         /// PANEL CONTENEDOR
-        containerPanel = new wxScrolledWindow(bigBox, wxID_ANY, wxDefaultPosition, wxSize(400, -1), wxBORDER_THEME, "containerPanel");
+        containerPanel = new wxScrolledWindow(bigBox, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_NONE, "containerPanel");
         containerPanel->SetScrollRate(0, 10); // 0 en la dirección x (horizontal) y 10 en la dirección y (vertical).
 
         containerSizer = new wxBoxSizer(wxVERTICAL);
         containerPanel->SetSizer(containerSizer);
 
-        bigSizer->Add(containerPanel, 0, wxEXPAND | wxALL, 5);
-        mainSizer->Add(bigSizer, 0, wxEXPAND | wxALL, 5); ////////////////////////////////////
+        bigSizer->Add(containerPanel, 1, wxEXPAND | wxALL, 5);
+        mainSizer->Add(bigSizer, 1, wxEXPAND | wxALL, 5); ////////////////////////////////////
 
         ///////////////////////// PARTE DERECHA /////////////////////////
 
@@ -1556,7 +1550,6 @@ private:
     wxBoxSizer *containerSizer;
     wxBoxSizer *itemsSizer;
     wxTextCtrl *itemIndexTextBox;
-    wxTextCtrl *itemTextBox; //////////////////////////////////////////////////
     wxTextCtrl *itemPositionTextBox;
     int nextNumber;
     int lastNumber;
@@ -1585,7 +1578,12 @@ class MyApp : public wxApp
 public:
     virtual bool OnInit()
     {
-        MainWindow *frame = new MainWindow("CineDoc", wxPoint(50, 50), wxSize(1500, 600));
+        // Crear ventana proncipal "frame"
+        MainWindow *frame = new MainWindow("CineDoc", wxPoint(50, 50), wxSize(1000, 700));
+
+        // Establecer el tamaño mínimo de la ventana
+        frame->SetMinSize(wxSize(1000, 700));
+
         frame->Show(true);
         return true;
     }
