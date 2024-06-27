@@ -45,7 +45,7 @@ enum
 };
 
 std::vector<int> root; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
-std::vector<int> tree; // Vector para almacenar el parentId actual
+std::vector<int> tree; // Vector para almacenar la sucesion de parentId actual
 // (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
 // Para crear un nuevo guion se le pregunta firstEmpty a root y se reemplaza el elemento en la posicion 0 con ese numero
 
@@ -148,7 +148,7 @@ int TextListPanelPosition; // ItemTextList  (used in up, down, move (evtb))
 class Script
 {
 public:
-    std::vector<int> id;
+    std::vector<int> id; // No importa que sea vector por que se basa siempre en root
     std::string title;
     std::string plain_text;
 
@@ -160,91 +160,6 @@ public:
     void serialize(Archive &ar, const unsigned int version)
     {
         ar & id & title & plain_text;
-    }
-};
-
-class Character
-{
-public:
-    int id;
-    std::string first_name;
-    std::string last_name;
-    std::string surrname;
-
-    Character(std::string first_name, std::string last_name, std::string surrname)
-        : first_name(first_name), last_name(last_name), surrname(surrname) {}
-
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar & id & first_name & last_name & surrname;
-    }
-};
-
-class Actor
-{
-public:
-    int id;
-    int parentId;
-    int passport_id;
-    std::string first_name;
-    std::string last_name;
-    std::string surrname;
-    std::string birthdate;
-
-    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
-        : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
-
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar & id & parentId & passport_id & first_name & last_name & surrname & birthdate;
-    }
-};
-
-class Location
-{
-public:
-    int id;
-    std::string name;
-    std::string adress;
-    std::string phone;
-    std::string hospital;
-    std::string parking;
-
-    Location(std::string name, std::string adress)
-        : name(name), adress(adress) {}
-
-    Location(std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
-        : name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
-
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-        ar & id & name & adress & phone & hospital & parking;
-    }
-};
-
-class Object
-{
-public:
-    int id;
-    std::string name;
-    std::string description;
-    std::string type;
-
-    Object(std::string name, std::string description, std::string type)
-        : name(name), description(description), type(type) {}
-
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-
-        ar & id & name & description & type;
     }
 };
 
@@ -383,17 +298,103 @@ public:
     }
 };
 
+class Character
+{
+public:
+    int id;
+    std::string first_name;
+    std::string last_name;
+    std::string surrname;
+
+    Character(std::string first_name, std::string last_name, std::string surrname)
+        : first_name(first_name), last_name(last_name), surrname(surrname) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & first_name & last_name & surrname;
+    }
+};
+
+class Actor
+{
+public:
+    int id;
+    int parentId;
+    int passport_id;
+    std::string first_name;
+    std::string last_name;
+    std::string surrname;
+    std::string birthdate;
+
+    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
+        : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & parentId & passport_id & first_name & last_name & surrname & birthdate;
+    }
+};
+
+class Location
+{
+public:
+    int id;
+    std::string name;
+    std::string adress;
+    std::string phone;
+    std::string hospital;
+    std::string parking;
+
+    Location(std::string name, std::string adress)
+        : name(name), adress(adress) {}
+
+    Location(std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
+        : name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+        ar & id & name & adress & phone & hospital & parking;
+    }
+};
+
+class Object
+{
+public:
+    int id;
+    std::string name;
+    std::string description;
+    std::string type;
+
+    Object(std::string name, std::string description, std::string type)
+        : name(name), description(description), type(type) {}
+
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & name & description & type;
+    }
+};
+
 // DATA ARRAYS
 std::vector<Script> scripts = {};
-std::vector<Character> characters = {};
-std::vector<Actor> actors = {};
-std::vector<Location> locations = {};
-std::vector<Object> objects = {};
 std::vector<Scene> scenes = {};
 std::vector<Take> takes = {};
 std::vector<Use_case> use_cases = {};
 std::vector<Tech_use> tech_uses = {};
 std::vector<Event> events = {};
+
+std::vector<Character> characters = {};
+std::vector<Actor> actors = {};
+std::vector<Location> locations = {};
+std::vector<Object> objects = {};
 
 // TEMP GUI DATA ARRAYS
 std::vector<Scene> scenesTemp = {};
@@ -1805,10 +1806,21 @@ void MainWindow::writeFile(const wxString &filename)
 // SCRIPT MENU
 void MainWindow::OnNewScript(wxCommandEvent &event)
 {
-    wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
-                 "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
-    SetStatusText("StatusBar overide");
-    // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION"
+    wxTextEntryDialog dialog(NULL, wxT("Ingrese el título del guión:"), wxT("Nuevo Guión")); // Prompt / Titulo Ventana
+
+    // Mostrar el cuadro de diálogo y obtener el resultado
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString title = dialog.GetValue();
+
+        // Aquí puedes realizar las verificaciones adicionales con el título ingresado
+        // ...
+    }
+
+    /*     wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
+                     "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+        SetStatusText("StatusBar overide");
+        // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION" */
 }
 
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
