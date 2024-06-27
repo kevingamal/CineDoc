@@ -1837,7 +1837,7 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
         else
         {
-            wxMessageBox("Ya existe un guión con ese título", // CONTENIDO VENTANA POP UP
+            wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
                          "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
         }
 
