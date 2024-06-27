@@ -405,6 +405,20 @@ std::vector<Event> eventsTemp = {};
 
 // ARRAYS FUNCTIONS
 
+// SCRIPTS
+bool checkTitleExists(const std::vector<Script> &scripts, const std::string &title)
+{
+    // Recorrer el vector de scripts y comparar cada título con el título dado
+    for (const auto &script : scripts)
+    {
+        if (script.title == title)
+        {
+            return false; // El título ya existe
+        }
+    }
+    return true; // El título no existe
+}
+
 // SCENES
 void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
@@ -1797,6 +1811,7 @@ void MainWindow::writeFile(const wxString &filename)
 {
     std::ofstream out_fs(filename.ToStdString()); // Convierte wxString a std::string
     boost::archive::text_oarchive outArchive(out_fs);
+    outArchive << scripts;
     outArchive << scenes;
     outArchive << takes;
     out_fs.close();
@@ -1812,6 +1827,19 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
     if (dialog.ShowModal() == wxID_OK)
     {
         wxString title = dialog.GetValue();
+
+        if (checkTitleExists(scripts, title.ToStdString()))
+        {
+            nextNumber = firstEmpty(root);
+            Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
+            scripts.push_back(newScript);
+        }
+
+        else
+        {
+            wxMessageBox("Ya existe un guión con ese título", // CONTENIDO VENTANA POP UP
+                         "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+        }
 
         // Aquí puedes realizar las verificaciones adicionales con el título ingresado
         // ...
