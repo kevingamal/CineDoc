@@ -44,10 +44,10 @@ enum
     ID_HELP = 7
 };
 
-std::vector<int> root; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
-std::vector<int> tree; // Vector para almacenar la sucesion de parentId actual
+std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
+std::vector<int> tree;         // Vector para almacenar la sucesion de parentId actual
 // (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
-// Para crear un nuevo guion se le pregunta firstEmpty a root y se reemplaza el elemento en la posicion 0 con ese numero
+// Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
 
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
@@ -148,7 +148,7 @@ int TextListPanelPosition; // ItemTextList  (used in up, down, move (evtb))
 class Script
 {
 public:
-    std::vector<int> id; // No importa que sea vector por que se basa siempre en root
+    std::vector<int> id; // No importa que sea vector por que se basa siempre en scriptsArray
     std::string title;
     std::string plain_text;
 
@@ -413,10 +413,10 @@ bool checkTitleExists(const std::vector<Script> &scripts, const std::string &tit
     {
         if (script.title == title)
         {
-            return false; // El título ya existe
+            return true; // El título ya existe
         }
     }
-    return true; // El título no existe
+    return false; // El título no existe
 }
 
 // SCENES
@@ -1828,9 +1828,9 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
     {
         wxString title = dialog.GetValue();
 
-        if (checkTitleExists(scripts, title.ToStdString()))
+        if (!checkTitleExists(scripts, title.ToStdString()))
         {
-            nextNumber = firstEmpty(root);
+            nextNumber = firstEmpty(scriptsArray);
             Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
             scripts.push_back(newScript);
         }
