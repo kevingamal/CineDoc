@@ -1368,6 +1368,14 @@ public:
         leftTextBox = new wxTextCtrl(this, wxID_ANY, wxEmptyString,
                                      wxDefaultPosition, wxDefaultSize,
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
+
+        leftTextBox->Enable(false);
+
+        // leftTextBox->Clear();
+        // wxString allText = leftTextBox->GetValue();
+        // wxString selectedText = leftTextBox->GetStringSelection();
+        // leftTextBox->SetValue("Este es el texto inicial");
+
         leftSizer->Add(leftTextBox, 1, wxEXPAND | wxALL, 5);
 
         wxButton *backButton = new wxButton(this, wxID_ANY, "Volver");
@@ -1467,25 +1475,8 @@ public:
 
     void OnAddButtonClicked(wxCommandEvent &event)
     {
-        if (!leftTextBox)
-        {
-            wxMessageBox("No se pudo obtener el cuadro de texto a la izquierda.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
-
+        // wxString allText = leftTextBox->GetValue();
         wxString selectedText = leftTextBox->GetStringSelection();
-
-        if (!containerPanel)
-        {
-            wxMessageBox("No se pudo obtener el contenedor de los cuadros de texto.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
-
-        if (!containerSizer)
-        {
-            wxMessageBox("El contenedor no tiene un sizer asociado.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
 
         nextNumber = firstEmpty(textBoxsContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
         lastNumber = lastEmpty(textBoxsContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
