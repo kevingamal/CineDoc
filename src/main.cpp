@@ -1500,25 +1500,8 @@ public:
 
     void OnBackButtonClicked(wxCommandEvent &event)
     {
-        if (!leftTextBox)
-        {
-            wxMessageBox("No se pudo obtener el cuadro de texto a la izquierda.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
-
+        // wxString allText = leftTextBox->GetValue();
         wxString selectedText = leftTextBox->GetStringSelection();
-
-        if (!itemsPanel)
-        {
-            wxMessageBox("No se pudo obtener el contenedor de los cuadros de texto.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
-
-        if (!itemsSizer)
-        {
-            wxMessageBox("El contenedor no tiene un sizer asociado.", "Error", wxOK | wxICON_ERROR);
-            return;
-        }
 
         nextNumber = firstEmpty(itemsListContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
         lastNumber = lastEmpty(itemsListContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
