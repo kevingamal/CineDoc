@@ -1830,16 +1830,25 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         scriptTitles.Add(script.title);
     }
 
-    wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles);
+    if (scriptTitles.IsEmpty())
+    {
+        scriptTitles.Add(wxT("Primero crea un guión!!"));
+    }
+
+    wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
 
     wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    textCtrl->Disable();
 
-    if (!scriptTitles.IsEmpty())
+    if (scriptTitles[0] != wxT("Primero crea un guión!!"))
     {
         comboBox->SetSelection(0); // Seleccionar el primer elemento
         textCtrl->Enable();
         textCtrl->SetValue(scriptTitles[0]); // Establecer el valor del primer elemento
+    }
+    else
+    {
+        comboBox->SetSelection(0); // Seleccionar el primer elemento
+        textCtrl->Disable();
     }
 
     vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
