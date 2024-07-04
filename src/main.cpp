@@ -1814,19 +1814,53 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
             wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
                          "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
         }
-
-        // Aquí puedes realizar las verificaciones adicionales con el título ingresado
-        // ...
     }
-
-    /*     wxMessageBox("Test",                                          // CONTENIDO VENTANA POP UP
-                     "Crear nuevo guion", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
-        SetStatusText("StatusBar overide");
-        // wxLogMessage("Hello world from wxWidgets!"); // VENTANA CON TITULO GENERICO "MAIN INFORMATION" */
 }
 
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
+    wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxSize(300, 200));
+
+    wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+    // Crear el wxComboBox con los títulos de los guiones disponibles
+    wxArrayString scriptTitles;
+    for (const auto &script : scripts)
+    {
+        scriptTitles.Add(script.title);
+    }
+
+    wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles);
+
+    wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    textCtrl->Disable();
+
+    if (!scriptTitles.IsEmpty())
+    {
+        comboBox->SetSelection(0); // Seleccionar el primer elemento
+        textCtrl->Enable();
+        textCtrl->SetValue(scriptTitles[0]); // Establecer el valor del primer elemento
+    }
+
+    vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+    vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
+    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+    dialog.SetSizer(vbox);
+
+    // Mostrar el cuadro de diálogo y obtener el resultado
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString editedTitle = textCtrl->GetValue();
+        if (!editedTitle.IsEmpty())
+        {
+            // Aquí puedes añadir la lógica para guardar el título editado
+        }
+        else
+        {
+            wxMessageBox("El título no puede estar vacío", "Error", wxOK | wxICON_ERROR);
+        }
+    }
 }
 
 void MainWindow::OnScriptDel(wxCommandEvent &event)
