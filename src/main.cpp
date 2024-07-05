@@ -1878,17 +1878,27 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
             if (selectedTitle == editedTitle)
             {
-                wxMessageBox("No puede tener el mismo nombre!", "Error", wxOK | wxICON_ERROR);
+                wxMessageBox(wxT("No puede tener el mismo nombre!"), "Error", wxOK | wxICON_ERROR);
             }
 
             else
             {
-                wxMessageBox("ACTUALIZAR", "Ok", wxOK | wxICON_ERROR);
+                if (!checkTitleExists(scripts, editedTitle.ToStdString()))
+                {
+                    wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+                }
+
+                else
+                {
+                    wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
+                                 "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+                }
             }
         }
+
         else
         {
-            wxMessageBox("No puede estar vacio!", "Error", wxOK | wxICON_ERROR);
+            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
         }
     }
 }
