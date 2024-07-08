@@ -106,6 +106,7 @@ void deleteVectorItem(std::vector<int> &vector, int item)
 }
 
 void updateElementPosition(std::vector<int> &vector, int id, int newPosition)
+
 {
     auto it = std::find(vector.begin(), vector.end(), id);
 
@@ -129,6 +130,28 @@ void updateElementPosition(std::vector<int> &vector, int id, int newPosition)
 
     // Insertar el elemento en la nueva posición
     vector.insert(vector.begin() + newPosition, id);
+}
+
+// Función para convertir vector<int> a wxString
+wxString VectorToString(const std::vector<int> &vec)
+{
+    wxString result;
+    for (int val : vec)
+    {
+        result += wxString::Format("%d ", val);
+    }
+    return result;
+}
+
+// Función para convertir wxArrayString a wxString
+wxString ArrayStringToString(const wxArrayString &arr)
+{
+    wxString result;
+    for (const wxString &val : arr)
+    {
+        result += val + " ";
+    }
+    return result;
 }
 
 // numeros.push_back(x); // Añade el numero x al final
@@ -1480,20 +1503,20 @@ public:
 
         nextNumber = firstEmpty(textBoxsContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
         lastNumber = lastEmpty(textBoxsContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
+        textBoxsContainer.push_back(nextNumber);
 
         TitledTextBox *newTitledTextBox = new TitledTextBox(containerPanel, containerSizer, nextNumber, selectedText);
-        textBoxsContainer.push_back(nextNumber);
         containerSizer->Add(newTitledTextBox, 0, wxEXPAND | wxALL, 5);
-
-        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
-        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
-        Scene newScene(nextNumber, tree, selectedText.ToStdString(), lastNumber);
-        scenes.push_back(newScene);
 
         containerSizer->Layout();
         containerPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
         containerPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
+
+        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
+        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
+        Scene newScene(nextNumber, tree, selectedText.ToStdString(), lastNumber);
+        scenes.push_back(newScene);
 
         mod = true;
     }
@@ -1505,20 +1528,20 @@ public:
 
         nextNumber = firstEmpty(itemsListContainer); // DE LA LISTA DE IDS, EL SIGUIENTE DISPONIBLE (EL ULTIMO O EL PRIMER HUECO VACIO)
         lastNumber = lastEmpty(itemsListContainer);  // LA POSICION DENTRO DEL PANEL MAS ALLA DE SU ID (SIEMPRE SE AGREGA AL FINAL)
+        itemsListContainer.push_back(nextNumber);
 
         ItemTextList *newItemTextList = new ItemTextList(itemsPanel, itemsSizer, nextNumber, selectedText);
-        itemsListContainer.push_back(nextNumber);
         itemsSizer->Add(newItemTextList, 0, wxEXPAND | wxALL, 5);
-
-        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
-        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
-        Take newTake(nextNumber, tree, selectedText.ToStdString(), lastNumber);
-        takes.push_back(newTake);
 
         itemsSizer->Layout();
         itemsPanel->Layout();
         // containerPanel->SetVirtualSize(containerSizer->GetMinSize());
         itemsPanel->FitInside(); // Esta funcion reemplaza a la linea de arriba
+
+        // nextNumber es la posicion dentro del arreglo (el que va a ser su id); tree es el parentId
+        // lastNumber es la posicion dentro del contenedor, al final (por que last se inserta siempre al final)
+        Take newTake(nextNumber, tree, selectedText.ToStdString(), lastNumber);
+        takes.push_back(newTake);
 
         mod = true;
     }
@@ -1807,6 +1830,7 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
             nextNumber = firstEmpty(scriptsArray);
             Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
             scripts.push_back(newScript);
+            scriptsArray.push_back(nextNumber);
         }
 
         else
@@ -1819,12 +1843,15 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
-    wxString selectedTitle;
+    // wxString selectedTitle;
 
+    std::vector<int> ScriptIds;
     wxArrayString scriptTitles;
+
     for (const auto &script : scripts)
     {
         scriptTitles.Add(script.title);
+        ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
     }
 
     if (scriptTitles.IsEmpty())
@@ -1849,9 +1876,15 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
     // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
     comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
+
                    {
-                       selectedTitle = comboBox->GetStringSelection(); // Para cada vez que cambiamos
-                       textCtrl->SetValue(selectedTitle); });
+                       textCtrl->SetValue(comboBox->GetStringSelection());
+                       // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
+                       // textCtrl->SetValue(scriptTitles[comboBox->GetSelection()]);
+                       // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
+                   }
+
+    );
 
     dialog.SetSizer(vbox);
 
@@ -1874,9 +1907,9 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         wxString editedTitle = textCtrl->GetValue();
         if (!editedTitle.IsEmpty())
         {
-            selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
+            // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
 
-            if (selectedTitle == editedTitle)
+            if (comboBox->GetStringSelection() == editedTitle)
             {
                 wxMessageBox(wxT("No puede tener el mismo nombre!"), "Error", wxOK | wxICON_ERROR);
             }
@@ -1885,7 +1918,8 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
             {
                 if (!checkTitleExists(scripts, editedTitle.ToStdString()))
                 {
-                    wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+                    // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+                    wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_ERROR);
                 }
 
                 else
