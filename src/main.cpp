@@ -1828,9 +1828,10 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
         if (!checkTitleExists(scripts, title.ToStdString()))
         {
             nextNumber = firstEmpty(scriptsArray);
+            scriptsArray.push_back(nextNumber);
+
             Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
             scripts.push_back(newScript);
-            scriptsArray.push_back(nextNumber);
         }
 
         else
@@ -1843,8 +1844,6 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
-    // wxString selectedTitle;
-
     std::vector<int> ScriptIds;
     wxArrayString scriptTitles;
 
@@ -1882,6 +1881,8 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
                        // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
                        // textCtrl->SetValue(scriptTitles[comboBox->GetSelection()]);
                        // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
+                       // wxMessageBox(VectorToString(ScriptIds), "Contenido de ScriptIds", wxOK | wxICON_INFORMATION);
+                       // wxMessageBox(ArrayStringToString(scriptTitles), "Contenido de scriptTitles", wxOK | wxICON_INFORMATION);
                    }
 
     );
