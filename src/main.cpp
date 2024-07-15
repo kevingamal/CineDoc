@@ -1844,97 +1844,105 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
 void MainWindow::OnScriptEdit(wxCommandEvent &event)
 {
-    std::vector<int> ScriptIds;
-    wxArrayString scriptTitles;
-
-    for (const auto &script : scripts)
+    if (!scripts.empty()) // Si hay algo que editar (si no está vacío), editar
     {
-        scriptTitles.Add(script.title);
-        ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
-    }
+        std::vector<int> ScriptIds;
+        wxArrayString scriptTitles;
 
-    if (scriptTitles.IsEmpty())
-    {
-        scriptTitles.Add(wxT("Primero crea un guión!!"));
-    }
-
-    wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxSize(300, 200));
-
-    wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
-
-    wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
-
-    wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-
-    vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
-    vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
-    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
-
-    // Boton para cambiar el estado de Ok
-    wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
-
-    // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-    comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
-
-                   {
-                       textCtrl->SetValue(comboBox->GetStringSelection());
-                       // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
-                       // textCtrl->SetValue(scriptTitles[comboBox->GetSelection()]);
-                       // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
-                       // wxMessageBox(VectorToString(ScriptIds), "Contenido de ScriptIds", wxOK | wxICON_INFORMATION);
-                       // wxMessageBox(ArrayStringToString(scriptTitles), "Contenido de scriptTitles", wxOK | wxICON_INFORMATION);
-                   }
-
-    );
-
-    dialog.SetSizer(vbox);
-
-    if (scriptTitles[0] != wxT("Primero crea un guión!!"))
-    {
-        comboBox->SetSelection(0); // Seleccionar el primer elemento
-        textCtrl->Enable();
-        textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
-    }
-    else
-    {
-        comboBox->SetSelection(0); // Seleccionar el primer elemento
-        okButton->Disable();
-        textCtrl->Disable();
-    }
-
-    // Mostrar el cuadro de diálogo y obtener el resultado
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxString editedTitle = textCtrl->GetValue();
-        if (!editedTitle.IsEmpty())
+        for (const auto &script : scripts)
         {
-            // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
+            scriptTitles.Add(script.title);
+            ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
+        }
 
-            if (comboBox->GetStringSelection() == editedTitle)
-            {
-                wxMessageBox(wxT("No puede tener el mismo nombre!"), "Error", wxOK | wxICON_ERROR);
-            }
+        if (scriptTitles.IsEmpty())
+        {
+            scriptTitles.Add(wxT("Primero crea un guión!!"));
+        }
 
-            else
+        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxSize(300, 200));
+
+        wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
+
+        wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+
+        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+
+        // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
+        comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
+
+                       {
+                           textCtrl->SetValue(comboBox->GetStringSelection());
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
+                           // textCtrl->SetValue(scriptTitles[comboBox->GetSelection()]);
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
+                           // wxMessageBox(VectorToString(ScriptIds), "Contenido de ScriptIds", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(scriptTitles), "Contenido de scriptTitles", wxOK | wxICON_INFORMATION);
+                       }
+
+        );
+
+        dialog.SetSizer(vbox);
+
+        if (scriptTitles[0] != wxT("Primero crea un guión!!"))
+        {
+            comboBox->SetSelection(0); // Seleccionar el primer elemento
+            textCtrl->Enable();
+            textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
+        }
+        else
+        {
+            comboBox->SetSelection(0); // Seleccionar el primer elemento
+            okButton->Disable();
+            textCtrl->Disable();
+        }
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            wxString editedTitle = textCtrl->GetValue();
+            if (!editedTitle.IsEmpty())
             {
-                if (!checkTitleExists(scripts, editedTitle.ToStdString()))
+                // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
+
+                if (comboBox->GetStringSelection() == editedTitle)
                 {
-                    // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
-                    wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_ERROR);
+                    wxMessageBox(wxT("No puede tener el mismo nombre!"), "Error", wxOK | wxICON_ERROR);
                 }
 
                 else
                 {
-                    wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
-                                 "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+                    if (!checkTitleExists(scripts, editedTitle.ToStdString()))
+                    {
+                        // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+                        wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_ERROR);
+                    }
+
+                    else
+                    {
+                        wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
+                                     "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+                    }
                 }
             }
-        }
 
-        else
-        {
-            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+            else
+            {
+                wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+            }
         }
+    }
+
+    else // Si esta vacio (no hay nada que editar, error!)
+    {
+        wxMessageBox(wxT("Primero crea un guión!!"), "Error", wxOK | wxICON_ERROR);
     }
 }
 
