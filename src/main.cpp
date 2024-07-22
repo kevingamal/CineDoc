@@ -1870,18 +1870,6 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         comboBox->SetSelection(0);           // Seleccionar el primer elemento
         textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
 
-        // Boton para cambiar el etado de Ok
-        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
-
-        // Evento para deshabilitar el boton de ok cuando se borra la selección en el textCtrl
-        textCtrl->Bind(wxEVT_TEXT, [okButton](wxCommandEvent &event)
-                       {
-            if (event.GetString().IsEmpty()) {
-                okButton->Disable();
-            } else {
-                okButton->Enable();
-            } });
-
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
         comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
 
@@ -1895,6 +1883,23 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
                        }
 
         );
+
+        // Boton para cambiar el etado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
+
+        // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+        textCtrl->Bind(wxEVT_TEXT, [okButton, textCtrl, comboBox](wxCommandEvent &event)
+                       {
+                        wxString editedTitle = textCtrl->GetValue();
+                        if (editedTitle.IsEmpty() || comboBox->GetStringSelection() == editedTitle)
+                        {
+                            okButton->Disable();
+                        }
+                        else
+                        {
+                            okButton->Enable();
+                        } });
 
         dialog.SetSizer(vbox);
 
