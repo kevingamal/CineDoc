@@ -1855,11 +1855,6 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
             ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
         }
 
-        if (scriptTitles.IsEmpty())
-        {
-            scriptTitles.Add(wxT("Primero crea un guión!!"));
-        }
-
         wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxSize(300, 200));
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
@@ -1872,8 +1867,20 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
         vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
 
-        // Boton para cambiar el estado de Ok
+        comboBox->SetSelection(0);           // Seleccionar el primer elemento
+        textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
+
+        // Boton para cambiar el etado de Ok
         wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+
+        // Evento para deshabilitar el boton de ok cuando se borra la selección en el textCtrl
+        textCtrl->Bind(wxEVT_TEXT, [okButton](wxCommandEvent &event)
+                       {
+            if (event.GetString().IsEmpty()) {
+                okButton->Disable();
+            } else {
+                okButton->Enable();
+            } });
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
         comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
@@ -1890,19 +1897,6 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         );
 
         dialog.SetSizer(vbox);
-
-        if (scriptTitles[0] != wxT("Primero crea un guión!!"))
-        {
-            comboBox->SetSelection(0); // Seleccionar el primer elemento
-            textCtrl->Enable();
-            textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
-        }
-        else
-        {
-            comboBox->SetSelection(0); // Seleccionar el primer elemento
-            okButton->Disable();
-            textCtrl->Disable();
-        }
 
         // Mostrar el cuadro de diálogo y obtener el resultado
         if (dialog.ShowModal() == wxID_OK)
