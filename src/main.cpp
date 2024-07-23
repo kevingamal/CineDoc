@@ -1884,7 +1884,7 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
         );
 
-        // Boton para cambiar el etado de Ok
+        // Boton para cambiar el estado de Ok
         wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
         okButton->Disable();
 
@@ -1921,13 +1921,13 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
                     if (!checkTitleExists(scripts, editedTitle.ToStdString()))
                     {
                         // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
-                        wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_ERROR);
+                        wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
                     }
 
                     else
                     {
-                        wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
-                                     "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+                        wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                                     "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
                     }
                 }
             }
@@ -1947,6 +1947,42 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
 void MainWindow::OnScriptDel(wxCommandEvent &event)
 {
+    if (!scripts.empty()) // Si hay algo que borrar (si no está vacío), abrir ventana
+    {
+        std::vector<int> ScriptIds;
+        wxArrayString scriptTitles;
+
+        for (const auto &script : scripts)
+        {
+            scriptTitles.Add(script.title);
+            ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
+        }
+
+        wxDialog dialog(NULL, wxID_ANY, wxT("Eliminar Guión"), wxDefaultPosition, wxSize(300, 200));
+
+        wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
+
+        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+        comboBox->SetSelection(0); // Seleccionar el primer elemento
+
+        dialog.SetSizer(vbox);
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+            wxMessageBox(wxString::Format(wxT("Eliminar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+        }
+    }
+
+    else // Si esta vacio (no hay nada que borrar, error!)
+    {
+        wxMessageBox(wxT("Primero crea un guión!!"), "Error", wxOK | wxICON_ERROR);
+    }
 }
 
 //// CONTROL MSSG EVENTS ////
