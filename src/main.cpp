@@ -1818,26 +1818,61 @@ void MainWindow::writeFile(const wxString &filename)
 // SCRIPT MENU
 void MainWindow::OnNewScript(wxCommandEvent &event)
 {
-    wxTextEntryDialog dialog(NULL, wxT("Ingrese el título del guión:"), wxT("Nuevo Guión")); // Prompt / Titulo Ventana
+    // wxTextEntryDialog dialog(NULL, wxT("Ingrese el título del guión:"), wxT("Nuevo Guión")); // Prompt / Titulo Ventana
+    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Guión"), wxDefaultPosition, wxSize(300, 200));
+
+    wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+    wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+
+    vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
+    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+    // Boton para cambiar el estado de Ok
+    wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+    okButton->Disable();
+
+    // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+    textCtrl->Bind(wxEVT_TEXT, [okButton, textCtrl](wxCommandEvent &event)
+                   {
+                        wxString title = textCtrl->GetValue();
+                        if (title.IsEmpty())
+                        {
+                            okButton->Disable();
+                        }
+                        else
+                        {
+                            okButton->Enable();
+                        } });
+
+    dialog.SetSizer(vbox);
 
     // Mostrar el cuadro de diálogo y obtener el resultado
     if (dialog.ShowModal() == wxID_OK)
     {
-        wxString title = dialog.GetValue();
-
-        if (!checkTitleExists(scripts, title.ToStdString()))
+        wxString title = textCtrl->GetValue();
+        if (!title.IsEmpty())
         {
-            nextNumber = firstEmpty(scriptsArray);
-            scriptsArray.push_back(nextNumber);
+            if (!checkTitleExists(scripts, title.ToStdString()))
+            {
+                nextNumber = firstEmpty(scriptsArray);
+                scriptsArray.push_back(nextNumber);
 
-            Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
-            scripts.push_back(newScript);
+                Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
+                scripts.push_back(newScript);
+                // wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+            }
+
+            else
+            {
+                wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                             "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+            }
         }
 
         else
         {
-            wxMessageBox("Ese nombre ya existe",              // CONTENIDO VENTANA POP UP
-                         "Error", wxOK | wxICON_INFORMATION); // TITULO VENTANA POP UP
+            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
         }
     }
 }
