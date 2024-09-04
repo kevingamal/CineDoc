@@ -2009,7 +2009,6 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
         // Mostrar el cuadro de diálogo y obtener el resultado
         if (dialog.ShowModal() == wxID_OK)
         {
-            // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
             wxMessageBox(wxString::Format(wxT("Eliminar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
         }
     }
