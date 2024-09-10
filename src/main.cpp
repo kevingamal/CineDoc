@@ -39,13 +39,18 @@ enum
     ID_SCRIPT_NEW = 3,
     ID_SCRIPT_EDIT = 4,
     ID_SCRIPT_DEL = 5,
-    ID_Hello = 6,
+    ID_CHARACTER_NEW = 7,
+    ID_CHARACTER_EDIT = 8,
+    ID_CHARACTER_DEL = 9,
+    ID_Hello = 10,
     // ID_ABOUT = 11,
-    ID_HELP = 7
+    ID_HELP = 11
 };
 
 std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
 std::vector<int> tree;         // Vector para almacenar la sucesion de parentId actual
+std::vector<int> charactersArray;
+
 // (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
 // Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
 
@@ -329,8 +334,8 @@ public:
     std::string last_name;
     std::string surrname;
 
-    Character(std::string first_name, std::string last_name, std::string surrname)
-        : first_name(first_name), last_name(last_name), surrname(surrname) {}
+    Character(int id, std::string first_name, std::string last_name, std::string surrname)
+        : id(id), first_name(first_name), last_name(last_name), surrname(surrname) {}
 
     // Función de serialización
     template <class Archive>
@@ -871,6 +876,20 @@ void removeEvent(std::vector<Event> &source, std::vector<int> specificParentId, 
 }
 // removeEvent(eventsTemp, specificParentId, specificId);
 
+// CHARACTERS
+bool checkCharacterExists(const std::vector<Character> &characters, const std::string &first_name, const std::string &last_name, const std::string &surrname)
+{
+    // Recorrer el vector de personajes y comparar cada título con el título dado
+    for (const auto &character : characters)
+    {
+        if (character.first_name == first_name && character.last_name == last_name && character.surrname == surrname)
+        {
+            return true; // El nombre ya existe
+        }
+    }
+    return false; // El nombre no existe
+}
+
 // CONTROLS CLASSES
 
 class TitledTextBox : public wxPanel
@@ -1324,9 +1343,9 @@ public:
 
         // MENU PERSONAJE
         wxMenu *menuCharacter = new wxMenu;
-        menuCharacter->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo personaje");
-        menuCharacter->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar personaje");
-        menuCharacter->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar personaje");
+        menuCharacter->Append(ID_CHARACTER_NEW, "&Nuevo...", "Nuevo personaje");
+        menuCharacter->Append(ID_CHARACTER_EDIT, "&Editar...", "Editar personaje");
+        menuCharacter->Append(ID_CHARACTER_DEL, "&Eliminar...", "Eliminar personaje");
 
         // MENU ACTOR
         wxMenu *menuActor = new wxMenu;
@@ -1579,6 +1598,11 @@ private:
     void OnScriptEdit(wxCommandEvent &event);
     void OnScriptDel(wxCommandEvent &event);
 
+    // Character Menu Events
+    void OnNewCharacter(wxCommandEvent &event);
+    void OnCharacterEdit(wxCommandEvent &event);
+    void OnCharacterDel(wxCommandEvent &event);
+
     //
     void OnAbout(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
@@ -1616,10 +1640,14 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
                                 EVT_MENU(ID_SCRIPT_EDIT, MainWindow::OnScriptEdit)
                                     EVT_MENU(ID_SCRIPT_DEL, MainWindow::OnScriptDel)
 
-                                        EVT_MENU(ID_HELP, MainWindow::OnAbout)
-                                            EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
-                                                wxEND_EVENT_TABLE()
-                                                    wxIMPLEMENT_APP(MyApp);
+                                        EVT_MENU(ID_CHARACTER_NEW, MainWindow::OnNewCharacter)
+                                            EVT_MENU(ID_CHARACTER_EDIT, MainWindow::OnCharacterEdit)
+                                                EVT_MENU(ID_CHARACTER_DEL, MainWindow::OnCharacterDel)
+
+                                                    EVT_MENU(ID_HELP, MainWindow::OnAbout)
+                                                        EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
+                                                            wxEND_EVENT_TABLE()
+                                                                wxIMPLEMENT_APP(MyApp);
 
 // FILE MENU
 void MainWindow::OnNewFile(wxCommandEvent &event)
@@ -1860,7 +1888,7 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
                 Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
                 scripts.push_back(newScript);
-                // wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+                // wxMessageBox(wxString::Format(wxT("Crear guión Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
             }
 
             else
@@ -2017,6 +2045,85 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
     {
         wxMessageBox(wxT("Primero crea un guión!!"), "Error", wxOK | wxICON_ERROR);
     }
+}
+
+void MainWindow::OnNewCharacter(wxCommandEvent &event)
+{
+    // wxTextEntryDialog dialog(NULL, wxT("Ingrese el nombre del personaje:"), wxT("Nuevo Personaje")); // Prompt / Titulo Ventana
+    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Personaje"), wxDefaultPosition, wxSize(300, 200));
+
+    wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+    wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+
+    vbox->Add(textCtrlF, 0, wxALL | wxEXPAND, 10);
+    vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
+    vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
+
+    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+    // Boton para cambiar el estado de Ok
+    wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+    okButton->Disable();
+
+    // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+    textCtrlS->Bind(wxEVT_TEXT, [okButton, textCtrlF, textCtrlS](wxCommandEvent &event)
+                    {
+                        wxString first_name = textCtrlF->GetValue();
+                        wxString surrname = textCtrlS->GetValue();
+
+                        if (first_name.IsEmpty() || surrname.IsEmpty())
+                        {
+                            okButton->Disable();
+                        }
+                        else
+                        {
+                            okButton->Enable();
+                        } });
+
+    dialog.SetSizer(vbox);
+
+    // Mostrar el cuadro de diálogo y obtener el resultado
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString first_name = textCtrlF->GetValue();
+        wxString last_name = textCtrlL->GetValue();
+        wxString surrname = textCtrlS->GetValue();
+
+        if (!first_name.IsEmpty() && !surrname.IsEmpty())
+        {
+            if (!checkCharacterExists(characters, first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString()))
+            {
+                nextNumber = firstEmpty(charactersArray);
+                charactersArray.push_back(nextNumber);
+
+                Character newCharacter(nextNumber, first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString());
+                characters.push_back(newCharacter);
+                // wxMessageBox(wxString::Format(wxT("Crear personaje Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+            }
+
+            else
+            {
+                wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                             "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+            }
+        }
+
+        else
+        {
+            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+        }
+    }
+}
+
+void MainWindow::OnCharacterEdit(wxCommandEvent &event)
+{
+}
+
+void MainWindow::OnCharacterDel(wxCommandEvent &event)
+{
 }
 
 //// CONTROL MSSG EVENTS ////
