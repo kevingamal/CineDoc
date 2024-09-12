@@ -1860,10 +1860,11 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
     wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
     okButton->Disable();
 
-    // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+    // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
     textCtrl->Bind(wxEVT_TEXT, [okButton, textCtrl](wxCommandEvent &event)
                    {
                         wxString title = textCtrl->GetValue();
+
                         if (title.IsEmpty())
                         {
                             okButton->Disable();
@@ -1879,6 +1880,7 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
     if (dialog.ShowModal() == wxID_OK)
     {
         wxString title = textCtrl->GetValue();
+
         if (!title.IsEmpty())
         {
             if (!checkTitleExists(scripts, title.ToStdString()))
@@ -1951,10 +1953,11 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
         okButton->Disable();
 
-        // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+        // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio o es el mismo
         textCtrl->Bind(wxEVT_TEXT, [okButton, textCtrl, comboBox](wxCommandEvent &event)
                        {
                         wxString editedTitle = textCtrl->GetValue();
+
                         if (editedTitle.IsEmpty() || comboBox->GetStringSelection() == editedTitle)
                         {
                             okButton->Disable();
@@ -1970,6 +1973,7 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
         if (dialog.ShowModal() == wxID_OK)
         {
             wxString editedTitle = textCtrl->GetValue();
+
             if (!editedTitle.IsEmpty())
             {
                 // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
@@ -2068,7 +2072,7 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
     wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
     okButton->Disable();
 
-    // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+    // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
     textCtrlS->Bind(wxEVT_TEXT, [okButton, textCtrlF, textCtrlS](wxCommandEvent &event)
                     {
                         wxString first_name = textCtrlF->GetValue();
@@ -2120,6 +2124,125 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
 
 void MainWindow::OnCharacterEdit(wxCommandEvent &event)
 {
+    if (!characters.empty()) // Si hay algo que editar (si no está vacío), editar
+    {
+        std::vector<int> CharactersIds;
+        wxArrayString firstNames;
+        wxArrayString lastNames;
+        wxArrayString surrnames;
+        wxArrayString fullnames;
+
+        for (const auto &character : characters)
+        {
+            firstNames.Add(character.first_name);
+            lastNames.Add(character.last_name);
+            surrnames.Add(character.surrname);
+
+            fullnames.Add(character.first_name + " " + character.last_name + " " + character.surrname);
+            CharactersIds.push_back(character.id); // El id dentro de cada script es un arreglo estatico, por eso el [0]
+        }
+
+        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Personaje"), wxDefaultPosition, wxSize(300, 200));
+
+        wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+
+        wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+
+        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(textCtrlF, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+
+        comboBox->SetSelection(0);          // Seleccionar el primer elemento
+        textCtrlF->SetValue(firstNames[0]); // Escribir el primer elemento en el cuadro de texto
+        textCtrlL->SetValue(lastNames[0]);  // Escribir el primer elemento en el cuadro de texto
+        textCtrlS->SetValue(surrnames[0]);  // Escribir el primer elemento en el cuadro de texto
+
+        // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
+
+                       {
+                           // textCtrl->SetValue(comboBox->GetStringSelection());
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
+                           textCtrlF->SetValue(firstNames[comboBox->GetSelection()]);
+                           textCtrlL->SetValue(lastNames[comboBox->GetSelection()]);
+                           textCtrlS->SetValue(surrnames[comboBox->GetSelection()]);
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
+                           // wxMessageBox(VectorToString(ScriptIds), "Contenido de ScriptIds", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(scriptTitles), "Contenido de scriptTitles", wxOK | wxICON_INFORMATION);
+                       }
+
+        );
+
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
+
+        // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+        textCtrlF->Bind(wxEVT_TEXT, [okButton, textCtrlF, textCtrlS, comboBox, firstNames, surrnames](wxCommandEvent &event)
+                        {
+                        wxString first_name = textCtrlF->GetValue();
+                        wxString surrname = textCtrlS->GetValue();
+
+                        if (first_name.IsEmpty() || surrname.IsEmpty() || firstNames[comboBox->GetSelection()] == first_name || surrnames[comboBox->GetSelection()] == surrname)
+                        {
+                            okButton->Disable();
+                        }
+                        else
+                        {
+                            okButton->Enable();
+                        } });
+
+        dialog.SetSizer(vbox);
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            wxString editedFirst_name = textCtrlF->GetValue();
+            wxString editedLast_name = textCtrlF->GetValue();
+            wxString editedSurrname = textCtrlS->GetValue();
+
+            if (!editedFirst_name.IsEmpty() && !editedSurrname.IsEmpty())
+            {
+                // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
+
+                if (firstNames[comboBox->GetSelection()] == editedFirst_name && lastNames[comboBox->GetSelection()] == editedLast_name && surrnames[comboBox->GetSelection()] == editedSurrname)
+                {
+                    wxMessageBox(wxT("No puede tener el mismo nombre!"), "Error", wxOK | wxICON_ERROR);
+                }
+
+                else
+                {
+                    if (!checkCharacterExists(characters, editedFirst_name.ToStdString(), editedLast_name.ToStdString(), editedSurrname.ToStdString()))
+                    {
+                        // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
+                        wxMessageBox(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                    }
+
+                    else
+                    {
+                        wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                                     "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+                    }
+                }
+            }
+
+            else
+            {
+                wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+            }
+        }
+    }
+
+    else // Si esta vacio (no hay nada que editar, error!)
+    {
+        wxMessageBox(wxT("Primero crea un personaje!!"), "Error", wxOK | wxICON_ERROR);
+    }
 }
 
 void MainWindow::OnCharacterDel(wxCommandEvent &event)
