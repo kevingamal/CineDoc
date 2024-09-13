@@ -2152,7 +2152,7 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
             surrnames.Add(character.surrname);
 
             fullnames.Add(character.first_name + " " + character.last_name + " " + character.surrname);
-            CharactersIds.push_back(character.id); // El id dentro de cada script es un arreglo estatico, por eso el [0]
+            CharactersIds.push_back(character.id);
         }
 
         wxDialog dialog(NULL, wxID_ANY, wxT("Editar Personaje"), wxDefaultPosition, wxDefaultSize);
@@ -2263,6 +2263,44 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
 
 void MainWindow::OnCharacterDel(wxCommandEvent &event)
 {
+    if (!characters.empty()) // Si hay algo que editar (si no está vacío), editar
+    {
+        std::vector<int> CharactersIds;
+        wxArrayString fullnames;
+
+        for (const auto &character : characters)
+        {
+            fullnames.Add(character.first_name + " " + character.last_name + " " + character.surrname);
+            CharactersIds.push_back(character.id);
+        }
+
+        wxDialog dialog(NULL, wxID_ANY, wxT("Eliminar Personaje"), wxDefaultPosition, wxDefaultSize);
+
+        wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
+
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+
+        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(vbox);
+        dialog.Fit();
+
+        comboBox->SetSelection(0); // Seleccionar el primer elemento
+
+        dialog.SetSizer(vbox);
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            wxMessageBox(wxString::Format(wxT("Eliminar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+        }
+    }
+
+    else // Si esta vacio (no hay nada que borrar, error!)
+    {
+        wxMessageBox(wxT("Primero crea un personaje!!"), "Error", wxOK | wxICON_ERROR);
+    }
 }
 
 //// CONTROL MSSG EVENTS ////
