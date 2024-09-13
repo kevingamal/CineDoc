@@ -1847,14 +1847,17 @@ void MainWindow::writeFile(const wxString &filename)
 void MainWindow::OnNewScript(wxCommandEvent &event)
 {
     // wxTextEntryDialog dialog(NULL, wxT("Ingrese el título del guión:"), wxT("Nuevo Guión")); // Prompt / Titulo Ventana
-    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Guión"), wxDefaultPosition, wxSize(300, 200));
+    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Guión"), wxDefaultPosition, wxDefaultSize);
 
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
     wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
 
     vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
-    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+    dialog.SetSizer(vbox);
+    dialog.Fit();
 
     // Boton para cambiar el estado de Ok
     wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
@@ -1920,7 +1923,7 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
             ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
         }
 
-        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxSize(300, 200));
+        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Guión"), wxDefaultPosition, wxDefaultSize);
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -1930,13 +1933,17 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
         vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
         vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(vbox);
+        dialog.Fit();
 
         comboBox->SetSelection(0);           // Seleccionar el primer elemento
         textCtrl->SetValue(scriptTitles[0]); // Escribir el primer elemento en el cuadro de texto
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
+        // comboBox->Bind(wxEVT_COMBOBOX, [&](wxCommandEvent &event)
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrl, scriptTitles, ScriptIds](wxCommandEvent &event)
 
                        {
                            textCtrl->SetValue(comboBox->GetStringSelection());
@@ -2025,14 +2032,17 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
             ScriptIds.push_back(script.id[0]); // El id dentro de cada script es un arreglo estatico, por eso el [0]
         }
 
-        wxDialog dialog(NULL, wxID_ANY, wxT("Eliminar Guión"), wxDefaultPosition, wxSize(300, 200));
+        wxDialog dialog(NULL, wxID_ANY, wxT("Eliminar Guión"), wxDefaultPosition, wxDefaultSize);
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
         wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
 
         vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(vbox);
+        dialog.Fit();
 
         comboBox->SetSelection(0); // Seleccionar el primer elemento
 
@@ -2054,7 +2064,7 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
 void MainWindow::OnNewCharacter(wxCommandEvent &event)
 {
     // wxTextEntryDialog dialog(NULL, wxT("Ingrese el nombre del personaje:"), wxT("Nuevo Personaje")); // Prompt / Titulo Ventana
-    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Personaje"), wxDefaultPosition, wxSize(300, 200));
+    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Personaje"), wxDefaultPosition, wxDefaultSize);
 
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -2066,7 +2076,10 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
     vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
     vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
 
-    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+    vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+    dialog.SetSizer(vbox);
+    dialog.Fit();
 
     // Boton para cambiar el estado de Ok
     wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
@@ -2142,7 +2155,7 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
             CharactersIds.push_back(character.id); // El id dentro de cada script es un arreglo estatico, por eso el [0]
         }
 
-        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Personaje"), wxDefaultPosition, wxSize(300, 200));
+        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Personaje"), wxDefaultPosition, wxDefaultSize);
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -2156,7 +2169,10 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         vbox->Add(textCtrlF, 0, wxALL | wxEXPAND, 10);
         vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
         vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxEXPAND, 10);
+        vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(vbox);
+        dialog.Fit();
 
         comboBox->SetSelection(0);          // Seleccionar el primer elemento
         textCtrlF->SetValue(firstNames[0]); // Escribir el primer elemento en el cuadro de texto
@@ -2164,17 +2180,17 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         textCtrlS->SetValue(surrnames[0]);  // Escribir el primer elemento en el cuadro de texto
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames, fullnames](wxCommandEvent &event)
 
                        {
                            // textCtrl->SetValue(comboBox->GetStringSelection());
-                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), comboBox->GetSelection()));
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), comboBox->GetSelection()));
                            textCtrlF->SetValue(firstNames[comboBox->GetSelection()]);
                            textCtrlL->SetValue(lastNames[comboBox->GetSelection()]);
                            textCtrlS->SetValue(surrnames[comboBox->GetSelection()]);
-                           // textCtrl->SetValue(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]));
-                           // wxMessageBox(VectorToString(ScriptIds), "Contenido de ScriptIds", wxOK | wxICON_INFORMATION);
-                           // wxMessageBox(ArrayStringToString(scriptTitles), "Contenido de scriptTitles", wxOK | wxICON_INFORMATION);
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
+                           // wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
                        }
 
         );
