@@ -2086,19 +2086,27 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
     okButton->Disable();
 
     // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
-    textCtrlS->Bind(wxEVT_TEXT, [okButton, textCtrlF, textCtrlS](wxCommandEvent &event)
-                    {
-                        wxString first_name = textCtrlF->GetValue();
-                        wxString surrname = textCtrlS->GetValue();
+    auto validateTextFields = [okButton, textCtrlF, textCtrlL, textCtrlS](wxCommandEvent &event)
+    {
+        wxString firstName = textCtrlF->GetValue();
+        wxString lastName = textCtrlL->GetValue();
+        wxString surrname = textCtrlS->GetValue();
 
-                        if (first_name.IsEmpty() || surrname.IsEmpty())
-                        {
-                            okButton->Disable();
-                        }
-                        else
-                        {
-                            okButton->Enable();
-                        } });
+        // Habilitar el botón solo si todos los campos no están vacíos
+        if (!firstName.IsEmpty() && !surrname.IsEmpty())
+        {
+            okButton->Enable();
+        }
+        else
+        {
+            okButton->Disable();
+        }
+    };
+
+    // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
+    textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
+    textCtrlL->Bind(wxEVT_TEXT, validateTextFields);
+    textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
 
     dialog.SetSizer(vbox);
 
@@ -2200,19 +2208,27 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         okButton->Disable();
 
         // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
-        textCtrlF->Bind(wxEVT_TEXT, [okButton, textCtrlF, textCtrlS, comboBox, firstNames, surrnames](wxCommandEvent &event)
-                        {
-                        wxString first_name = textCtrlF->GetValue();
-                        wxString surrname = textCtrlS->GetValue();
+        auto validateTextFields = [okButton, textCtrlF, textCtrlL, textCtrlS, comboBox, firstNames, lastNames, surrnames](wxCommandEvent &event)
+        {
+            wxString first_name = textCtrlF->GetValue();
+            wxString last_name = textCtrlL->GetValue();
+            wxString surrname = textCtrlS->GetValue();
 
-                        if (first_name.IsEmpty() || surrname.IsEmpty() || firstNames[comboBox->GetSelection()] == first_name || surrnames[comboBox->GetSelection()] == surrname)
-                        {
-                            okButton->Disable();
-                        }
-                        else
-                        {
-                            okButton->Enable();
-                        } });
+            // Si: (el primero no esta vacio Y el segundo no esta vacio) Y (el primero O el segundo O el tercero es diferente)
+            if ((!first_name.IsEmpty() && !surrname.IsEmpty()) && (firstNames[comboBox->GetSelection()] != first_name || lastNames[comboBox->GetSelection()] != last_name || surrnames[comboBox->GetSelection()] != surrname))
+            {
+                okButton->Enable();
+            }
+            else
+            {
+                okButton->Disable();
+            }
+        };
+
+        // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
+        textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlL->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
 
         dialog.SetSizer(vbox);
 
