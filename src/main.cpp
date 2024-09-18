@@ -13,6 +13,7 @@
 // Resto de los includes
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
+#include <wx/datectrl.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
 
@@ -42,9 +43,12 @@ enum
     ID_CHARACTER_NEW = 7,
     ID_CHARACTER_EDIT = 8,
     ID_CHARACTER_DEL = 9,
-    ID_Hello = 10,
+    ID_ACTOR_NEW = 10,
+    ID_ACTOR_EDIT = 11,
+    ID_ACTOR_DEL = 12,
+    ID_Hello = 13,
     // ID_ABOUT = 11,
-    ID_HELP = 11
+    ID_HELP = 14
 };
 
 std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
@@ -1349,9 +1353,9 @@ public:
 
         // MENU ACTOR
         wxMenu *menuActor = new wxMenu;
-        menuActor->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nuevo actor");
-        menuActor->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar actor");
-        menuActor->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar actor");
+        menuActor->Append(ID_ACTOR_NEW, "&Nuevo...", "Nuevo actor");
+        menuActor->Append(ID_ACTOR_EDIT, "&Editar...", "Editar actor");
+        menuActor->Append(ID_ACTOR_DEL, "&Eliminar...", "Eliminar actor");
 
         // MENU LOCACION
         wxMenu *menuLocation = new wxMenu;
@@ -1603,6 +1607,11 @@ private:
     void OnCharacterEdit(wxCommandEvent &event);
     void OnCharacterDel(wxCommandEvent &event);
 
+    // Actor Menu Events
+    void OnNewActor(wxCommandEvent &event);
+    void OnActorEdit(wxCommandEvent &event);
+    void OnActorDel(wxCommandEvent &event);
+
     //
     void OnAbout(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
@@ -1644,10 +1653,14 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
                                             EVT_MENU(ID_CHARACTER_EDIT, MainWindow::OnCharacterEdit)
                                                 EVT_MENU(ID_CHARACTER_DEL, MainWindow::OnCharacterDel)
 
-                                                    EVT_MENU(ID_HELP, MainWindow::OnAbout)
-                                                        EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
-                                                            wxEND_EVENT_TABLE()
-                                                                wxIMPLEMENT_APP(MyApp);
+                                                    EVT_MENU(ID_ACTOR_NEW, MainWindow::OnNewActor)
+                                                        EVT_MENU(ID_ACTOR_EDIT, MainWindow::OnActorEdit)
+                                                            EVT_MENU(ID_ACTOR_DEL, MainWindow::OnActorDel)
+
+                                                                EVT_MENU(ID_HELP, MainWindow::OnAbout)
+                                                                    EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
+                                                                        wxEND_EVENT_TABLE()
+                                                                            wxIMPLEMENT_APP(MyApp);
 
 // FILE MENU
 void MainWindow::OnNewFile(wxCommandEvent &event)
@@ -1843,6 +1856,7 @@ void MainWindow::writeFile(const wxString &filename)
 }
 
 //// UDMR EVENTS ////
+
 // SCRIPT MENU
 void MainWindow::OnNewScript(wxCommandEvent &event)
 {
@@ -1851,9 +1865,14 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
-    wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    // Texto descriptivo
+    wxStaticText *label = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el título:"), wxDefaultPosition, wxDefaultSize);
+    vbox->Add(label, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
 
-    vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
+    // Campo de texto
+    wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vbox->Add(textCtrl, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
     vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
     dialog.SetSizer(vbox);
@@ -1927,12 +1946,22 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
+        // Texto descriptivo
+        wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione el guión:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelSel, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
+
+        // Selector
         wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
+        vbox->Add(comboBox, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
 
+        // Texto descriptivo
+        wxStaticText *labelDesc = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el nuevo título:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelDesc, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+        // Campo de texto
         wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vbox->Add(textCtrl, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
 
-        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(textCtrl, 0, wxALL | wxEXPAND, 10);
         vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
         dialog.SetSizer(vbox);
@@ -2036,9 +2065,14 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
-        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
+        // Texto descriptivo
+        wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione el guión:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelSel, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
 
-        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        // Selector
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, scriptTitles, wxCB_READONLY);
+        vbox->Add(comboBox, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
         vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
         dialog.SetSizer(vbox);
@@ -2061,6 +2095,7 @@ void MainWindow::OnScriptDel(wxCommandEvent &event)
     }
 }
 
+// CHARACTER MENU
 void MainWindow::OnNewCharacter(wxCommandEvent &event)
 {
     // wxTextEntryDialog dialog(NULL, wxT("Ingrese el nombre del personaje:"), wxT("Nuevo Personaje")); // Prompt / Titulo Ventana
@@ -2068,13 +2103,29 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
 
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
-    wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    // Texto descriptivo
+    wxStaticText *labelFirst = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el primer nombre:"), wxDefaultPosition, wxDefaultSize);
+    vbox->Add(labelFirst, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
 
-    vbox->Add(textCtrlF, 0, wxALL | wxEXPAND, 10);
-    vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
-    vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
+    // Campo de texto
+    wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vbox->Add(textCtrlF, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
+    // Texto descriptivo
+    wxStaticText *labelLast = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el segundo nombre:"), wxDefaultPosition, wxDefaultSize);
+    vbox->Add(labelLast, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+    // Campo de texto
+    wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vbox->Add(textCtrlL, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
+    // Texto descriptivo
+    wxStaticText *labelSurr = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el apellido:"), wxDefaultPosition, wxDefaultSize);
+    vbox->Add(labelSurr, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+    // Campo de texto
+    wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vbox->Add(textCtrlS, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
 
     vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
@@ -2167,16 +2218,38 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
+        // Texto descriptivo
+        wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione el personaje:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelSel, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
+
+        // Selector
         wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        vbox->Add(comboBox, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
 
+        // Texto descriptivo
+        wxStaticText *labelFirst = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el primer nombre:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelFirst, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+        // Campo de texto
         wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-        wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-        wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vbox->Add(textCtrlF, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
 
-        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(textCtrlF, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(textCtrlL, 0, wxALL | wxEXPAND, 10);
-        vbox->Add(textCtrlS, 0, wxALL | wxEXPAND, 10);
+        // Texto descriptivo
+        wxStaticText *labelLast = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el segundo nombre:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelLast, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+        // Campo de texto
+        wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vbox->Add(textCtrlL, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
+        // Texto descriptivo
+        wxStaticText *labelSurr = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el apellido:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelSurr, 0, wxLEFT | wxRIGHT | wxTOP, 10); // Espacio arriba y a los lados, pero no abajo
+
+        // Campo de texto
+        wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vbox->Add(textCtrlS, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
         vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
         dialog.SetSizer(vbox);
@@ -2294,9 +2367,13 @@ void MainWindow::OnCharacterDel(wxCommandEvent &event)
 
         wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
-        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        // Texto descriptivo
+        wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione el personaje:"), wxDefaultPosition, wxDefaultSize);
+        vbox->Add(labelSel, 0, wxLEFT | wxRIGHT | wxTOP, 5); // Espacio arriba y a los lados, pero no abajo
 
-        vbox->Add(comboBox, 0, wxALL | wxEXPAND, 10);
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        vbox->Add(comboBox, 0, wxLEFT | wxRIGHT | wxTOP | wxEXPAND, 5); // Espacio abajo y a los lados, ligeramente arriba
+
         vbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
 
         dialog.SetSizer(vbox);
@@ -2319,8 +2396,20 @@ void MainWindow::OnCharacterDel(wxCommandEvent &event)
     }
 }
 
-//// CONTROL MSSG EVENTS ////
+// ACTOR MENU
+void MainWindow::OnNewActor(wxCommandEvent &event)
+{
+}
 
+void MainWindow::OnActorEdit(wxCommandEvent &event)
+{
+}
+
+void MainWindow::OnActorDel(wxCommandEvent &event)
+{
+}
+
+//// CONTROL MSSG EVENTS ////
 void MainWindow::OnUpdatePositionEvent(wxCommandEvent &event)
 {
     // wxLogMessage(wxT("Evento Position corriendo"));
@@ -2342,7 +2431,6 @@ void MainWindow::OnUpdateIndexEvent(wxCommandEvent &event)
 }
 
 // HELP MENU
-
 void MainWindow::OnAbout(wxCommandEvent &event)
 {
     wxMessageBox("This is CineDoc: An C++ and wxWidgets multiplattform App", // CONTENIDO VENTANA POP UP
