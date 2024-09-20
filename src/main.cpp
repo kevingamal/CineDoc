@@ -53,7 +53,9 @@ enum
 
 std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
 std::vector<int> tree;         // Vector para almacenar la sucesion de parentId actual
+
 std::vector<int> charactersArray;
+std::vector<int> actorsArray;
 
 // (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
 // Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
@@ -354,13 +356,13 @@ class Actor
 public:
     int id;
     int parentId;
-    int passport_id;
+    std::string passport_id;
     std::string first_name;
     std::string last_name;
     std::string surrname;
     std::string birthdate;
 
-    Actor(int parentId, int passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
+    Actor(int id, int parentId, std::string passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
         : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
 
     // Función de serialización
@@ -887,6 +889,20 @@ bool checkCharacterExists(const std::vector<Character> &characters, const std::s
     for (const auto &character : characters)
     {
         if (character.first_name == first_name && character.last_name == last_name && character.surrname == surrname)
+        {
+            return true; // El nombre ya existe
+        }
+    }
+    return false; // El nombre no existe
+}
+
+// ACTORS
+bool checkActorExists(const std::vector<Actor> &actors, const std::string &first_name, const std::string &surrname, const std::string &passport_id)
+{
+    // Recorrer el vector de personajes y comparar cada título con el título dado
+    for (const auto &actor : actors)
+    {
+        if (actor.first_name == first_name && actor.surrname == surrname && actor.passport_id == passport_id)
         {
             return true; // El nombre ya existe
         }
@@ -2140,14 +2156,13 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
     okButton->Disable();
 
     // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
-    auto validateTextFields = [okButton, textCtrlF, textCtrlL, textCtrlS](wxCommandEvent &event)
+    auto validateTextFields = [okButton, textCtrlF, textCtrlS](wxCommandEvent &event)
     {
-        wxString firstName = textCtrlF->GetValue();
-        wxString lastName = textCtrlL->GetValue();
+        wxString first_name = textCtrlF->GetValue();
         wxString surrname = textCtrlS->GetValue();
 
         // Habilitar el botón solo si todos los campos no están vacíos
-        if (!firstName.IsEmpty() && !surrname.IsEmpty())
+        if (!first_name.IsEmpty() && !surrname.IsEmpty())
         {
             okButton->Enable();
         }
@@ -2157,9 +2172,8 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
         }
     };
 
-    // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
+    // Vinculamos el evento a cualquier cambio en cualquiera de los 2 controles
     textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
-    textCtrlL->Bind(wxEVT_TEXT, validateTextFields);
     textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
 
     // Mostrar el cuadro de diálogo y obtener el resultado
@@ -2403,128 +2417,149 @@ void MainWindow::OnCharacterDel(wxCommandEvent &event)
 // ACTOR MENU
 void MainWindow::OnNewActor(wxCommandEvent &event)
 {
-    // wxTextEntryDialog dialog(NULL, wxT("Ingrese el nombre del actor:"), wxT("Nuevo Actor")); // Prompt / Titulo Ventana
-    wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Actor"), wxDefaultPosition, wxDefaultSize);
-
-    wxBoxSizer *vboxa = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *vboxb = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer *mbox = new wxBoxSizer(wxVERTICAL);
-
-    // Texto descriptivo
-    wxStaticText *labelFirst = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el primer nombre:"), wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(labelFirst, 0, wxTOP, 5); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(textCtrlF, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    // Texto descriptivo
-    wxStaticText *labelLast = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el segundo nombre:"), wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(labelLast, 0, wxTOP, 10); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(textCtrlL, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    // Texto descriptivo
-    wxStaticText *labelSurr = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el apellido:"), wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(labelSurr, 0, wxTOP, 10); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxa->Add(textCtrlS, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    // Texto descriptivo
-    wxStaticText *labelPass = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el ID / Nº de Pasaporte:"), wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(labelPass, 0, wxTOP, 5); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlP = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(textCtrlP, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    // Texto descriptivo
-    wxStaticText *labelDate = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la fecha de nacimiento:"), wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(labelDate, 0, wxTOP, 10); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlD = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(textCtrlD, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    // Texto descriptivo
-    wxStaticText *labelRol = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el papel:"), wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(labelRol, 0, wxTOP, 10); // Espacio arriba
-
-    // Campo de texto
-    wxTextCtrl *textCtrlR = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
-    vboxb->Add(textCtrlR, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
-
-    hbox->Add(vboxa, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxa ocupa parte de hbox
-    hbox->Add(vboxb, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxb ocupa parte de hbox
-    mbox->Add(hbox, 1, wxLEFT | wxRIGHT | wxEXPAND, 10);
-
-    mbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
-
-    dialog.SetSizer(mbox);
-    dialog.Fit();
-
-    // Boton para cambiar el estado de Ok
-    wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
-    okButton->Disable();
-
-    // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
-    auto validateTextFields = [okButton, textCtrlF, textCtrlL, textCtrlS](wxCommandEvent &event)
+    if (!characters.empty()) // Si hay algo que asignar (si no está vacío), crear
     {
-        wxString firstName = textCtrlF->GetValue();
-        wxString lastName = textCtrlL->GetValue();
-        wxString surrname = textCtrlS->GetValue();
+        std::vector<int> CharactersIds;
+        wxArrayString fullnames;
 
-        // Habilitar el botón solo si todos los campos no están vacíos
-        if (!firstName.IsEmpty() && !surrname.IsEmpty())
+        for (const auto &character : characters)
         {
-            okButton->Enable();
+            fullnames.Add(character.first_name + " " + character.last_name + " " + character.surrname);
+            CharactersIds.push_back(character.id);
         }
-        else
+
+        wxDialog dialog(NULL, wxID_ANY, wxT("Nuevo Actor"), wxDefaultPosition, wxDefaultSize);
+
+        wxBoxSizer *vboxa = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *vboxb = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+        wxBoxSizer *mbox = new wxBoxSizer(wxVERTICAL);
+
+        // Texto descriptivo
+        wxStaticText *labelFirst = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el primer nombre:"), wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(labelFirst, 0, wxTOP, 5); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(textCtrlF, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelLast = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el segundo nombre:"), wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(labelLast, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlL = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(textCtrlL, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelSurr = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el apellido:"), wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(labelSurr, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlS = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(textCtrlS, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelPass = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el ID / Nº de Pasaporte:"), wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(labelPass, 0, wxTOP, 5); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlP = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(textCtrlP, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelDate = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la fecha de nacimiento:"), wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(labelDate, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlD = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(textCtrlD, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelRol = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el papel:"), wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(labelRol, 0, wxTOP, 10); // Espacio arriba
+
+        // Selector
+        wxComboBox *comboBoxRol = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        vboxb->Add(comboBoxRol, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        hbox->Add(vboxa, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxa ocupa parte de hbox
+        hbox->Add(vboxb, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxb ocupa parte de hbox
+        mbox->Add(hbox, 1, wxLEFT | wxRIGHT | wxEXPAND, 10);
+
+        mbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(mbox);
+        dialog.Fit();
+
+        comboBoxRol->SetSelection(0);
+
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
+
+        // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
+        auto validateTextFields = [okButton, textCtrlF, textCtrlS, textCtrlP](wxCommandEvent &event)
         {
-            okButton->Disable();
-        }
-    };
+            wxString firstName = textCtrlF->GetValue();
+            wxString surrname = textCtrlS->GetValue();
+            wxString passport = textCtrlP->GetValue();
 
-    // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
-    textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
-    textCtrlL->Bind(wxEVT_TEXT, validateTextFields);
-    textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
-
-    // Mostrar el cuadro de diálogo y obtener el resultado
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxString first_name = textCtrlF->GetValue();
-        wxString last_name = textCtrlL->GetValue();
-        wxString surrname = textCtrlS->GetValue();
-
-        if (!first_name.IsEmpty() && !surrname.IsEmpty())
-        {
-            if (!checkCharacterExists(characters, first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString()))
+            // Habilitar el botón solo si todos los campos no están vacíos
+            if (!firstName.IsEmpty() && !surrname.IsEmpty() && !passport.IsEmpty())
             {
-                nextNumber = firstEmpty(charactersArray);
-                charactersArray.push_back(nextNumber);
+                okButton->Enable();
+            }
+            else
+            {
+                okButton->Disable();
+            }
+        };
 
-                Character newCharacter(nextNumber, first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString());
-                characters.push_back(newCharacter);
-                // wxMessageBox(wxString::Format(wxT("Crear personaje Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+        // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
+        textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlP->Bind(wxEVT_TEXT, validateTextFields);
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            int parent_id = CharactersIds[comboBoxRol->GetSelection()];
+            wxString passport = textCtrlS->GetValue();
+            wxString first_name = textCtrlF->GetValue();
+            wxString last_name = textCtrlL->GetValue();
+            wxString surrname = textCtrlS->GetValue();
+            wxString birth_date = textCtrlD->GetValue();
+
+            if (!first_name.IsEmpty() && !surrname.IsEmpty() && !passport.IsEmpty())
+            {
+                if (!checkActorExists(actors, first_name.ToStdString(), surrname.ToStdString(), passport.ToStdString()))
+                {
+                    nextNumber = firstEmpty(actorsArray);
+                    actorsArray.push_back(nextNumber);
+
+                    Actor newActor(nextNumber, parent_id, passport.ToStdString(), first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString(), birth_date.ToStdString());
+                    actors.push_back(newActor);
+                    // wxMessageBox(wxString::Format(wxT("Crear personaje Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+                }
+
+                else
+                {
+                    wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                                 "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+                }
             }
 
             else
             {
-                wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
-                             "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+                wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
             }
         }
+    }
 
-        else
-        {
-            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
-        }
+    else // Si esta vacio (no hay nada que asignar, error!)
+    {
+        wxMessageBox(wxT("Primero crea un personaje!!"), "Error", wxOK | wxICON_ERROR);
     }
 }
 
