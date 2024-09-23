@@ -14,6 +14,7 @@
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
 #include <wx/datectrl.h>
+#include <wx/dateevt.h>
 #include <wx/button.h>
 #include <wx/stattext.h>
 
@@ -897,12 +898,12 @@ bool checkCharacterExists(const std::vector<Character> &characters, const std::s
 }
 
 // ACTORS
-bool checkActorExists(const std::vector<Actor> &actors, const std::string &first_name, const std::string &surrname, const std::string &passport_id)
+bool checkPassportExists(const std::vector<Actor> &actors, const std::string &passport_id)
 {
     // Recorrer el vector de personajes y comparar cada título con el título dado
     for (const auto &actor : actors)
     {
-        if (actor.first_name == first_name && actor.surrname == surrname && actor.passport_id == passport_id)
+        if (actor.passport_id == passport_id)
         {
             return true; // El nombre ya existe
         }
@@ -2278,9 +2279,12 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         textCtrlL->SetValue(lastNames[0]);  // Escribir el primer elemento en el cuadro de texto
         textCtrlS->SetValue(surrnames[0]);  // Escribir el primer elemento en el cuadro de texto
 
-        // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
 
+        // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, okButton, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
                        {
                            // textCtrl->SetValue(comboBox->GetStringSelection());
                            // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), comboBox->GetSelection()));
@@ -2290,13 +2294,9 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
                            // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
                            // wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
                            // wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
-                       }
+                           okButton->Disable(); }
 
         );
-
-        // Boton para cambiar el estado de Ok
-        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
-        okButton->Disable();
 
         // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
         auto validateTextFields = [okButton, comboBox, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
@@ -2471,15 +2471,15 @@ void MainWindow::OnNewActor(wxCommandEvent &event)
         wxStaticText *labelDate = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la fecha de nacimiento:"), wxDefaultPosition, wxDefaultSize);
         vboxb->Add(labelDate, 0, wxTOP, 10); // Espacio arriba
 
-        // Campo de texto
-        wxTextCtrl *textCtrlD = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        // Campo de fecha
+        wxDatePickerCtrl *textCtrlD = new wxDatePickerCtrl(&dialog, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT);
         vboxb->Add(textCtrlD, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
 
         // Texto descriptivo
         wxStaticText *labelRol = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el papel:"), wxDefaultPosition, wxDefaultSize);
         vboxb->Add(labelRol, 0, wxTOP, 10); // Espacio arriba
 
-        // Selector
+        // Selector de personaje
         wxComboBox *comboBoxRol = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
         vboxb->Add(comboBoxRol, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
 
@@ -2529,11 +2529,11 @@ void MainWindow::OnNewActor(wxCommandEvent &event)
             wxString first_name = textCtrlF->GetValue();
             wxString last_name = textCtrlL->GetValue();
             wxString surrname = textCtrlS->GetValue();
-            wxString birth_date = textCtrlD->GetValue();
+            wxString birth_date = textCtrlD->GetValue().FormatISODate();
 
             if (!passport.IsEmpty() && !first_name.IsEmpty() && !surrname.IsEmpty())
             {
-                if (!checkActorExists(actors, first_name.ToStdString(), surrname.ToStdString(), passport.ToStdString()))
+                if (!checkPassportExists(actors, passport.ToStdString()))
                 {
                     nextNumber = firstEmpty(actorsArray);
                     actorsArray.push_back(nextNumber);
@@ -2545,7 +2545,7 @@ void MainWindow::OnNewActor(wxCommandEvent &event)
 
                 else
                 {
-                    wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                    wxMessageBox("Ese pasaporte ya existe",     // CONTENIDO VENTANA POP UP
                                  "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
                 }
             }
@@ -2650,16 +2650,16 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
         wxStaticText *labelDate = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la fecha de nacimiento:"), wxDefaultPosition, wxDefaultSize);
         vboxb->Add(labelDate, 0, wxTOP, 10); // Espacio arriba
 
-        // Campo de texto
-        wxTextCtrl *textCtrlD = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        // Campo de fecha
+        wxDatePickerCtrl *textCtrlD = new wxDatePickerCtrl(&dialog, wxID_ANY, wxDefaultDateTime, wxDefaultPosition, wxDefaultSize, wxDP_DEFAULT);
         vboxb->Add(textCtrlD, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
 
         // Texto descriptivo
         wxStaticText *labelRol = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el papel:"), wxDefaultPosition, wxDefaultSize);
         vboxb->Add(labelRol, 0, wxTOP, 10); // Espacio arriba
 
-        // Selector
-        wxComboBox *comboBoxRol = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        // Selector de personaje
+        wxComboBox *comboBoxRol = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, charactersFullNames, wxCB_READONLY);
         vboxb->Add(comboBoxRol, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
 
         hbox->Add(vboxa, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxa ocupa parte de hbox
@@ -2676,11 +2676,23 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
         textCtrlF->SetValue(firstNames[0]); // Escribir el primer elemento en el cuadro de texto
         textCtrlL->SetValue(lastNames[0]);  // Escribir el primer elemento en el cuadro de texto
         textCtrlS->SetValue(surrnames[0]);  // Escribir el primer elemento en el cuadro de texto
-        textCtrlD->SetValue(birthDates[0]); // Escribir el primer elemento en el cuadro de texto
+
+        wxDateTime tempDate;
+        if (tempDate.ParseISODate(birthDates[0]))
+        {
+            textCtrlD->SetValue(tempDate);
+        }
+        else
+        {
+            textCtrlD->SetValue(wxDefaultDateTime);
+        }
+
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, textCtrlP, textCtrlF, textCtrlL, textCtrlS, textCtrlD, passports, firstNames, lastNames, surrnames, birthDates](wxCommandEvent &event)
-
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, okButton, textCtrlP, textCtrlF, textCtrlL, textCtrlS, textCtrlD, passports, firstNames, lastNames, surrnames, birthDates](wxCommandEvent &event)
                        {
                            // textCtrl->SetValue(comboBox->GetStringSelection());
                            // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), comboBox->GetSelection()));
@@ -2688,17 +2700,22 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
                            textCtrlF->SetValue(firstNames[comboBox->GetSelection()]);
                            textCtrlL->SetValue(lastNames[comboBox->GetSelection()]);
                            textCtrlS->SetValue(surrnames[comboBox->GetSelection()]);
-                           textCtrlD->SetValue(birthDates[comboBox->GetSelection()]);
-                           // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
-                           // wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
-                           // wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
-                       }
+
+                           wxDateTime tempDate;
+                           if (tempDate.ParseISODate(birthDates[comboBox->GetSelection()]))
+                           {
+                               textCtrlD->SetValue(tempDate);
+                           }
+                           else
+                           {
+                               textCtrlD->SetValue(wxDefaultDateTime);
+                           }
+                           //  textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
+                           //  wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
+                           //  wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
+                           okButton->Disable(); }
 
         );
-
-        // Boton para cambiar el estado de Ok
-        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
-        okButton->Disable();
 
         // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
         auto validateTextFields = [okButton, comboBox, textCtrlP, textCtrlF, textCtrlL, textCtrlS, textCtrlD, passports, firstNames, lastNames, surrnames, birthDates](wxCommandEvent &event)
@@ -2707,10 +2724,13 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
             wxString first_name = textCtrlF->GetValue();
             wxString last_name = textCtrlL->GetValue();
             wxString surrname = textCtrlS->GetValue();
-            wxString birthdate = textCtrlD->GetValue();
+            wxDateTime birth_date;
+
+            birth_date.ParseISODate(birthDates[comboBox->GetSelection()]);
+            bool dateChanged = textCtrlD->GetValue() != birth_date;
 
             // Si: (el primero no esta vacio Y el segundo no esta vacio Y el tercero no esta vacio) Y (el primero O el segundo O el tercero es diferente)
-            if ((!passport.IsEmpty() && !first_name.IsEmpty() && !surrname.IsEmpty()) && (passports[comboBox->GetSelection()] != passport || firstNames[comboBox->GetSelection()] != first_name || lastNames[comboBox->GetSelection()] != last_name || surrnames[comboBox->GetSelection()] != surrname || birthDates[comboBox->GetSelection()] != birthdate))
+            if ((!passport.IsEmpty() && !first_name.IsEmpty() && !surrname.IsEmpty()) && (passports[comboBox->GetSelection()] != passport || firstNames[comboBox->GetSelection()] != first_name || lastNames[comboBox->GetSelection()] != last_name || surrnames[comboBox->GetSelection()] != surrname || dateChanged))
             {
                 okButton->Enable();
             }
@@ -2725,7 +2745,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
         textCtrlF->Bind(wxEVT_TEXT, validateTextFields);
         textCtrlL->Bind(wxEVT_TEXT, validateTextFields);
         textCtrlS->Bind(wxEVT_TEXT, validateTextFields);
-        textCtrlD->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlD->Bind(wxEVT_DATE_CHANGED, validateTextFields);
 
         // Mostrar el cuadro de diálogo y obtener el resultado
         if (dialog.ShowModal() == wxID_OK)
@@ -2734,7 +2754,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
             wxString editedFirst_name = textCtrlF->GetValue();
             wxString editedLast_name = textCtrlF->GetValue();
             wxString editedSurrname = textCtrlS->GetValue();
-            wxString editedDate = textCtrlD->GetValue();
+            wxString editedDate = textCtrlD->GetValue().FormatISODate();
 
             if (!editedFirst_name.IsEmpty() && !editedSurrname.IsEmpty() && !editedPassport.IsEmpty())
             {
@@ -2747,7 +2767,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
                 else
                 {
-                    if (!checkActorExists(actors, editedFirst_name.ToStdString(), editedSurrname.ToStdString(), editedPassport.ToStdString()))
+                    if (!checkPassportExists(actors, editedPassport.ToStdString()))
                     {
                         // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
                         wxMessageBox(wxString::Format(wxT("Editar actor Id Nº: %d"), ActorsIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
@@ -2755,7 +2775,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
                     else
                     {
-                        wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                        wxMessageBox("Ese pasaporte ya existe",     // CONTENIDO VENTANA POP UP
                                      "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
                     }
                 }
