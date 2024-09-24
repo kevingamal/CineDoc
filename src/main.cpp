@@ -187,6 +187,8 @@ public:
     std::string title;
     std::string plain_text;
 
+    Script() {}
+
     Script(std::vector<int> id, std::string title, std::string plain_text)
         : id(id), title(title), plain_text(plain_text) {}
 
@@ -208,6 +210,8 @@ public:
     int time;
     std::string plain_text;
     int position;
+
+    Scene() {}
 
     Scene(int idTail, std::vector<int> parentId, std::string plain_text, int position)
         : parentId(parentId), plain_text(plain_text), position(position)
@@ -245,6 +249,8 @@ public:
     std::string floor_plan;
     int position;
 
+    Take() {}
+
     Take(int idTail, std::vector<int> parentId, std::string description, int position)
         : parentId(parentId), description(description), position(position)
     {
@@ -272,6 +278,8 @@ public:
     int objectId;
     int position;
 
+    Use_case() {}
+
     Use_case(int idTail, std::vector<int> parentId, int actorId, int objectId, int position)
         : parentId(parentId), actorId(actorId), objectId(objectId), position(position)
     {
@@ -294,6 +302,8 @@ public:
     std::vector<int> parentId; // Relaciona objetos con tomas
     int objectId;
     int position;
+
+    Tech_use() {}
 
     Tech_use(int idTail, std::vector<int> parentId, int objectId, int position)
         : parentId(parentId), objectId(objectId), position(position)
@@ -318,6 +328,8 @@ public:
     int type;
     int position;
 
+    Event() {}
+
     Event(int idTail, std::vector<int> parentId, int type, int position)
         : parentId(parentId), type(type), position(position)
     {
@@ -341,6 +353,8 @@ public:
     std::string last_name;
     std::string surrname;
 
+    Character() {}
+
     Character(int id, std::string first_name, std::string last_name, std::string surrname)
         : id(id), first_name(first_name), last_name(last_name), surrname(surrname) {}
 
@@ -363,6 +377,8 @@ public:
     std::string surrname;
     std::string birthdate;
 
+    Actor() {}
+
     Actor(int id, int parentId, std::string passport_id, std::string first_name, std::string last_name, std::string surrname, std::string birthdate)
         : id(id), parentId(parentId), passport_id(passport_id), first_name(first_name), last_name(last_name), surrname(surrname), birthdate(birthdate) {}
 
@@ -383,6 +399,8 @@ public:
     std::string phone;
     std::string hospital;
     std::string parking;
+
+    Location() {}
 
     Location(std::string name, std::string adress)
         : name(name), adress(adress) {}
@@ -405,6 +423,8 @@ public:
     std::string name;
     std::string description;
     std::string type;
+
+    Object() {}
 
     Object(std::string name, std::string description, std::string type)
         : name(name), description(description), type(type) {}
@@ -1341,7 +1361,8 @@ public:
     MainWindow(const wxString &title, const wxPoint &pos, const wxSize &size)
         : wxFrame(NULL, wxID_ANY, title, pos, size), leftTextBox(nullptr)
     {
-        SetBackgroundColour(wxColour(255, 255, 255));
+        // SetBackgroundColour(wxColour(255, 255, 255));
+
         // MENU PROYECTO
         wxMenu *menuProject = new wxMenu;
         // nombreMenu->añadir(EVENTO, "nombreItem\KeyShortcut", "mssg to statusbar")//
@@ -1432,7 +1453,7 @@ public:
                                      wxDefaultPosition, wxDefaultSize,
                                      wxTE_MULTILINE, wxDefaultValidator, "leftTextBox");
 
-        leftTextBox->Enable(false);
+        leftTextBox->Enable(true);
 
         // leftTextBox->Clear();
         // wxString allText = leftTextBox->GetValue();
@@ -1612,6 +1633,7 @@ private:
     void OnSaveAsFile(wxCommandEvent &event);
     void OnCloseFile(wxCommandEvent &event);
     void writeFile(const wxString &filename);
+    void readFile(const wxString &filename);
     void OnExit(wxCommandEvent &event);
 
     // Script Menu Events
@@ -1710,7 +1732,7 @@ void MainWindow::OnOpenFile(wxCommandEvent &event)
     // El usuario seleccionó un archivo, actualiza la variable filename
     filename = openFileDialog.GetPath();
 
-    // Se llama a la futura funcion openFile();
+    readFile(filename);
 
     mod = false;
     opf = true;
@@ -1862,13 +1884,43 @@ void MainWindow::OnExit(wxCommandEvent &event)
     // Close(true);
 }
 
+void MainWindow::readFile(const wxString &filename)
+{
+    std::ifstream in_fs(filename.ToStdString()); // Convierte wxString a std::string
+    boost::archive::text_iarchive inArchive(in_fs);
+
+    inArchive >> scripts;
+    inArchive >> scenes;
+    inArchive >> takes;
+
+    inArchive >> use_cases;
+    inArchive >> tech_uses;
+    inArchive >> events;
+
+    inArchive >> characters;
+    inArchive >> actors;
+    inArchive >> locations;
+    inArchive >> objects;
+}
+
 void MainWindow::writeFile(const wxString &filename)
 {
     std::ofstream out_fs(filename.ToStdString()); // Convierte wxString a std::string
     boost::archive::text_oarchive outArchive(out_fs);
+
     outArchive << scripts;
     outArchive << scenes;
     outArchive << takes;
+
+    outArchive << use_cases;
+    outArchive << tech_uses;
+    outArchive << events;
+
+    outArchive << characters;
+    outArchive << actors;
+    outArchive << locations;
+    outArchive << objects;
+
     out_fs.close();
 }
 
