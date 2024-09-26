@@ -474,6 +474,34 @@ bool checkTitleExists(const std::vector<Script> &scripts, const std::string &tit
     return false; // El título no existe
 }
 
+void updateScript(std::vector<Script> &scripts, const Script &updatedScript, bool updateTitle = true, bool updatePlainText = true)
+{
+    // Buscar el Script que tiene el mismo primer valor en id
+    auto it = std::find_if(scripts.begin(), scripts.end(), [&](const Script &script)
+                           { return !script.id.empty() && script.id[0] == updatedScript.id[0]; });
+
+    if (it != scripts.end())
+    {
+        // Actualizar solo si updateTitle es verdadero
+        if (updateTitle)
+        {
+            it->title = updatedScript.title;
+        }
+
+        // Actualizar solo si updatePlainText es verdadero
+        if (updatePlainText)
+        {
+            it->plain_text = updatedScript.plain_text;
+        }
+
+        std::cout << "Script actualizado correctamente." << std::endl;
+    }
+    else
+    {
+        std::cout << "No se encontró un Script con el ID especificado." << std::endl;
+    }
+}
+
 // SCENES
 void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
 {
@@ -915,6 +943,40 @@ bool checkCharacterExists(const std::vector<Character> &characters, const std::s
         }
     }
     return false; // El nombre no existe
+}
+
+void updateCharacter(std::vector<Character> &characters, const Character &updatedCharacter, bool updateFirstName = true, bool updateLastName = true, bool updateSurrname = true)
+{
+    // Buscar el Character que tiene el mismo id
+    auto it = std::find_if(characters.begin(), characters.end(), [&](const Character &character)
+                           { return character.id == updatedCharacter.id; });
+
+    if (it != characters.end())
+    {
+        // Actualizar solo si updateFirstName es verdadero
+        if (updateFirstName)
+        {
+            it->first_name = updatedCharacter.first_name;
+        }
+
+        // Actualizar solo si updateLastName es verdadero
+        if (updateLastName)
+        {
+            it->last_name = updatedCharacter.last_name;
+        }
+
+        // Actualizar solo si updateSurrname es verdadero
+        if (updateSurrname)
+        {
+            it->surrname = updatedCharacter.surrname;
+        }
+
+        std::cout << "Character actualizado correctamente." << std::endl;
+    }
+    else
+    {
+        std::cout << "No se encontró un Character con el ID especificado." << std::endl;
+    }
 }
 
 // ACTORS
@@ -1982,7 +2044,9 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
                 Script newScript({nextNumber}, title.ToStdString(), title.ToStdString());
                 scripts.push_back(newScript);
+
                 // wxMessageBox(wxString::Format(wxT("Crear guión Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+                mod = true;
             }
 
             else
@@ -2094,8 +2158,11 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
                 {
                     if (!checkTitleExists(scripts, editedTitle.ToStdString()))
                     {
-                        // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
-                        wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        Script updatedScript({ScriptIds[comboBox->GetSelection()]}, editedTitle.ToStdString(), "");
+                        updateScript(scripts, updatedScript, true, false); // (Arreglo, elementoActualizado, titulo, texto)
+
+                        // wxMessageBox(wxString::Format(wxT("Editar guión Id Nº: %d"), ScriptIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        mod = true;
                     }
 
                     else
@@ -2245,7 +2312,9 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
 
                 Character newCharacter(nextNumber, first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString());
                 characters.push_back(newCharacter);
+
                 // wxMessageBox(wxString::Format(wxT("Crear personaje Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+                mod = true;
             }
 
             else
@@ -2336,7 +2405,7 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         okButton->Disable();
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, okButton, textCtrlF, textCtrlL, textCtrlS, firstNames, lastNames, surrnames](wxCommandEvent &event)
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, okButton, textCtrlF, textCtrlL, textCtrlS, CharactersIds, firstNames, lastNames, surrnames](wxCommandEvent &event)
                        {
                            // textCtrl->SetValue(comboBox->GetStringSelection());
                            // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), comboBox->GetSelection()));
@@ -2345,7 +2414,9 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
                            textCtrlS->SetValue(surrnames[comboBox->GetSelection()]);
                            // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
                            // wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
-                           // wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(firstNames), "Contenido de firstNames", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(lastNames), "Contenido de lastNames", wxOK | wxICON_INFORMATION);
+                           // wxMessageBox(ArrayStringToString(surrnames), "Contenido de surrnames", wxOK | wxICON_INFORMATION);
                            okButton->Disable(); }
 
         );
@@ -2377,7 +2448,7 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
         if (dialog.ShowModal() == wxID_OK)
         {
             wxString editedFirst_name = textCtrlF->GetValue();
-            wxString editedLast_name = textCtrlF->GetValue();
+            wxString editedLast_name = textCtrlL->GetValue();
             wxString editedSurrname = textCtrlS->GetValue();
 
             if (!editedFirst_name.IsEmpty() && !editedSurrname.IsEmpty())
@@ -2393,8 +2464,11 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
                 {
                     if (!checkCharacterExists(characters, editedFirst_name.ToStdString(), editedLast_name.ToStdString(), editedSurrname.ToStdString()))
                     {
-                        // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
-                        wxMessageBox(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        Character updatedCharacter(CharactersIds[comboBox->GetSelection()], editedFirst_name.ToStdString(), editedLast_name.ToStdString(), editedSurrname.ToStdString());
+                        updateCharacter(characters, updatedCharacter, true, true, true); // (Arreglo, elementoActualizado, pNombre, sNombre, apellido)
+
+                        // wxMessageBox(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        mod = true;
                     }
 
                     else
