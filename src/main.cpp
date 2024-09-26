@@ -980,17 +980,71 @@ void updateCharacter(std::vector<Character> &characters, const Character &update
 }
 
 // ACTORS
-bool checkPassportExists(const std::vector<Actor> &actors, const std::string &passport_id)
+bool checkPassportExists(const std::vector<Actor> &actors, const std::string &passport_id, int excludeId)
 {
-    // Recorrer el vector de personajes y comparar cada título con el título dado
+    // Recorrer el vector de actores y comparar cada pasaporte, excepto el que tiene el id definido
     for (const auto &actor : actors)
     {
+        // Omitir la comparación si el id del actor coincide con el id a excluir
+        if (actor.id == excludeId)
+        {
+            continue;
+        }
+
+        // Verificar si el pasaporte coincide
         if (actor.passport_id == passport_id)
         {
-            return true; // El nombre ya existe
+            return true; // El pasaporte ya existe
         }
     }
-    return false; // El nombre no existe
+    return false; // El pasaporte no existe
+}
+
+void updateActor(std::vector<Actor> &actors, const Actor &updatedActor, bool updateParentId = true, bool updatePassportId = true, bool updateFirstName = true, bool updateLastName = true, bool updateSurrname = true, bool updateBirthdate = true)
+{
+    // Buscar el Actor que tiene el mismo id
+    auto it = std::find_if(actors.begin(), actors.end(), [&](const Actor &actor)
+                           { return actor.id == updatedActor.id; });
+
+    if (it != actors.end())
+    {
+        // Actualizar solo si los booleanos son verdaderos
+        if (updateParentId)
+        {
+            it->parentId = updatedActor.parentId;
+        }
+
+        if (updatePassportId)
+        {
+            it->passport_id = updatedActor.passport_id;
+        }
+
+        if (updateFirstName)
+        {
+            it->first_name = updatedActor.first_name;
+        }
+
+        if (updateLastName)
+        {
+            it->last_name = updatedActor.last_name;
+        }
+
+        if (updateSurrname)
+        {
+            it->surrname = updatedActor.surrname;
+        }
+
+        if (updateBirthdate)
+        {
+            it->birthdate = updatedActor.birthdate;
+        }
+
+        std::cout << "Actor actualizado correctamente." << std::endl;
+    }
+    else
+    {
+        std::cout << "No se encontró un Actor con el ID especificado." << std::endl;
+    }
 }
 
 // CONTROLS CLASSES
@@ -2656,12 +2710,12 @@ void MainWindow::OnNewActor(wxCommandEvent &event)
             wxString last_name = textCtrlL->GetValue();
             wxString surrname = textCtrlS->GetValue();
             wxString birth_date = textCtrlD->GetValue().FormatISODate();
+            nextNumber = firstEmpty(actorsArray);
 
             if (!passport.IsEmpty() && !first_name.IsEmpty() && !surrname.IsEmpty())
             {
-                if (!checkPassportExists(actors, passport.ToStdString()))
+                if (!checkPassportExists(actors, passport.ToStdString(), nextNumber))
                 {
-                    nextNumber = firstEmpty(actorsArray);
                     actorsArray.push_back(nextNumber);
 
                     Actor newActor(nextNumber, parent_id, passport.ToStdString(), first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString(), birth_date.ToStdString());
@@ -2889,25 +2943,27 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
         {
             wxString editedPassport = textCtrlP->GetValue();
             wxString editedFirst_name = textCtrlF->GetValue();
-            wxString editedLast_name = textCtrlF->GetValue();
+            wxString editedLast_name = textCtrlL->GetValue();
             wxString editedSurrname = textCtrlS->GetValue();
             wxString editedDate = textCtrlD->GetValue().FormatISODate();
+            int editedParent_id = CharactersIds[comboBoxRol->GetSelection()];
 
             if (!editedFirst_name.IsEmpty() && !editedSurrname.IsEmpty() && !editedPassport.IsEmpty())
             {
-                // selectedTitle = comboBox->GetStringSelection(); // Si no cambiamos y dejamos el primero
-
-                if (passports[comboBox->GetSelection()] == editedPassport && firstNames[comboBox->GetSelection()] == editedFirst_name && lastNames[comboBox->GetSelection()] == editedLast_name && surrnames[comboBox->GetSelection()] == editedSurrname && birthDates[comboBox->GetSelection()] == editedDate)
+                if (passports[comboBox->GetSelection()] == editedPassport && firstNames[comboBox->GetSelection()] == editedFirst_name && lastNames[comboBox->GetSelection()] == editedLast_name && surrnames[comboBox->GetSelection()] == editedSurrname && birthDates[comboBox->GetSelection()] == editedDate && ActorsParentsIds[comboBox->GetSelection()] == editedParent_id)
                 {
-                    wxMessageBox(wxT("No puede los mismos datos!"), "Error", wxOK | wxICON_ERROR);
+                    wxMessageBox(wxT("No puede tener los mismos datos!"), "Error", wxOK | wxICON_ERROR);
                 }
 
                 else
                 {
-                    if (!checkPassportExists(actors, editedPassport.ToStdString()))
+                    if (!checkPassportExists(actors, editedPassport.ToStdString(), ActorsIds[comboBox->GetSelection()]))
                     {
-                        // wxMessageBox(wxT("Así funciona"), "Ok", wxOK | wxICON_ERROR);
-                        wxMessageBox(wxString::Format(wxT("Editar actor Id Nº: %d"), ActorsIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        Actor updatedActor(ActorsIds[comboBox->GetSelection()], editedParent_id, editedPassport.ToStdString(), editedFirst_name.ToStdString(), editedLast_name.ToStdString(), editedSurrname.ToStdString(), editedDate.ToStdString());
+                        updateActor(actors, updatedActor, true, true, true, true, true, true); // (Arreglo, elementoActualizado, parentId, pasaporte, pNombre, sNombre, apellido, fecha)
+
+                        // wxMessageBox(wxString::Format(wxT("Editar actor Id Nº: %d"), ActorsIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        mod = true;
                     }
 
                     else
