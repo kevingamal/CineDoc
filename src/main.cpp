@@ -47,9 +47,12 @@ enum
     ID_ACTOR_NEW = 10,
     ID_ACTOR_EDIT = 11,
     ID_ACTOR_DEL = 12,
-    ID_Hello = 13,
+    ID_ADDRESS_NEW = 13,
+    ID_ADDRESS_EDIT = 14,
+    ID_ADDRESS_DEL = 15,
+    ID_Hello = 16,
     // ID_ABOUT = 11,
-    ID_HELP = 14
+    ID_HELP = 17
 };
 
 std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
@@ -57,6 +60,7 @@ std::vector<int> tree;         // Vector para almacenar la sucesion de parentId 
 
 std::vector<int> charactersArray;
 std::vector<int> actorsArray;
+std::vector<int> locationsArray;
 
 // (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
 // Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
@@ -395,24 +399,21 @@ class Location
 public:
     int id;
     std::string name;
-    std::string adress;
+    std::string address;
     std::string phone;
     std::string hospital;
     std::string parking;
 
     Location() {}
 
-    Location(std::string name, std::string adress)
-        : name(name), adress(adress) {}
-
-    Location(std::string name, std::string adress, std::string phone, std::string hospital, std::string parking)
-        : name(name), adress(adress), phone(phone), hospital(hospital), parking(parking) {}
+    Location(int id, std::string name, std::string address, std::string phone, std::string hospital, std::string parking)
+        : id(id), name(name), address(address), phone(phone), hospital(hospital), parking(parking) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & name & adress & phone & hospital & parking;
+        ar & id & name & address & phone & hospital & parking;
     }
 };
 
@@ -1047,6 +1048,27 @@ void updateActor(std::vector<Actor> &actors, const Actor &updatedActor, bool upd
     }
 }
 
+// LOCATIONS
+bool checkAddressExists(const std::vector<Location> &locations, const std::string &address, int excludeId)
+{
+    // Recorrer el vector de locaciones y comparar cada dirección, excepto la que tiene el id definido
+    for (const auto &location : locations)
+    {
+        // Omitir la comparación si el id de la locación coincide con el id a excluir
+        if (location.id == excludeId)
+        {
+            continue;
+        }
+
+        // Verificar si la dirección coincide
+        if (location.address == address)
+        {
+            return true; // La dirección ya existe
+        }
+    }
+    return false; // La dirección no existe
+}
+
 // CONTROLS CLASSES
 
 class TitledTextBox : public wxPanel
@@ -1513,9 +1535,9 @@ public:
 
         // MENU LOCACION
         wxMenu *menuLocation = new wxMenu;
-        menuLocation->Append(ID_SCRIPT_NEW, "&Nuevo...", "Nueva locación");
-        menuLocation->Append(ID_SCRIPT_EDIT, "&Editar...", "Editar locación");
-        menuLocation->Append(ID_SCRIPT_DEL, "&Eliminar...", "Eliminar locación");
+        menuLocation->Append(ID_ADDRESS_NEW, "&Nuevo...", "Nueva locación");
+        menuLocation->Append(ID_ADDRESS_EDIT, "&Editar...", "Editar locación");
+        menuLocation->Append(ID_ADDRESS_DEL, "&Eliminar...", "Eliminar locación");
 
         // MENU OBJETO
         wxMenu *menuObject = new wxMenu;
@@ -1767,6 +1789,11 @@ private:
     void OnActorEdit(wxCommandEvent &event);
     void OnActorDel(wxCommandEvent &event);
 
+    // Address Menu Events
+    void OnNewAddress(wxCommandEvent &event);
+    void OnAddressEdit(wxCommandEvent &event);
+    void OnAddressDel(wxCommandEvent &event);
+
     //
     void OnAbout(wxCommandEvent &event);
     wxDECLARE_EVENT_TABLE();
@@ -1812,10 +1839,14 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
                                                         EVT_MENU(ID_ACTOR_EDIT, MainWindow::OnActorEdit)
                                                             EVT_MENU(ID_ACTOR_DEL, MainWindow::OnActorDel)
 
-                                                                EVT_MENU(ID_HELP, MainWindow::OnAbout)
-                                                                    EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
-                                                                        wxEND_EVENT_TABLE()
-                                                                            wxIMPLEMENT_APP(MyApp);
+                                                                EVT_MENU(ID_ADDRESS_NEW, MainWindow::OnNewAddress)
+                                                                    EVT_MENU(ID_ADDRESS_EDIT, MainWindow::OnAddressEdit)
+                                                                        EVT_MENU(ID_ADDRESS_DEL, MainWindow::OnAddressDel)
+
+                                                                            EVT_MENU(ID_HELP, MainWindow::OnAbout)
+                                                                                EVT_MENU(wxID_ABOUT, MainWindow::OnAbout)
+                                                                                    wxEND_EVENT_TABLE()
+                                                                                        wxIMPLEMENT_APP(MyApp);
 
 // FILE MENU
 void MainWindow::OnNewFile(wxCommandEvent &event)
@@ -1913,7 +1944,7 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
 {
     if (mod)
     {
-        int response = wxMessageBox("Hay cambios sin guardar en el proyecto!", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
+        int response = wxMessageBox(wxT("Hay cambios sin guardar en el proyecto!"), "Guardar cambios", wxYES_NO | wxICON_QUESTION);
 
         if (response == wxYES)
         {
@@ -1957,7 +1988,7 @@ void MainWindow::OnExit(wxCommandEvent &event)
 {
     if (mod)
     {
-        int response = wxMessageBox("¿Deseas guardar los cambios?", "Guardar cambios", wxYES_NO | wxICON_QUESTION);
+        int response = wxMessageBox(wxT("¿Deseas guardar los cambios?"), "Guardar cambios", wxYES_NO | wxICON_QUESTION);
 
         if (response == wxYES)
         {
@@ -2105,7 +2136,7 @@ void MainWindow::OnNewScript(wxCommandEvent &event)
 
             else
             {
-                wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                wxMessageBox(wxT("Ese nombre ya existe"),   // CONTENIDO VENTANA POP UP
                              "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
             }
         }
@@ -2221,7 +2252,7 @@ void MainWindow::OnScriptEdit(wxCommandEvent &event)
 
                     else
                     {
-                        wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                        wxMessageBox(wxT("Ese nombre ya existe"),   // CONTENIDO VENTANA POP UP
                                      "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
                     }
                 }
@@ -2373,7 +2404,7 @@ void MainWindow::OnNewCharacter(wxCommandEvent &event)
 
             else
             {
-                wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                wxMessageBox(wxT("Ese nombre ya existe"),   // CONTENIDO VENTANA POP UP
                              "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
             }
         }
@@ -2527,7 +2558,7 @@ void MainWindow::OnCharacterEdit(wxCommandEvent &event)
 
                     else
                     {
-                        wxMessageBox("Ese nombre ya existe",        // CONTENIDO VENTANA POP UP
+                        wxMessageBox(wxT("Ese nombre ya existe"),   // CONTENIDO VENTANA POP UP
                                      "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
                     }
                 }
@@ -2720,13 +2751,13 @@ void MainWindow::OnNewActor(wxCommandEvent &event)
 
                     Actor newActor(nextNumber, parent_id, passport.ToStdString(), first_name.ToStdString(), last_name.ToStdString(), surrname.ToStdString(), birth_date.ToStdString());
                     actors.push_back(newActor);
-                    // wxMessageBox(wxString::Format(wxT("Crear personaje Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+                    // wxMessageBox(wxString::Format(wxT("Crear actor Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
                 }
 
                 else
                 {
-                    wxMessageBox("Ese pasaporte ya existe",     // CONTENIDO VENTANA POP UP
-                                 "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+                    wxMessageBox(wxT("Ese pasaporte ya existe"), // CONTENIDO VENTANA POP UP
+                                 "Error", wxOK | wxICON_ERROR);  // TITULO VENTANA POP UP
                 }
             }
 
@@ -2784,6 +2815,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
         wxDialog dialog(NULL, wxID_ANY, wxT("Editar Actor"), wxDefaultPosition, wxDefaultSize);
 
+        wxBoxSizer *vboxtop = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer *vboxa = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer *vboxb = new wxBoxSizer(wxVERTICAL);
         wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
@@ -2791,15 +2823,17 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
         // Texto descriptivo
         wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione el actor:"), wxDefaultPosition, wxDefaultSize);
-        mbox->Add(labelSel, 0, wxTOP, 5); // Espacio arriba
+        vboxtop->Add(labelSel, 0, wxTOP, 5); // Espacio arriba
 
         // Selector
         wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
-        mbox->Add(comboBox, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+        vboxtop->Add(comboBox, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        mbox->Add(vboxtop, 0, wxLEFT | wxRIGHT | wxEXPAND, 15); // Espacio arriba
 
         // Texto descriptivo
         wxStaticText *labelFirst = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el primer nombre:"), wxDefaultPosition, wxDefaultSize);
-        vboxa->Add(labelFirst, 0, wxTOP, 5); // Espacio arriba
+        vboxa->Add(labelFirst, 0, wxTOP, 10); // Espacio arriba
 
         // Campo de texto
         wxTextCtrl *textCtrlF = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
@@ -2823,7 +2857,7 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
         // Texto descriptivo
         wxStaticText *labelPass = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el ID / Nº de Pasaporte:"), wxDefaultPosition, wxDefaultSize);
-        vboxb->Add(labelPass, 0, wxTOP, 5); // Espacio arriba
+        vboxb->Add(labelPass, 0, wxTOP, 10); // Espacio arriba
 
         // Campo de texto
         wxTextCtrl *textCtrlP = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
@@ -2968,8 +3002,8 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 
                     else
                     {
-                        wxMessageBox("Ese pasaporte ya existe",     // CONTENIDO VENTANA POP UP
-                                     "Error", wxOK | wxICON_ERROR); // TITULO VENTANA POP UP
+                        wxMessageBox(wxT("Ese pasaporte ya existe"), // CONTENIDO VENTANA POP UP
+                                     "Error", wxOK | wxICON_ERROR);  // TITULO VENTANA POP UP
                     }
                 }
             }
@@ -2988,6 +3022,136 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
 }
 
 void MainWindow::OnActorDel(wxCommandEvent &event)
+{
+}
+
+// ADDRESS MENU
+void MainWindow::OnNewAddress(wxCommandEvent &event)
+{
+    wxDialog dialog(NULL, wxID_ANY, wxT("Nueva Locación"), wxDefaultPosition, wxDefaultSize);
+
+    wxBoxSizer *vboxtop = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *vboxa = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *vboxb = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer *mbox = new wxBoxSizer(wxVERTICAL);
+
+    // Texto descriptivo
+    wxStaticText *labelName = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el nombre:"), wxDefaultPosition, wxDefaultSize);
+    vboxtop->Add(labelName, 0, wxTOP, 5); // Espacio arriba
+
+    // Campo de texto
+    wxTextCtrl *textCtrlN = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vboxtop->Add(textCtrlN, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+    mbox->Add(vboxtop, 0, wxLEFT | wxRIGHT | wxEXPAND, 15); // Espacio arriba
+
+    // Texto descriptivo
+    wxStaticText *labelAdd = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la dirección:"), wxDefaultPosition, wxDefaultSize);
+    vboxa->Add(labelAdd, 0, wxTOP, 10); // Espacio arriba
+
+    // Campo de texto
+    wxTextCtrl *textCtrlA = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vboxa->Add(textCtrlA, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+    // Texto descriptivo
+    wxStaticText *labelHosp = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el hospital cercano:"), wxDefaultPosition, wxDefaultSize);
+    vboxa->Add(labelHosp, 0, wxTOP, 10); // Espacio arriba
+
+    // Campo de texto
+    wxTextCtrl *textCtrlH = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vboxa->Add(textCtrlH, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+    // Texto descriptivo
+    wxStaticText *labelTel = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el teléfono:"), wxDefaultPosition, wxDefaultSize);
+    vboxb->Add(labelTel, 0, wxTOP, 10); // Espacio arriba
+
+    // Campo de texto
+    wxTextCtrl *textCtrlT = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vboxb->Add(textCtrlT, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+    // Texto descriptivo
+    wxStaticText *labelPark = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el estacionamiento:"), wxDefaultPosition, wxDefaultSize);
+    vboxb->Add(labelPark, 0, wxTOP, 10); // Espacio arriba
+
+    // Campo de texto
+    wxTextCtrl *textCtrlP = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+    vboxb->Add(textCtrlP, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+    hbox->Add(vboxa, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxa ocupa parte de hbox
+    hbox->Add(vboxb, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxb ocupa parte de hbox
+    mbox->Add(hbox, 1, wxLEFT | wxRIGHT | wxEXPAND, 10);
+
+    mbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+    dialog.SetSizer(mbox);
+    dialog.Fit();
+
+    // Boton para cambiar el estado de Ok
+    wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+    okButton->Disable();
+
+    // Captura okButton, textCtrl y comboBox para deshabilitar "okButton" si esta vacio
+    auto validateTextFields = [okButton, textCtrlN, textCtrlA](wxCommandEvent &event)
+    {
+        wxString name = textCtrlN->GetValue();
+        wxString address = textCtrlA->GetValue();
+
+        // Habilitar el botón solo si todos los campos no están vacíos
+        if (!name.IsEmpty() && !address.IsEmpty())
+        {
+            okButton->Enable();
+        }
+        else
+        {
+            okButton->Disable();
+        }
+    };
+
+    // Vinculamos el evento a cualquier cambio en cualquiera de los 3 controles
+    textCtrlN->Bind(wxEVT_TEXT, validateTextFields);
+    textCtrlA->Bind(wxEVT_TEXT, validateTextFields);
+
+    // Mostrar el cuadro de diálogo y obtener el resultado
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        wxString name = textCtrlA->GetValue();
+        wxString address = textCtrlA->GetValue();
+        wxString telephone = textCtrlT->GetValue();
+        wxString hospital = textCtrlH->GetValue();
+        wxString parking = textCtrlP->GetValue();
+        nextNumber = firstEmpty(locationsArray);
+
+        if (!name.IsEmpty() && !address.IsEmpty())
+        {
+            if (!checkAddressExists(locations, address.ToStdString(), nextNumber))
+            {
+                locationsArray.push_back(nextNumber);
+
+                Location newLocation(nextNumber, name.ToStdString(), address.ToStdString(), telephone.ToStdString(), hospital.ToStdString(), parking.ToStdString());
+                locations.push_back(newLocation);
+                // wxMessageBox(wxString::Format(wxT("Crear locacion Id Nº: %d"),), "Ok", wxOK | wxICON_INFORMATION);
+            }
+
+            else
+            {
+                wxMessageBox(wxT("Esa dirección ya existe"), // CONTENIDO VENTANA POP UP
+                             "Error", wxOK | wxICON_ERROR);  // TITULO VENTANA POP UP
+            }
+        }
+
+        else
+        {
+            wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+        }
+    }
+}
+
+void MainWindow::OnAddressEdit(wxCommandEvent &event)
+{
+}
+
+void MainWindow::OnAddressDel(wxCommandEvent &event)
 {
 }
 
