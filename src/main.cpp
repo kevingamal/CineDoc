@@ -400,20 +400,20 @@ public:
     int id;
     std::string name;
     std::string address;
-    std::string phone;
     std::string hospital;
+    std::string phone;
     std::string parking;
 
     Location() {}
 
-    Location(int id, std::string name, std::string address, std::string phone, std::string hospital, std::string parking)
-        : id(id), name(name), address(address), phone(phone), hospital(hospital), parking(parking) {}
+    Location(int id, std::string name, std::string address, std::string hospital, std::string phone, std::string parking)
+        : id(id), name(name), address(address), hospital(hospital), phone(phone), parking(parking) {}
 
     // Función de serialización
     template <class Archive>
     void serialize(Archive &ar, const unsigned int version)
     {
-        ar & id & name & address & phone & hospital & parking;
+        ar & id & name & address & hospital & phone & parking;
     }
 };
 
@@ -2911,10 +2911,10 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
         okButton->Disable();
 
         // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
-        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, comboBoxRol, okButton, textCtrlP, textCtrlF, textCtrlL, textCtrlS, textCtrlD, passports, firstNames, lastNames, surrnames, birthDates, ActorsParentsIdsIndexes](wxCommandEvent &event)
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, comboBoxRol, okButton, textCtrlP, textCtrlF, textCtrlL, textCtrlS, textCtrlD, ActorsIds, passports, firstNames, lastNames, surrnames, birthDates, ActorsParentsIdsIndexes](wxCommandEvent &event)
                        {
                            // textCtrl->SetValue(comboBox->GetStringSelection());
-                           // textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), comboBox->GetSelection()));
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar actor Id Nº: %d"), comboBox->GetSelection()));
                            textCtrlP->SetValue(passports[comboBox->GetSelection()]);
                            textCtrlF->SetValue(firstNames[comboBox->GetSelection()]);
                            textCtrlL->SetValue(lastNames[comboBox->GetSelection()]);
@@ -2931,8 +2931,8 @@ void MainWindow::OnActorEdit(wxCommandEvent &event)
                            }
 
                            comboBoxRol->SetSelection(ActorsParentsIdsIndexes[comboBox->GetSelection()]);
-                           //  textCtrl->SetValue(wxString::Format(wxT("Editar personaje Id Nº: %d"), CharactersIds[comboBox->GetSelection()]));
-                           //  wxMessageBox(VectorToString(CharactersIds), "Contenido de CharactersIds", wxOK | wxICON_INFORMATION);
+                           //  textCtrl->SetValue(wxString::Format(wxT("Editar actor Id Nº: %d"), ActorsIds[comboBox->GetSelection()]));
+                           //  wxMessageBox(VectorToString(ActorsIds), "Contenido de ActorsIds", wxOK | wxICON_INFORMATION);
                            //  wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
                            okButton->Disable(); }
 
@@ -3115,10 +3115,10 @@ void MainWindow::OnNewAddress(wxCommandEvent &event)
     // Mostrar el cuadro de diálogo y obtener el resultado
     if (dialog.ShowModal() == wxID_OK)
     {
-        wxString name = textCtrlA->GetValue();
+        wxString name = textCtrlN->GetValue();
         wxString address = textCtrlA->GetValue();
-        wxString telephone = textCtrlT->GetValue();
         wxString hospital = textCtrlH->GetValue();
+        wxString telephone = textCtrlT->GetValue();
         wxString parking = textCtrlP->GetValue();
         nextNumber = firstEmpty(locationsArray);
 
@@ -3149,6 +3149,197 @@ void MainWindow::OnNewAddress(wxCommandEvent &event)
 
 void MainWindow::OnAddressEdit(wxCommandEvent &event)
 {
+    if (!locations.empty()) // Si hay algo que editar (si no está vacío), editar
+    {
+        std::vector<int> LocationsIds;
+        wxArrayString LocationsNames;
+        wxArrayString LocationsAddress;
+        wxArrayString LocationsPhones;
+        wxArrayString LocationsHospitals;
+        wxArrayString LocationsParkings;
+        wxArrayString fullnames;
+
+        for (const auto &location : locations)
+        {
+            LocationsIds.push_back(location.id);
+            LocationsNames.Add(location.name);
+            LocationsAddress.Add(location.address);
+            LocationsHospitals.Add(location.hospital);
+            LocationsPhones.Add(location.phone);
+            LocationsParkings.Add(location.parking);
+
+            fullnames.Add(location.name + " (" + location.address + ")");
+        }
+
+        wxDialog dialog(NULL, wxID_ANY, wxT("Editar Locación"), wxDefaultPosition, wxDefaultSize);
+
+        wxBoxSizer *vboxtop = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *vboxa = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *vboxb = new wxBoxSizer(wxVERTICAL);
+        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+        wxBoxSizer *mbox = new wxBoxSizer(wxVERTICAL);
+
+        // Texto descriptivo
+        wxStaticText *labelSel = new wxStaticText(&dialog, wxID_ANY, wxT("Seleccione la locación:"), wxDefaultPosition, wxDefaultSize);
+        vboxtop->Add(labelSel, 0, wxTOP, 5); // Espacio arriba
+
+        // Selector
+        wxComboBox *comboBox = new wxComboBox(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, fullnames, wxCB_READONLY);
+        vboxtop->Add(comboBox, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelName = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el nombre:"), wxDefaultPosition, wxDefaultSize);
+        vboxtop->Add(labelName, 0, wxTOP, 5); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlN = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxtop->Add(textCtrlN, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        mbox->Add(vboxtop, 0, wxLEFT | wxRIGHT | wxEXPAND, 15); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelAdd = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese la dirección:"), wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(labelAdd, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlA = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(textCtrlA, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelHosp = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el hospital cercano:"), wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(labelHosp, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlH = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxa->Add(textCtrlH, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelTel = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el teléfono:"), wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(labelTel, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlT = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(textCtrlT, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        // Texto descriptivo
+        wxStaticText *labelPark = new wxStaticText(&dialog, wxID_ANY, wxT("Ingrese el estacionamiento:"), wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(labelPark, 0, wxTOP, 10); // Espacio arriba
+
+        // Campo de texto
+        wxTextCtrl *textCtrlP = new wxTextCtrl(&dialog, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize);
+        vboxb->Add(textCtrlP, 0, wxTOP | wxEXPAND, 5); // Espacio arriba
+
+        hbox->Add(vboxa, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxa ocupa parte de hbox
+        hbox->Add(vboxb, 1, wxLEFT | wxRIGHT | wxEXPAND, 5); // vboxb ocupa parte de hbox
+        mbox->Add(hbox, 1, wxLEFT | wxRIGHT | wxEXPAND, 10);
+
+        mbox->Add(dialog.CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL | wxALIGN_CENTER_HORIZONTAL, 10);
+
+        dialog.SetSizer(mbox);
+        dialog.Fit();
+
+        comboBox->SetSelection(0);                  // Seleccionar el primer elemento
+        textCtrlN->SetValue(LocationsNames[0]);     // Escribir el primer elemento en el cuadro de texto
+        textCtrlA->SetValue(LocationsAddress[0]);   // Escribir el primer elemento en el cuadro de texto
+        textCtrlH->SetValue(LocationsHospitals[0]); // Escribir el primer elemento en el cuadro de texto
+        textCtrlT->SetValue(LocationsPhones[0]);    // Escribir el primer elemento en el cuadro de texto
+        textCtrlP->SetValue(LocationsParkings[0]);  // Escribir el primer elemento en el cuadro de texto
+
+        // Boton para cambiar el estado de Ok
+        wxButton *okButton = dynamic_cast<wxButton *>(dialog.FindWindow(wxID_OK));
+        okButton->Disable();
+
+        // Evento para actualizar el cuadro de texto cuando se cambia la selección en el wxComboBox
+        comboBox->Bind(wxEVT_COMBOBOX, [comboBox, okButton, textCtrlN, textCtrlA, textCtrlH, textCtrlT, textCtrlP, LocationsIds, LocationsNames, LocationsAddress, LocationsHospitals, LocationsPhones, LocationsParkings](wxCommandEvent &event)
+                       {
+                           // textCtrl->SetValue(comboBox->GetStringSelection());
+                           // textCtrl->SetValue(wxString::Format(wxT("Editar locación Id Nº: %d"), comboBox->GetSelection()));
+                           textCtrlN->SetValue(LocationsNames[comboBox->GetSelection()]);
+                           textCtrlA->SetValue(LocationsAddress[comboBox->GetSelection()]);
+                           textCtrlH->SetValue(LocationsHospitals[comboBox->GetSelection()]);
+                           textCtrlT->SetValue(LocationsPhones[comboBox->GetSelection()]);
+                           textCtrlP->SetValue(LocationsParkings[comboBox->GetSelection()]);
+
+                           //  textCtrl->SetValue(wxString::Format(wxT("Editar locación Id Nº: %d"), LocationsIds[comboBox->GetSelection()]));
+                           //  wxMessageBox(VectorToString(LocationsIds), "Contenido de LocationsIds", wxOK | wxICON_INFORMATION);
+                           //  wxMessageBox(ArrayStringToString(fullnames), "Contenido de fullnames", wxOK | wxICON_INFORMATION);
+                           okButton->Disable(); }
+
+        );
+
+        // Captura okButton, textCtrl y comboBox para deshabilitar ok si esta vacio o es el mismo
+        auto validateTextFields = [okButton, comboBox, textCtrlN, textCtrlA, textCtrlH, textCtrlT, textCtrlP, LocationsNames, LocationsAddress, LocationsHospitals, LocationsPhones, LocationsParkings](wxCommandEvent &event)
+        {
+            wxString name = textCtrlN->GetValue();
+            wxString address = textCtrlA->GetValue();
+            wxString hospital = textCtrlH->GetValue();
+            wxString telephone = textCtrlT->GetValue();
+            wxString parking = textCtrlP->GetValue();
+
+            // Si: (el primero no esta vacio Y el segundo no esta vacio) Y (el primero O el segundo O el tercero es diferente)
+            if ((!name.IsEmpty() && !address.IsEmpty()) && (LocationsNames[comboBox->GetSelection()] != name || LocationsAddress[comboBox->GetSelection()] != address || LocationsHospitals[comboBox->GetSelection()] != hospital || LocationsPhones[comboBox->GetSelection()] != telephone || LocationsParkings[comboBox->GetSelection()] != parking))
+            {
+                okButton->Enable();
+            }
+            else
+            {
+                okButton->Disable();
+            }
+        };
+
+        // Vinculamos el evento a cualquier cambio en cualquiera de los controles
+        textCtrlN->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlA->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlH->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlT->Bind(wxEVT_TEXT, validateTextFields);
+        textCtrlP->Bind(wxEVT_TEXT, validateTextFields);
+
+        // Mostrar el cuadro de diálogo y obtener el resultado
+        if (dialog.ShowModal() == wxID_OK)
+        {
+            wxString editedName = textCtrlN->GetValue();
+            wxString editedAddress = textCtrlA->GetValue();
+            wxString editedHospital = textCtrlH->GetValue();
+            wxString editedPhone = textCtrlT->GetValue();
+            wxString editedParking = textCtrlP->GetValue();
+
+            if (!editedName.IsEmpty() && !editedAddress.IsEmpty())
+            {
+                if (LocationsNames[comboBox->GetSelection()] == editedName && LocationsAddress[comboBox->GetSelection()] == editedAddress && LocationsHospitals[comboBox->GetSelection()] == editedHospital && LocationsPhones[comboBox->GetSelection()] == editedPhone && LocationsParkings[comboBox->GetSelection()] == editedParking)
+                {
+                    wxMessageBox(wxT("No puede tener los mismos datos!"), "Error", wxOK | wxICON_ERROR);
+                }
+
+                else
+                {
+                    if (!checkAddressExists(locations, editedAddress.ToStdString(), LocationsIds[comboBox->GetSelection()]))
+                    {
+                        Location updatedLocation(LocationsIds[comboBox->GetSelection()], editedName.ToStdString(), editedAddress.ToStdString(), editedHospital.ToStdString(), editedPhone.ToStdString(), editedParking.ToStdString());
+                        // updateActor(actors, updatedActor, true, true, true, true, true, true); // (Arreglo, elementoActualizado, parentId, pasaporte, pNombre, sNombre, apellido, fecha)
+
+                        // wxMessageBox(wxString::Format(wxT("Editar locacion Id Nº: %d"), LocationsIds[comboBox->GetSelection()]), "Ok", wxOK | wxICON_INFORMATION);
+                        mod = true;
+                    }
+
+                    else
+                    {
+                        wxMessageBox(wxT("Esa dirección ya existe"), // CONTENIDO VENTANA POP UP
+                                     "Error", wxOK | wxICON_ERROR);  // TITULO VENTANA POP UP
+                    }
+                }
+            }
+
+            else
+            {
+                wxMessageBox(wxT("No puede estar vacío!"), "Error", wxOK | wxICON_ERROR);
+            }
+        }
+    }
+
+    else // Si esta vacio (no hay nada que editar, error!)
+    {
+        wxMessageBox(wxT("Primero crea una locación!!"), "Error", wxOK | wxICON_ERROR);
+    }
 }
 
 void MainWindow::OnAddressDel(wxCommandEvent &event)
