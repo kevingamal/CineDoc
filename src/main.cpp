@@ -55,15 +55,21 @@ enum
     ID_HELP = 17
 };
 
-std::vector<int> scriptsArray; // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
-std::vector<int> tree;         // Vector para almacenar la sucesion de parentId actual
+std::vector<int> tree; // Vector para almacenar la sucesion de parentId actual
+// (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
+
+// Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
+std::vector<int> scriptsArray;  // Vector para almacenar temporalmente los scrips (guiones) y reciclar los antiguos
+std::vector<int> scenesArray;   // Vector para almacenar temporalmente las scenes (escenas) y reciclar los antiguos
+std::vector<int> takesArray;    // Vector para almacenar temporalmente los takes (tomas) y reciclar los antiguos
+std::vector<int> useCasesArray; // Vector para almacenar temporalmente los useCases (casos de uso) y reciclar los antiguos
+std::vector<int> techUsesArray; // Vector para almacenar temporalmente los techUses (usos técnicos) y reciclar los antiguos
+std::vector<int> eventsArray;   // Vector para almacenar temporalmente los events (acciones) y reciclar los antiguos
 
 std::vector<int> charactersArray;
 std::vector<int> actorsArray;
 std::vector<int> locationsArray;
-
-// (Siempre en el ultimo elemento) <- Se añade al bajar, se borra al subir y se edita al cambiar
-// Para crear un nuevo guion se le pregunta firstEmpty a scriptsArray y se reemplaza el elemento en la posicion 0 con ese numero
+std::vector<int> objectsArray;
 
 // VECTOR (solo para almacenar temporalmente los indices y posiciones y reciclar los antiguos)
 std::vector<int> textBoxsContainer;
@@ -1982,6 +1988,38 @@ void MainWindow::OnCloseFile(wxCommandEvent &event)
         }
         // Si el usuario cierra la ventana de mensaje, no se realiza ninguna acción adicional
     }
+
+    // DATA KILLER
+
+    // Ids Arrays
+    scriptsArray.clear();
+    scenesArray.clear();
+    takesArray.clear();
+    useCasesArray.clear();
+    techUsesArray.clear();
+    eventsArray.clear();
+
+    charactersArray.clear();
+    actorsArray.clear();
+    locationsArray.clear();
+    objectsArray.clear();
+
+    // GUI Arrays
+    textBoxsContainer.clear();
+    itemsListContainer.clear();
+
+    // Class Arrays
+    scripts.clear();
+    scenes.clear();
+    takes.clear();
+    use_cases.clear();
+    tech_uses.clear();
+    events.clear();
+
+    characters.clear();
+    actors.clear();
+    locations.clear();
+    objects.clear();
 }
 
 void MainWindow::OnExit(wxCommandEvent &event)
