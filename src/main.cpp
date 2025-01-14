@@ -63,8 +63,8 @@ std::vector<int> scriptsArray;  // Vector para almacenar temporalmente los scrip
 std::vector<int> scenesArray;   // Vector para almacenar temporalmente las scenes (escenas) y reciclar los antiguos
 std::vector<int> takesArray;    // Vector para almacenar temporalmente los takes (tomas) y reciclar los antiguos
 std::vector<int> useCasesArray; // Vector para almacenar temporalmente los useCases (casos de uso) y reciclar los antiguos
-std::vector<int> techUsesArray; // Vector para almacenar temporalmente los techUses (usos técnicos) y reciclar los antiguos
 std::vector<int> eventsArray;   // Vector para almacenar temporalmente los events (acciones) y reciclar los antiguos
+std::vector<int> techUsesArray; // Vector para almacenar temporalmente los techUses (usos técnicos) y reciclar los antiguos
 
 std::vector<int> charactersArray;
 std::vector<int> actorsArray;
@@ -466,6 +466,99 @@ std::vector<Tech_use> tech_usesTemp = {};
 std::vector<Event> eventsTemp = {};
 
 // ARRAYS FUNCTIONS
+
+// ARRAY LOADER
+void loadIDs(
+    const std::vector<Script> &scripts,
+    const std::vector<Scene> &scenes,
+    const std::vector<Take> &takes,
+    const std::vector<Use_case> &use_cases,
+    const std::vector<Event> &events,
+    const std::vector<Tech_use> tech_uses,
+    std::vector<int> &scriptsArray,
+    std::vector<int> &scenesArray,
+    std::vector<int> &takesArray,
+    std::vector<int> &useCasesArray,
+    std::vector<int> &eventsArray,
+    std::vector<int> &techUsesArray)
+{
+    scriptsArray.clear();
+    scenesArray.clear();
+    takesArray.clear();
+    useCasesArray.clear();
+    eventsArray.clear();
+    techUsesArray.clear();
+
+    if (scripts.empty())
+        return; // Verificar que haya al menos un script
+
+    // Cargar todos los IDs de scripts
+    for (const auto &script : scripts)
+    {
+        if (!script.id.empty())
+        {
+            scriptsArray.push_back(script.id[0]); // Cargar el ID de cada script
+        }
+    }
+
+    // Primer script ID
+    int firstScriptID = scripts[0].id[0];
+    size_t firstSceneIndex = 0;
+    bool foundScene = false;
+
+    // Buscar y cargar todos los scenes que pertenecen al primer script
+    for (size_t i = 0; i < scenes.size(); ++i)
+    {
+        const auto &scene = scenes[i];
+        if (!scene.id.empty() && scene.id[0] == firstScriptID)
+        {
+            scenesArray.push_back(scene.id[1]);
+            if (!foundScene)
+            {
+                firstSceneIndex = i; // Guardar el índice del primer scene válido
+                foundScene = true;
+            }
+        }
+    }
+
+    if (!foundScene)
+        return; // Si no se encontró ningún scene, terminar
+
+    // Primer scene ID
+    int firstSceneID = scenes[firstSceneIndex].id[1];
+    size_t firstTakeIndex = 0;
+    bool foundTake = false;
+
+    // Buscar y cargar todos los takes que pertenecen al primer scene
+    for (size_t i = 0; i < takes.size(); ++i)
+    {
+        const auto &take = takes[i];
+        if (!take.id.empty() && take.id[0] == firstScriptID && take.id[1] == firstSceneID)
+        {
+            takesArray.push_back(take.id[2]);
+            if (!foundTake)
+            {
+                firstTakeIndex = i; // Guardar el índice del primer take válido
+                foundTake = true;
+            }
+        }
+    }
+
+    if (!foundTake)
+        return; // Si no se encontró ningún take, terminar
+
+    // Primer take ID
+    int firstTakeID = takes[firstTakeIndex].id[2];
+
+    // Buscar y cargar todos los events que pertenecen al primer take
+    for (const auto &event : events)
+    {
+        if (!event.id.empty() && event.id[0] == firstScriptID && event.id[1] == firstSceneID && event.id[2] == firstTakeID)
+        {
+            eventsArray.push_back(event.id[3]);
+        }
+    }
+}
 
 // SCRIPTS
 bool checkTitleExists(const std::vector<Script> &scripts, const std::string &title)
