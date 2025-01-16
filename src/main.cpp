@@ -279,7 +279,7 @@ public:
     }
 };
 
-class Use_case
+class Use_case // Contiene actores y objetos. Cual de los 2 es se define dependiendo de cual id tenga
 {
 public:
     std::vector<int> id;
@@ -305,31 +305,6 @@ public:
     }
 };
 
-class Tech_use
-{
-public:
-    std::vector<int> id;
-    std::vector<int> parentId; // Relaciona objetos con tomas
-    int objectId;
-    int position;
-
-    Tech_use() {}
-
-    Tech_use(int idTail, std::vector<int> parentId, int objectId, int position)
-        : parentId(parentId), objectId(objectId), position(position)
-    {
-        id = parentId;
-        id.push_back(idTail);
-    }
-    // Función de serialización
-    template <class Archive>
-    void serialize(Archive &ar, const unsigned int version)
-    {
-
-        ar & id & parentId & objectId & position;
-    }
-};
-
 class Event // Contiene acciones y dialogos. Cual de los 2 es se define en type
 {
 public:
@@ -352,6 +327,31 @@ public:
     void serialize(Archive &ar, const unsigned int version)
     {
         ar & id & parentId & type & position;
+    }
+};
+
+class Tech_use
+{
+public:
+    std::vector<int> id;
+    std::vector<int> parentId; // Relaciona objetos con tomas
+    int objectId;
+    int position;
+
+    Tech_use() {}
+
+    Tech_use(int idTail, std::vector<int> parentId, int objectId, int position)
+        : parentId(parentId), objectId(objectId), position(position)
+    {
+        id = parentId;
+        id.push_back(idTail);
+    }
+    // Función de serialización
+    template <class Archive>
+    void serialize(Archive &ar, const unsigned int version)
+    {
+
+        ar & id & parentId & objectId & position;
     }
 };
 
@@ -450,8 +450,8 @@ std::vector<Script> scripts = {};
 std::vector<Scene> scenes = {};
 std::vector<Take> takes = {};
 std::vector<Use_case> use_cases = {};
-std::vector<Tech_use> tech_uses = {};
 std::vector<Event> events = {};
+std::vector<Tech_use> tech_uses = {};
 
 std::vector<Character> characters = {};
 std::vector<Actor> actors = {};
@@ -462,100 +462,89 @@ std::vector<Object> objects = {};
 std::vector<Scene> scenesTemp = {};
 std::vector<Take> takesTemp = {};
 std::vector<Use_case> use_casesTemp = {};
-std::vector<Tech_use> tech_usesTemp = {};
 std::vector<Event> eventsTemp = {};
+std::vector<Tech_use> tech_usesTemp = {};
 
 // ARRAYS FUNCTIONS
 
 // ARRAY LOADER
-void loadIDs(
-    const std::vector<Script> &scripts,
-    const std::vector<Scene> &scenes,
-    const std::vector<Take> &takes,
-    const std::vector<Use_case> &use_cases,
-    const std::vector<Event> &events,
-    const std::vector<Tech_use> tech_uses,
-    std::vector<int> &scriptsArray,
-    std::vector<int> &scenesArray,
-    std::vector<int> &takesArray,
-    std::vector<int> &useCasesArray,
-    std::vector<int> &eventsArray,
-    std::vector<int> &techUsesArray)
+void loadIDs(const std::vector<Script> &scripts, const std::vector<Scene> &scenes, const std::vector<Take> &takes, const std::vector<Use_case> &use_cases, const std::vector<Event> &events, std::vector<int> &scriptsArray, std::vector<int> &scenesArray, std::vector<int> &takesArray, std::vector<int> &useCasesArray, std::vector<int> &eventsArray)
 {
     scriptsArray.clear();
     scenesArray.clear();
     takesArray.clear();
     useCasesArray.clear();
     eventsArray.clear();
-    techUsesArray.clear();
 
-    if (scripts.empty())
-        return; // Verificar que haya al menos un script
-
-    // Cargar todos los IDs de scripts
+    // Buscar el primer script válido
+    int firstScriptID = -1; // Para mantener el ID del primer script válido
     for (const auto &script : scripts)
     {
         if (!script.id.empty())
         {
             scriptsArray.push_back(script.id[0]); // Cargar el ID de cada script
+            if (firstScriptID == -1)
+            {
+                firstScriptID = script.id[0]; // Establecer el primer script ID válido
+            }
         }
     }
 
-    // Primer script ID
-    int firstScriptID = scripts[0].id[0];
-    size_t firstSceneIndex = 0;
-    bool foundScene = false;
+    // Si no se encontraron scripts válidos, terminar
+    if (firstScriptID == -1)
+        return;
 
-    // Buscar y cargar todos los scenes que pertenecen al primer script
-    for (size_t i = 0; i < scenes.size(); ++i)
+    // Buscar el primer scene válido que pertenezca al primer script
+    int firstSceneID = -1;
+    for (const auto &scene : scenes)
     {
-        const auto &scene = scenes[i];
         if (!scene.id.empty() && scene.id[0] == firstScriptID)
         {
             scenesArray.push_back(scene.id[1]);
-            if (!foundScene)
+            if (firstSceneID == -1)
             {
-                firstSceneIndex = i; // Guardar el índice del primer scene válido
-                foundScene = true;
+                firstSceneID = scene.id[1]; // Establecer el primer scene ID válido
             }
         }
     }
 
-    if (!foundScene)
-        return; // Si no se encontró ningún scene, terminar
+    // Si no hay scenes válidos, terminar
+    if (firstSceneID == -1)
+        return;
 
-    // Primer scene ID
-    int firstSceneID = scenes[firstSceneIndex].id[1];
-    size_t firstTakeIndex = 0;
-    bool foundTake = false;
-
-    // Buscar y cargar todos los takes que pertenecen al primer scene
-    for (size_t i = 0; i < takes.size(); ++i)
+    // Buscar el primer take válido que pertenezca al primer scene
+    int firstTakeID = -1;
+    for (const auto &take : takes)
     {
-        const auto &take = takes[i];
         if (!take.id.empty() && take.id[0] == firstScriptID && take.id[1] == firstSceneID)
         {
             takesArray.push_back(take.id[2]);
-            if (!foundTake)
+            if (firstTakeID == -1)
             {
-                firstTakeIndex = i; // Guardar el índice del primer take válido
-                foundTake = true;
+                firstTakeID = take.id[2]; // Establecer el primer take ID válido
             }
         }
     }
 
-    if (!foundTake)
-        return; // Si no se encontró ningún take, terminar
+    // Cargar todos los use_cases que pertenecen al primer scene
+    for (const auto &use_case : use_cases)
+    {
+        if (!use_case.id.empty() && use_case.id[0] == firstScriptID && use_case.id[1] == firstSceneID)
+        {
+            useCasesArray.push_back(use_case.id[2]);
+        }
+    }
 
-    // Primer take ID
-    int firstTakeID = takes[firstTakeIndex].id[2];
+    // Si no hay takes válidos, terminar
+    if (firstTakeID == -1)
+        return;
 
-    // Buscar y cargar todos los events que pertenecen al primer take
+    // Buscar el primer event válido que pertenezca al primer take
     for (const auto &event : events)
     {
         if (!event.id.empty() && event.id[0] == firstScriptID && event.id[1] == firstSceneID && event.id[2] == firstTakeID)
         {
-            eventsArray.push_back(event.id[3]);
+            eventsArray.push_back(event.id[3]); // Cargar el ID del event
         }
     }
 }
@@ -621,6 +610,7 @@ void transferScenes(std::vector<Scene> &source, std::vector<Scene> &destination,
         }
     }
 }
+// transferScenes(scenes, scenesTemp, specificParentId);
 
 void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
@@ -642,6 +632,7 @@ void updateScenes(std::vector<Scene> &source, std::vector<Scene> &destination, s
     // Paso 4: Limpiar 'source'
     source.clear();
 }
+// updateScenes(scenesTemp, scenes, specificParentId);
 
 void updateScenePosition(std::vector<Scene> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
@@ -671,6 +662,7 @@ void updateScenePosition(std::vector<Scene> &source, std::vector<int> specificPa
         }
     }
 }
+// updateScenePosition(scenesTemp, specificParentId, specificId, newPosition);
 
 void removeScene(std::vector<Scene> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
@@ -686,6 +678,7 @@ void removeScene(std::vector<Scene> &source, std::vector<int> specificParentId, 
                                 }),
                  source.end());
 }
+// removeScene(scenesTemp, specificParentId, specificId);
 
 // TAKES
 void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
@@ -706,6 +699,7 @@ void transferTakes(std::vector<Take> &source, std::vector<Take> &destination, st
         }
     }
 }
+// transferTakes(takes, takesTemp, specificParentId);
 
 void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
@@ -727,6 +721,7 @@ void updateTakes(std::vector<Take> &source, std::vector<Take> &destination, std:
     // Paso 4: Limpiar 'source'
     source.clear();
 }
+// updateTakes(takesTemp, takes, specificParentId);
 
 void updateTakePosition(std::vector<Take> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
@@ -756,6 +751,7 @@ void updateTakePosition(std::vector<Take> &source, std::vector<int> specificPare
         }
     }
 }
+// updateTakePosition(takesTemp, specificParentId, specificId, newPosition);
 
 void removeTake(std::vector<Take> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
@@ -771,6 +767,7 @@ void removeTake(std::vector<Take> &source, std::vector<int> specificParentId, in
                                 }),
                  source.end());
 }
+// removeTake(takesTemp, specificParentId, specificId);
 
 // USE CASES (ACTING AND OBJECT)
 void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
@@ -791,6 +788,7 @@ void transferUseCase(std::vector<Use_case> &source, std::vector<Use_case> &desti
         }
     }
 }
+// transferUseCase(use_cases, use_casesTemp, specificParentId);
 
 void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
 {
@@ -812,6 +810,7 @@ void updateUse_Case(std::vector<Use_case> &source, std::vector<Use_case> &destin
     // Paso 4: Limpiar 'source'
     source.clear();
 }
+// updateUse_Case(use_casesTemp, use_cases, specificParentId);
 
 void updateUse_CasePosition(std::vector<Use_case> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
 {
@@ -841,6 +840,7 @@ void updateUse_CasePosition(std::vector<Use_case> &source, std::vector<int> spec
         }
     }
 }
+// updateUse_CasePosition(use_casesTemp, specificParentId, specificId, newPosition);
 
 void removeUse_Case(std::vector<Use_case> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
 {
@@ -856,91 +856,7 @@ void removeUse_Case(std::vector<Use_case> &source, std::vector<int> specificPare
                                 }),
                  source.end());
 }
-
-// TECH USE
-void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
-{
-    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
-    destination.clear();
-
-    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
-              { return a.position < b.position; });
-
-    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
-    for (const auto &tech_use : source)
-    {
-        if (tech_use.parentId == specificParentId)
-        {
-            destination.push_back(tech_use);
-        }
-    }
-}
-
-void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
-{
-    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
-    destination.erase(std::remove_if(destination.begin(), destination.end(),
-                                     [specificParentId](const Tech_use &tech_use)
-                                     {
-                                         return tech_use.parentId == specificParentId;
-                                     }),
-                      destination.end());
-
-    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
-              { return a.position < b.position; });
-
-    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
-    destination.insert(destination.end(), source.begin(), source.end());
-
-    // Paso 4: Limpiar 'source'
-    source.clear();
-}
-
-void updateTech_usePosition(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
-{
-    // Construir specificId concatenando specificParentId e idTail
-    std::vector<int> specificId = specificParentId;
-    specificId.push_back(idTail);
-
-    for (auto &tech_use : source)
-    {
-        if (tech_use.parentId == specificParentId && tech_use.id == specificId)
-        {
-            tech_use.position = newPosition;
-            // break; // Salir del bucle una vez que se actualice el elemento
-        }
-    }
-
-    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
-    for (size_t i = 0; i < source.size(); ++i)
-    {
-        for (size_t j = 0; j < source.size() - i - 1; ++j)
-        {
-            if (source[j].position > source[j + 1].position)
-            {
-                // Intercambiar elementos
-                std::swap(source[j], source[j + 1]);
-            }
-        }
-    }
-}
-
-void removeTech_use(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
-{
-    // Construir specificId concatenando specificParentId e idTail
-    std::vector<int> specificId = specificParentId;
-    specificId.push_back(idTail);
-
-    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
-    source.erase(std::remove_if(source.begin(), source.end(),
-                                [specificParentId, specificId](const Tech_use &tech_use)
-                                {
-                                    return tech_use.parentId == specificParentId && tech_use.id == specificId;
-                                }),
-                 source.end());
-}
+// removeUse_Case(use_casesTemp, specificParentId, specificId);
 
 // EVENTS
 void transferEvents(std::vector<Event> &source, std::vector<Event> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
@@ -1030,6 +946,95 @@ void removeEvent(std::vector<Event> &source, std::vector<int> specificParentId, 
                  source.end());
 }
 // removeEvent(eventsTemp, specificParentId, specificId);
+
+// TECH USE
+void transferTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> TEMP
+{
+    // Paso 1: Limpia el vector de destino antes de transferir los nuevos elementos
+    destination.clear();
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
+    for (const auto &tech_use : source)
+    {
+        if (tech_use.parentId == specificParentId)
+        {
+            destination.push_back(tech_use);
+        }
+    }
+}
+// transferTech_use(tech_uses, tech_usesTemp, specificParentId);
+
+void updateTech_use(std::vector<Tech_use> &source, std::vector<Tech_use> &destination, std::vector<int> specificParentId) // Transfiere todos los de un padre -> MAIN
+{
+    // Paso 1: Eliminar todos los elementos con el parentId específico de 'destination'
+    destination.erase(std::remove_if(destination.begin(), destination.end(),
+                                     [specificParentId](const Tech_use &tech_use)
+                                     {
+                                         return tech_use.parentId == specificParentId;
+                                     }),
+                      destination.end());
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    std::sort(source.begin(), source.end(), [](const Tech_use &a, const Tech_use &b)
+              { return a.position < b.position; });
+
+    // Paso 3: Transferir todos los elementos de 'source' a 'destination'
+    destination.insert(destination.end(), source.begin(), source.end());
+
+    // Paso 4: Limpiar 'source'
+    source.clear();
+}
+// updateTech_use(tech_usesTemp, tech_uses, specificParentId);
+
+void updateTech_usePosition(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail, int newPosition) // Usar SOLO EN TEMP!!
+{
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
+    for (auto &tech_use : source)
+    {
+        if (tech_use.parentId == specificParentId && tech_use.id == specificId)
+        {
+            tech_use.position = newPosition;
+            // break; // Salir del bucle una vez que se actualice el elemento
+        }
+    }
+
+    // Paso 2: Ordenar el vector 'source' por la variable 'position' de menor a mayor
+    for (size_t i = 0; i < source.size(); ++i)
+    {
+        for (size_t j = 0; j < source.size() - i - 1; ++j)
+        {
+            if (source[j].position > source[j + 1].position)
+            {
+                // Intercambiar elementos
+                std::swap(source[j], source[j + 1]);
+            }
+        }
+    }
+}
+// updateTech_usePosition(tech_usesTemp, specificParentId, specificId, newPosition);
+
+void removeTech_use(std::vector<Tech_use> &source, std::vector<int> specificParentId, int idTail) // Usar SOLO EN TEMP!!
+{
+    // Construir specificId concatenando specificParentId e idTail
+    std::vector<int> specificId = specificParentId;
+    specificId.push_back(idTail);
+
+    // Utilizamos un iterador y std::remove_if para encontrar y eliminar el elemento
+    source.erase(std::remove_if(source.begin(), source.end(),
+                                [specificParentId, specificId](const Tech_use &tech_use)
+                                {
+                                    return tech_use.parentId == specificParentId && tech_use.id == specificId;
+                                }),
+                 source.end());
+}
+// removeTech_use(tech_usesTemp, specificParentId, specificId);
 
 // CHARACTERS
 bool checkCharacterExists(const std::vector<Character> &characters, const std::string &first_name, const std::string &last_name, const std::string &surrname)
